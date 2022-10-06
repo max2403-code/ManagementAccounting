@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ninject" Version="3.3.6" />
+    <PackageReference Include="ninject.extensions.conventions" Version="3.3.0" />
+    <PackageReference Include="Ninject.Extensions.Factory" Version="3.3.3" />
+    <PackageReference Include="Npgsql" Version="6.0.5" />
+  </ItemGroup>
+
+</Project>

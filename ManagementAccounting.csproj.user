@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="Forms\RemaindersForms\AddMaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\RemaindersForms\AddMaterialReceivingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\RemaindersForms\EditMaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\RemaindersForms\EditMaterialReceivingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\RemaindersForms\MaterialReceivingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\RemaindersForms\MaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
