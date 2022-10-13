@@ -8,15 +8,14 @@ namespace ManagementAccounting
 {
     public class Calculations : IProgramBlock
     {
-        private string _itemTypeName;
-        public string ItemTypeName => _itemTypeName;
+        public string ItemTypeName { get; }
         public int LengthOfItemsList { get; }
         private readonly IDataBase _dataBase;
         private readonly IBlockItemsFactory _blockItemFactory;
 
         public Calculations(IBlockItemsFactory blockItemFactory, IDataBase dataBase)
         {
-            _itemTypeName = "calculation";
+            ItemTypeName = "calculation";
             _dataBase = dataBase;
             _blockItemFactory = blockItemFactory;
             LengthOfItemsList = 5;

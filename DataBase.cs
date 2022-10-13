@@ -56,14 +56,7 @@ namespace ManagementAccounting
                 {
                     cmd.Connection = Connection;
                     cmd.CommandText = commandText;
-                    //if (hasParameters)
-                    //{
-                    //    if (typeOfCommand == "add")
-                    //        item.AssignParametersToAddCommand(cmd);
-                    //    else if (typeOfCommand == "edit")
-                    //        item.AssignParametersToEditCommand(cmd);
-                    //}
-
+                    
                     assignItemParameters?.Invoke(cmd); //if (assignItemParameters != null) assignItemParameters(cmd);
                     try
                     {
@@ -79,6 +72,40 @@ namespace ManagementAccounting
             task.Start();
             return task;
         }
+
+        public Task ExecuteIdReaderAsync(IBlockItem blockItem, Action<DbDataRecord> assignId, string commandText, string textMessage)
+        {
+            var task = new Task(() =>
+            {
+                lock (locker)
+                {
+                    Connection.Open();
+                    using (var cmd = new NpgsqlCommand())
+                    {
+                        cmd.Connection = Connection;
+
+                        cmd.CommandText = commandText;
+                        try
+                        {
+                            var reader = cmd.ExecuteReader();
+                            foreach (DbDataRecord item in reader)
+                            {
+                                assignId(item);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            blockItem.ExceptionEvent += () => throw new Exception(textMessage);
+                        }
+                        
+                    }
+                    Connection.Close();
+                }
+            });
+            task.Start();
+            return task;
+        }
+
 
         public Task<decimal> GetSum(string commandText)
         {
@@ -172,12 +199,42 @@ namespace ManagementAccounting
                         cmd.CommandText = "CREATE INDEX CalculationIdIndex ON calculationitems (CalculationIdCI);";
                         await cmd.ExecuteNonQueryAsync();
 
+                        cmd.CommandText =
+                            "CREATE TABLE preorders (IdPO SERIAL PRIMARY KEY, CalculationIdPO INTEGER REFERENCES calculations (IdC) ON DELETE RESTRICT, QuantityPO NUMERIC CHECK(QuantityPO > 0), CreationDatePO DATE, SearchNamePO CHARACTER VARYING(64))";
+                        await cmd.ExecuteNonQueryAsync();
 
-
+                        cmd.CommandText = "CREATE INDEX CalculationIdIndex ON preorders (CalculationIdPO);";
+                        await cmd.ExecuteNonQueryAsync();
 
 
                         cmd.CommandText =
-                            "CREATE TABLE orders (IdO SERIAL PRIMARY KEY, CreationDateO DATE, CalculationIdO INTEGER REFERENCES calculations (IdC) ON DELETE RESTRICT, QuantityO NUMERIC CHECK(QuantityO > 0))";
+                            "CREATE TABLE orders (IdO SERIAL PRIMARY KEY, CreationDateO TIMESTAMP UNIQUE, OrderNameO CHARACTER VARYING(61), QuantityO NUMERIC)";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText = "CREATE INDEX OrderNameIndex ON orders (OrderNameO);";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText = "CREATE INDEX CreationDateIndex ON orders (CreationDateO);";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText =
+                            "CREATE TABLE orderitems (IdOI SERIAL PRIMARY KEY, OrderIdOI INTEGER REFERENCES orders (IdO) ON DELETE CASCADE, MaterialIdOI INTEGER REFERENCES remainders (IdM) ON DELETE RESTRICT, QuantityOI NUMERIC CHECK(QuantityOI > 0))";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText = "CREATE INDEX OrderIdIndex ON orderitems (OrderIdOI);";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText = "CREATE INDEX MaterialIdIndex ON orderitems (MaterialIdOI);";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText =
+                            "CREATE TABLE ordermaterialreceiving (IdOMR SERIAL PRIMARY KEY, OrderItemIdOMR INTEGER REFERENCES orderitems (IdOI) ON DELETE CASCADE, MaterialReceivingIdOMR INTEGER REFERENCES materialreceiving (IdMR) ON DELETE RESTRICT, QuantityOMR NUMERIC CHECK(QuantityOMR > 0))";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText = "CREATE INDEX OrderItemIdIndex ON ordermaterialreceiving (OrderItemIdOMR);";
+                        await cmd.ExecuteNonQueryAsync();
+
+                        cmd.CommandText = "CREATE INDEX MaterialReceivingIdIndex ON ordermaterialreceiving (MaterialReceivingIdOMR);";
                         await cmd.ExecuteNonQueryAsync();
                     }
                 }

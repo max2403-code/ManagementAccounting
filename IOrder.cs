@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ManagementAccounting
 {
-    public interface IOrder : IProgramBlock, IBlockItem
+    public interface IOrder : IProgramBlock, IBlockItem, IAddable, IRemovable
     {
     }
 }

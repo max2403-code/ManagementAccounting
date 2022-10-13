@@ -4,7 +4,10 @@ using System.Text;
 
 namespace ManagementAccounting
 {
-    public interface IOrderItem : IBlockItem
+    public interface IOrderItem : IProgramBlock, IBlockItem
     {
+        public IMaterial Material { get; }
+        public IOrder Order { get; }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -10,46 +11,66 @@ namespace ManagementAccounting
     public class OrderItem : IOrderItem
     {
         public event Action ExceptionEvent;
-        private ICalculationItem _calculationItem;
+        public string Name { get; }
+        public int Index { get; }
+        public IMaterial Material { get; }
+        public IOrder Order { get; }
+        public decimal MaterialСonsumption { get; private set; }
+        public string ItemTypeName { get; }
+        public int LengthOfItemsList { get; }
+
         private readonly IDataBase _dataBase;
         private readonly IBlockItemsFactory _blockItemFactory;
 
-        public int OrderId { get; }
-        public string Name => _calculationItem.Name;
-        public int Index { get; }
+       
 
-        public OrderItem(ICalculationItem calculationItem, int orderId, int index, IDataBase dataBase, IBlockItemsFactory itemsFactory)
+        public OrderItem(IOrder order, IMaterial material, decimal materialСonsumption, int index, IDataBase dataBase, IBlockItemsFactory itemsFactory)
         {
-            _calculationItem = calculationItem;
-            OrderId = orderId;
+            ItemTypeName = "ordermaterialreceiving";
+            Order = order;
             Index = index;
+            MaterialСonsumption = materialСonsumption;
+            Material = material;
             _dataBase = dataBase;
             _blockItemFactory = itemsFactory;
+            LengthOfItemsList = 5;
         }
 
-        public void AssignParametersToAddCommand(NpgsqlCommand cmd)
+        
+
+        public IBlockItem GetNewBlockItem(params object[] parameters)
         {
-            throw new NotImplementedException();
+            var orderItem = this;
+            var materialReceiving = (IMaterialReceiving)parameters[0];
+            var materialConsumption = (decimal) parameters[1];
+            return _blockItemFactory.CreateOrderMaterialReceiving(orderItem, materialReceiving, materialConsumption);
         }
 
-        public void AssignParametersToEditCommand(NpgsqlCommand cmd)
+        
+        public async Task<List<IBlockItem>> GetItemsList(int offset, params string[] selectionCriterion)
         {
-            throw new NotImplementedException();
+            var commandText = $"SELECT * FROM ordermaterialreceiving, materialreceiving WHERE ordermaterialreceiving.OrderItemIdOMR = {Index} AND ordermaterialreceiving.MaterialReceivingIdOMR = materialreceiving.IdMR LIMIT {LengthOfItemsList + 1} OFFSET {offset};";
+            var itemsList = await _dataBase.ExecuteReaderAsync(GetBlockItemFromDataBase, commandText);
+
+            return itemsList;
         }
 
-        public Task AddItemToDataBase()
+        public IBlockItem GetBlockItemFromDataBase(DbDataRecord item)
         {
-            throw new NotImplementedException();
+            var orderItem = this;
+            var date = (DateTime)item["ReceiveDatemr"];
+            var quantity = (decimal)item["Quantitymr"];
+            var cost = (decimal)item["TotalCostmr"];
+            var remainder = (decimal)item["Remaindermr"];
+            var note = (string)item["Notemr"];
+            var materialIndex = (int)item["MaterialIdmr"];
+            var index = (int)item["Idmr"];
+            var materialReceiving = _blockItemFactory.CreateMaterialReceiving(date, quantity, cost, remainder, note, materialIndex, index);
+            var materialConsumption = (decimal)item["QuantityOMR"];
+
+            return _blockItemFactory.CreateOrderMaterialReceiving(orderItem, materialReceiving, materialConsumption);
         }
 
-        public Task EditItemInDataBase(params object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveItemFromDataBase()
-        {
-            throw new NotImplementedException();
-        }
+      
     }
 }

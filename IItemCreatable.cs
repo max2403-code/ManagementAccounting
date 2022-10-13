@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ManagementAccounting
 {
-    public interface IOrders : IItemsCollection
+    public  interface IItemCreatable
     {
+        public IBlockItem GetNewBlockItem(params object[] parameters);
     }
 }

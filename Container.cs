@@ -21,11 +21,16 @@ namespace ManagementAccounting
 
             container.Bind<IProgramBlock>().To<Remainders>();
             container.Bind<IProgramBlock>().To<Calculations>();
+            container.Bind<IProgramBlock>().To<PreOrders>();
+
 
             container.Bind<IMaterial>().To<Material>();
             container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
             container.Bind<ICalculation>().To<Calculation>();
             container.Bind<ICalculationItem>().To<CalculationItem>();
+            container.Bind<IPreOrder>().To<PreOrder>();
+            container.Bind<IPreOrderItem>().To<PreOrderItem>();
+
 
 
             container.Bind<IBlockItemsFactory>().ToFactory();
@@ -39,7 +44,7 @@ namespace ManagementAccounting
                         new KeyValuePair<Type, Func<object, IOperationsWithUserInput, Form>>(typeof(Material), (obj, inputOp) => new MaterialForm((IMaterial)obj, inputOp))
                     }
                 );
-            
+
             container.Bind<Dictionary<string, Func<IProgramBlock, IOperationsWithUserInput, Form>>>().ToSelf().WhenInjectedExactlyInto<BlockItemFormsCollection>()
                 .WithConstructorArgument
                 (

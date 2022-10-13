@@ -11,6 +11,8 @@ namespace ManagementAccounting
     {
         Task<List<T>> ExecuteReaderAsync<T>(Func<DbDataRecord, T> getItem, string commandText);
         Task ExecuteNonQueryAsync(IBlockItem item, string commandText, string exceptionMessage, Action<NpgsqlCommand> assignItemParameters = null);
+
+        public Task ExecuteIdReaderAsync(IBlockItem blockItem, Action<DbDataRecord> assignId, string commandText, string textMessage);
         Task<decimal> GetSum(string commandText);
         Task SignIn(string login, string password);
 

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ManagementAccounting
 {
-    public interface IOrders : IItemsCollection
+    public interface IPreOrderItem : IBlockItem
     {
     }
 }

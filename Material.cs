@@ -11,28 +11,25 @@ namespace ManagementAccounting
 {
     public class Material : IMaterial
     {
-        private int _index;
         private MaterialType _materialType;
         private string _name;
-        private string _itemTypeName;
         private readonly IDataBase _dataBase;
         private readonly IBlockItemsFactory _itemsFactory;
 
         public event Action ExceptionEvent;
-        public int Index => _index;
+        public int Index { get; }
         public MaterialType MaterialType => _materialType;
         public string Name => _name;
-        public string ItemTypeName => _itemTypeName;
-        //public int Offset { get; set; }
+        public string ItemTypeName { get; }
         public int LengthOfItemsList { get; }
 
         public Material(MaterialType materialType, string name, int index, IDataBase dataBase, IBlockItemsFactory itemsFactory)
         {
-            _index = index;
+            Index = index;
             _materialType = materialType;
             _name = name;
             _dataBase = dataBase;
-            _itemTypeName = "materialflow";
+            ItemTypeName = "materialflow";
             _itemsFactory = itemsFactory;
             LengthOfItemsList = 5;
         }
@@ -41,7 +38,6 @@ namespace ManagementAccounting
         {
             var commandText = "INSERT INTO remainders (materialtypem, materialnamem) VALUES (@materialtypem, @materialnamem)";
             if (ExceptionEvent != null) ExceptionEvent = null;
-            //await _dataBase.ExecuteNonQueryAsync(this, commandText, "Материал с таким именем уже существует", true, "add");
             await _dataBase.ExecuteNonQueryAsync(this, commandText, "Материал с таким именем уже существует", AssignParametersToAddCommand);
 
             ExceptionEvent?.Invoke();

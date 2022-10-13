@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace ManagementAccounting
 {
-    public interface IProgramBlock
+    public interface IProgramBlock : IItemCreatable, IItemsCollection
     {
-        public string ItemTypeName { get; }
-        public int LengthOfItemsList { get; }
-
-        public IBlockItem GetNewBlockItem(params object[] parameters);
-        public Task<List<IBlockItem>> GetItemsList(int offset, params string[] selectionCriterion);
-        public IBlockItem GetBlockItemFromDataBase(DbDataRecord item);
+        
 
     }
 }

@@ -8,9 +8,7 @@ namespace ManagementAccounting
 {
     public class Remainders : IProgramBlock
     {
-        private string _itemTypeName;
-
-        public string ItemTypeName => _itemTypeName;
+        public string ItemTypeName { get; }
         public int LengthOfItemsList { get; }
         private readonly IDataBase _dataBase;
         private readonly IBlockItemsFactory _blockItemFactory;
@@ -18,7 +16,7 @@ namespace ManagementAccounting
 
         public Remainders(IBlockItemsFactory blockItemFactory, IDataBase dataBase)
         {
-            _itemTypeName = "material";
+            ItemTypeName = "material";
             _dataBase = dataBase;
             _blockItemFactory = blockItemFactory;
             LengthOfItemsList = 5;
@@ -41,7 +39,6 @@ namespace ManagementAccounting
         public async Task<List<IBlockItem>> GetItemsList(int offset, params string[] selectionCriterion)
         {
             var commandText = $"SELECT * FROM remainders WHERE lower(MaterialNameM) LIKE '%{selectionCriterion[0]}%' ORDER BY MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
-            //var itemsList = await _dataBase.ExecuteReaderAsync(this, commandText);
             var itemsList = await _dataBase.ExecuteReaderAsync(GetBlockItemFromDataBase, commandText);
 
             return itemsList;
