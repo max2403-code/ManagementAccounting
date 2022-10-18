@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Factory;
 
 namespace ManagementAccounting
 {
@@ -32,17 +34,23 @@ namespace ManagementAccounting
 
         private int _offset { get; set; }
 
+        private EventHandler addAction { get; set; }
+        private EventHandler itemAction { get; set; }
 
-        private IOperationsWithUserInput _inputOperations { get; }
-        private IDataBase _dataBase { get; }
-        private IProgramBlock activeBlock { get; set; }
+        private IOperationsWithUserInput inputOperations { get; }
+        private IDataBase dataBase { get; }
+        private ICreatorFactory creatorFactory { get; }
+        private IFormFactory formFactory { get; }
+
+
+        private BlockItemsCollectionCreator block { get; set; }
          
-        public MainForm(IProgramBlock[] blocks, IDataBase dataBase, IBlockItemFormsCollection formsCollection, IOperationsWithUserInput inputOperations)
+        public MainForm(BlockItemsCollectionCreator[] blocks, IFormFactory formFactory, ICreatorFactory creatorFactory, IDataBase dataBase, IOperationsWithUserInput inputOperations)
         {
-            _dataBase = dataBase;
-
-            _inputOperations = inputOperations;
-            _formsCollection = formsCollection;
+            this.dataBase = dataBase;
+            this.formFactory = formFactory;
+            this.inputOperations = inputOperations;
+            this.creatorFactory = creatorFactory;
 
             mainButtonsHashSet = new List<Button>();
             activeTempControls = new List<Control>();
@@ -64,14 +72,13 @@ namespace ManagementAccounting
             remaindersButton.Enabled = false;
             remaindersButton.AutoSize = true;
             remaindersButton.Text = "Остатки материалов";
-            remaindersButton.Tag = (Remainders) blocks[0];
-            remaindersButton.Click += RemaindersButtonOnClick;
+            remaindersButton.Tag = blocks[0];
+            remaindersButton.Click += MaterialsButtonOnClick;
             mainButtonsHashSet.Add(remaindersButton);
             Controls.Add(remaindersButton);
 
             addItem = new Button();
             addItem.Location = new Point(10, signIn.Location.Y + signIn.Height + 25);
-            addItem.Click += AddButtonOnClick;
             addItem.Text = "Добавить";
             addItem.AutoSize = true;
             addItem.Enabled = false;
@@ -125,7 +132,7 @@ namespace ManagementAccounting
 
         private void SignInOnClick(object? sender, EventArgs e)
         {
-            var loginForm = new LoginForm(this, _dataBase);
+            var loginForm = new LoginForm(this, dataBase);
             loginForm.ShowDialog();
             if(!LoginCompleted) return;
             Controls.Remove(signIn);
@@ -134,13 +141,26 @@ namespace ManagementAccounting
                 button.Enabled = true;
         }
 
-        private void RemaindersButtonOnClick(object? sender, EventArgs e)
+        private void MaterialsButtonOnClick(object? sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control) sender;
-            activeBlock = (IProgramBlock) control.Tag;
+            block = (BlockItemsCollectionCreator) control.Tag;
+
+            if (addAction != null)
+            {
+                addItem.Click -= addAction;
+            }
+
+            addAction = AddMaterialButtonOnClick;
+            addItem.Click += addAction;
+
+            
+
+            itemAction = ItemMaterialLabel_Click;
+
+
             addItem.Text = "Добавить материал";
-            addItem.Tag = activeBlock.ItemTypeName;
             allItems.Text = "Показать все материалы";
             foreach (var ctrl in activeTempControls)
                 ctrl.Enabled = true;
@@ -152,20 +172,20 @@ namespace ManagementAccounting
             nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
         }
 
-        public bool CheckNextOffset(List<IBlockItem> itemsList)
-        {
-            var indexOfLastItem = activeBlock.LengthOfItemsList;
-            var lengthOfItemList = indexOfLastItem + 1;
+        //public bool CheckNextOffset(List<IBlockItem> itemsList)
+        //{
+        //    var indexOfLastItem = block.LengthOfItemsList;
+        //    var lengthOfItemList = indexOfLastItem + 1;
 
-            if (itemsList.Count != lengthOfItemList) return false;
-            itemsList.RemoveAt(indexOfLastItem);
-            return true;
-        }
+        //    if (itemsList.Count != lengthOfItemList) return false;
+        //    itemsList.RemoveAt(indexOfLastItem);
+        //    return true;
+        //}
 
-        public bool CheckPreviousOffset(int offset)
-        {
-            return offset > 0;
-        }
+        //public bool CheckPreviousOffset(int offset)
+        //{
+        //    return offset > 0;
+        //}
 
         private async void PreviousNext_Click(object sender, EventArgs e)
         {
@@ -193,8 +213,11 @@ namespace ManagementAccounting
 
         private async Task ShowItems(int offset)
         {
-            var maxShowItemsCount = activeBlock.LengthOfItemsList;
-            var itemsList = await activeBlock.GetItemsList(offset, searchNameLine.Text.ToLower());
+            var maxShowItemsCount = block.LengthOfItemsList;
+            var resultOfGettingItemsList = await block.GetItemsList(offset, searchNameLine.Text.ToLower());
+            var itemsList = resultOfGettingItemsList.Item1;
+            var isThereMoreOfItems = resultOfGettingItemsList.Item2;
+
             _offset = offset;
 
             if (itemsList.Count == 0)
@@ -203,7 +226,9 @@ namespace ManagementAccounting
                 {
                     offset -= maxShowItemsCount;
                     _offset = offset;
-                    itemsList = await activeBlock.GetItemsList(offset, searchNameLine.Text); 
+                    resultOfGettingItemsList = await block.GetItemsList(offset, searchNameLine.Text.ToLower());
+                    itemsList = resultOfGettingItemsList.Item1;
+                    isThereMoreOfItems = resultOfGettingItemsList.Item2;
                 }
                 else
                 {
@@ -212,7 +237,7 @@ namespace ManagementAccounting
                 }
             }
 
-            if (CheckNextOffset(itemsList))
+            if (isThereMoreOfItems)
             {
                 nextListButton.Enabled = true;
                 nextListButton.Tag = offset + maxShowItemsCount;
@@ -220,7 +245,7 @@ namespace ManagementAccounting
             else
                 DefaultNextButton();
 
-            if (CheckPreviousOffset(offset))
+            if (offset > 0)
             {
                 previousListButton.Enabled = true;
                 previousListButton.Tag = offset - maxShowItemsCount;
@@ -258,7 +283,7 @@ namespace ManagementAccounting
             var itemLabel = new Label();
             itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 10);
             itemLabel.Width = 100;
-            itemLabel.Click += ItemLabel_Click;
+            itemLabel.Click += itemAction;
             Controls.Add(itemLabel);
             activeItemTempControls.Add(itemLabel);
 
@@ -268,10 +293,14 @@ namespace ManagementAccounting
             return itemLabel;
         }
 
-        private void ItemLabel_Click(object sender, EventArgs e)
+        private void ItemMaterialLabel_Click(object sender, EventArgs e)
         {
             var label = (Label) sender;
-            var form = _formsCollection.GetItemForm(label.Tag.GetType(), label.Tag, _inputOperations);
+            var material = (IMaterial) label.Tag;
+            var creator = creatorFactory.CreateMaterialReceivingCreator((BlockItemDB) material);
+            var creatorNotEmpty = creatorFactory.CreateMaterialReceivingNotEmptyCreator((BlockItemDB)material);
+
+            var form = formFactory.CreateMaterialForm(material, creator, creatorNotEmpty);
 
             form.ShowDialog();
 
@@ -280,10 +309,9 @@ namespace ManagementAccounting
 
         
 
-        private void AddButtonOnClick(object? sender, EventArgs e)
+        private void AddMaterialButtonOnClick(object? sender, EventArgs e)
         {
-            var button = (Button)sender;
-            var form = _formsCollection.GetAddItemForm((string)button.Tag, activeBlock, _inputOperations);
+            var form = formFactory.CreateAddMaterialForm();
             form.ShowDialog();
 
             ShowItems(_offset);

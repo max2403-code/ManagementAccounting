@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
+using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Classes.ItemCreators;
+using ManagementAccounting.Interfaces.Factory;
+using ManagementAccounting.Interfaces.ItemCreators;
+using ManagementAccounting.Interfaces.Items;
 using Ninject;
 using Ninject.Extensions.Factory;
 
@@ -19,41 +24,31 @@ namespace ManagementAccounting
             var container = new StandardKernel();
             container.Bind<IDataBase>().To<DataBase>().InSingletonScope();
 
-            container.Bind<IProgramBlock>().To<Remainders>();
-            container.Bind<IProgramBlock>().To<Calculations>();
-            container.Bind<IProgramBlock>().To<PreOrders>();
+            container.Bind<BlockItemsCollectionCreator>().To<MaterialCollectionCreator>();
+
+            //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingCollectionCreator>();
+            //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingNotEmptyCollectionCreator>();
+            //container.Bind<ICalculationItemCollectionCreator>().To<CalculationItemCollectionCreator>();
+
+            //container.Bind<AddMaterialForm>().ToSelf();
+
+            //container.Bind<IProgramBlock>().To<PreOrders>();
 
 
-            container.Bind<IMaterial>().To<Material>();
-            container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
-            container.Bind<ICalculation>().To<Calculation>();
-            container.Bind<ICalculationItem>().To<CalculationItem>();
-            container.Bind<IPreOrder>().To<PreOrder>();
-            container.Bind<IPreOrderItem>().To<PreOrderItem>();
+            //container.Bind<IMaterial>().To<Material>();
+            //container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
+            //container.Bind<Calculation>().To<Calculation>();
+            //container.Bind<ICalculationItem>().To<CalculationItem>();
+            //container.Bind<IPreOrder>().To<PreOrder>();
+            //container.Bind<IPreOrderItem>().To<PreOrderItem>();
+
+
+            container.Bind<ICreatorFactory>().ToFactory();
+            container.Bind<IItemsFactory>().ToFactory();
+            container.Bind<IFormFactory>().ToFactory();
 
 
 
-            container.Bind<IBlockItemsFactory>().ToFactory();
-            container.Bind<IBlockItemFormsCollection>().To<BlockItemFormsCollection>().InSingletonScope();
-            container.Bind<Dictionary<Type, Func<object, IOperationsWithUserInput, Form>>>().ToSelf().WhenInjectedExactlyInto<BlockItemFormsCollection>()
-                .WithConstructorArgument
-                (
-                    "collection",
-                    new[]
-                    {
-                        new KeyValuePair<Type, Func<object, IOperationsWithUserInput, Form>>(typeof(Material), (obj, inputOp) => new MaterialForm((IMaterial)obj, inputOp))
-                    }
-                );
-
-            container.Bind<Dictionary<string, Func<IProgramBlock, IOperationsWithUserInput, Form>>>().ToSelf().WhenInjectedExactlyInto<BlockItemFormsCollection>()
-                .WithConstructorArgument
-                (
-                    "collection",
-                    new[]
-                    {
-                        new KeyValuePair<string, Func<IProgramBlock, IOperationsWithUserInput, Form>>("material", (block, inputOp) => new AddMaterialForm(block, inputOp))
-                    }
-                );
             container.Bind<IOperationsWithUserInput>().To<OperationsWithUserInput>().InSingletonScope();
             
             container.Bind<Dictionary<string, string>>().ToSelf().WhenInjectedExactlyInto<OperationsWithUserInput>()
@@ -68,6 +63,12 @@ namespace ManagementAccounting
                         new KeyValuePair<string, string>("Ткань", "Fabric"),
                         new KeyValuePair<string, string>("Фурнитура", "Accessories"),
                         new KeyValuePair<string, string>("Прочее", "Other"),
+                        new KeyValuePair<string, string>("g", "гр"),
+                        new KeyValuePair<string, string>("m2", "м2"),
+                        new KeyValuePair<string, string>("pcs", "шт"),
+                        new KeyValuePair<string, string>("гр", "g"),
+                        new KeyValuePair<string, string>( "м2", "m2"),
+                        new KeyValuePair<string, string>( "шт", "pcs")
                     }
                 );
 

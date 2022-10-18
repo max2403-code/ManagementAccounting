@@ -7,6 +7,6 @@ namespace ManagementAccounting
 {
     public interface IPreOrders : IProgramBlock
     {
-        public Task<List<ICalculation>> GetCalculations(int offset, params string[] selectionCriterion);
+       // public Task<List<ICalculation>> GetCalculations(int offset, params string[] selectionCriterion);
     }
 }

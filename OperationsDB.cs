@@ -72,7 +72,7 @@
 //        //        AssignParametersToCommand(cmd, obj);
 //        //        try
 //        //        {
-//        //            await cmd.ExecuteNonQueryAsync();
+//        //            await cmd.ExecuteNonQueryAndReaderAsync();
 //        //        }
 //        //        catch (Exception e)
 //        //        {
@@ -163,7 +163,7 @@
 //                        isDBExist = false;
 //                        await reader.CloseAsync();
 //                        cmd.CommandText = "CREATE DATABASE managementaccounting;";
-//                        await cmd.ExecuteNonQueryAsync();
+//                        await cmd.ExecuteNonQueryAndReaderAsync();
 //                    }
 //                }
 //            }
@@ -178,17 +178,17 @@
 //                    {
 //                        cmd.Connection = connectionMA;
 //                        cmd.CommandText = $"CREATE TABLE remainders (Id SERIAL PRIMARY KEY, MaterialType INTEGER, MaterialName CHARACTER VARYING({FactoryClass.GetNameItemLength()}) UNIQUE, Remainder DOUBLE PRECISION)";
-//                        await cmd.ExecuteNonQueryAsync();
+//                        await cmd.ExecuteNonQueryAndReaderAsync();
 
 //                        cmd.CommandText = "CREATE INDEX MaterialTypeIndex ON remainders (MaterialType);";
-//                        await cmd.ExecuteNonQueryAsync();
+//                        await cmd.ExecuteNonQueryAndReaderAsync();
 
 //                        cmd.CommandText =
-//                            "CREATE TABLE materialflow (Id SERIAL PRIMARY KEY, MaterialId INTEGER REFERENCES remainders (Id) ON DELETE CASCADE, OperationType INTEGER, Quantity DOUBLE PRECISION, FlowDate DATE, TotalCost DOUBLE PRECISION, Remainder DOUBLE PRECISION, Note CHARACTER VARYING(50))";
-//                        await cmd.ExecuteNonQueryAsync();
+//                            "CREATE TABLE materialflow (Id SERIAL PRIMARY KEY, MaterialId INTEGER REFERENCES remainders (Id) ON DELETE CASCADE, OperationType INTEGER, Consumption DOUBLE PRECISION, FlowDate DATE, TotalCost DOUBLE PRECISION, Remainder DOUBLE PRECISION, Note CHARACTER VARYING(50))";
+//                        await cmd.ExecuteNonQueryAndReaderAsync();
 
 //                        cmd.CommandText = "CREATE INDEX MaterialIdIndex ON materialflow (MaterialId);";
-//                        await cmd.ExecuteNonQueryAsync();
+//                        await cmd.ExecuteNonQueryAndReaderAsync();
 //                    }
 //                }
 //            }
