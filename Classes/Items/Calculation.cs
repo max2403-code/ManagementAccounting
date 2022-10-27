@@ -11,12 +11,16 @@ using BlockItemDB = ManagementAccounting.Classes.Abstract.BlockItemDB;
 
 namespace ManagementAccounting
 {
-    public class Calculation : BlockItemDB
+    public class Calculation : EditingBlockItemDB, ICalculation
     {
+        public string Name { get; private set; }
+        public int Index { get; private set; }
         private IItemsFactory itemsFactory { get; }
 
-        public Calculation(string calculationName, int index, IDataBase dataBase, IItemsFactory itemsFactory) : base(index, calculationName, dataBase)
+        public Calculation(string calculationName, int index, IDataBase dataBase, IItemsFactory itemsFactory) : base(dataBase)
         {
+            Name = calculationName;
+            Index = index;
             this.itemsFactory = itemsFactory;
         }
         private protected override string GetAddItemCommandText()
@@ -39,9 +43,9 @@ namespace ManagementAccounting
             Index = (int)index["IdC"];
         }
 
-        private protected override IBlockItem GetCopyItem()
+        private protected override T GetCopyItem<T>()
         {
-            return itemsFactory.CreateCalculation(Name, Index);
+            return (T)itemsFactory.CreateCalculation(Name, Index);
         }
 
         private protected override string GetEditItemCommandText()
@@ -64,9 +68,9 @@ namespace ManagementAccounting
             AssignParametersToAddCommand(cmd);
         }
 
-        private protected override void UndoValues(IBlockItem copyItem)
+        private protected override void UndoValues<T>(T copyItem)
         {
-            var copyCalculation = copyItem as BlockItemDB;
+            var copyCalculation = copyItem as ICalculation;
             Name = copyCalculation.Name;
 
         }

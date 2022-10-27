@@ -7,8 +7,8 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class MaterialReceivingNotEmptyCollectionCreator : MaterialReceivingCollectionCreator
     {
-        private BlockItemDB material { get; }
-        public MaterialReceivingNotEmptyCollectionCreator(BlockItemDB material, IDataBase dataBase, IItemsFactory itemsFactory) : base(material, dataBase, itemsFactory)
+        private IMaterial material { get; }
+        public MaterialReceivingNotEmptyCollectionCreator(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(material, lengthOfItemsList, dataBase, itemsFactory)
         {
             this.material = material;
         }
@@ -16,7 +16,7 @@ namespace ManagementAccounting.Classes.ItemCreators
         private protected override string GetCommandText(int offset, string searchCriterion)
         {
             return
-                $"SELECT * FROM materialreceiving AS mr, materials AS m WHERE mr.MaterialIdmr = {material.Index} AND mr.Remaindermr > 0 AND mr.SearchNamemr LIKE '%{searchCriterion}%' AND mr.MaterialIdmr = m.IdM ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
+                $"SELECT * FROM materialreceiving WHERE MaterialIdmr = {material.Index} AND Remaindermr > 0 AND SearchNamemr LIKE '%{searchCriterion}%' ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
         }
     }
 }

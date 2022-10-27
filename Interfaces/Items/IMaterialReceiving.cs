@@ -4,8 +4,9 @@ using System.Text;
 
 namespace ManagementAccounting
 {
-    public interface IMaterialReceiving 
+    public interface IMaterialReceiving : IBlockItem
     {
+        public int Index { get; }
         public IMaterial Material { get; }
         public DateTime Date { get; }
         public decimal Quantity { get; }

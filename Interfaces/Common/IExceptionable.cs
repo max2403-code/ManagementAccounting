@@ -4,7 +4,10 @@ using System.Text;
 
 namespace ManagementAccounting
 {
-    public interface IOrderMaterialReceiving : IAddable, IRemovable, IBlockItem
+    public interface IExceptionable
     {
+        public event Action ExceptionEvent;
+        //int Index { get; }
+
     }
 }

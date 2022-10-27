@@ -6,12 +6,13 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Factory;
 
 namespace ManagementAccounting.Forms.RemaindersForms
 {
     public partial class MaterialReceivingForm : Form
     {
-        private IMaterialReceiving _materialReceiving { get; }
+        private IMaterialReceiving _materialReceiving { get; set; }
         private IOperationsWithUserInput _inputOperations { get; }
         private Label topLabel { get; }
 
@@ -23,11 +24,13 @@ namespace ManagementAccounting.Forms.RemaindersForms
         private Label materialNameValue { get; }
         private Button editReceivingButton { get; }
         private Button removeReceivingButton { get; }
+        private IFormFactory formFactory { get; }
 
 
 
-        public MaterialReceivingForm(IMaterialReceiving materialReceiving, IOperationsWithUserInput inputOperations)
+        public MaterialReceivingForm(IMaterialReceiving materialReceiving, IFormFactory formFactory, IOperationsWithUserInput inputOperations)
         {
+            this.formFactory = formFactory;
             _inputOperations = inputOperations;
             _materialReceiving = materialReceiving;
 
@@ -36,7 +39,7 @@ namespace ManagementAccounting.Forms.RemaindersForms
             topLabel = new Label();
             topLabel.TextAlign = ContentAlignment.MiddleCenter;
             topLabel.Dock = DockStyle.Top;
-            topLabel.Text = ((BlockItemDB)_materialReceiving).Name;
+            topLabel.Text = _materialReceiving.Name;
             Controls.Add(topLabel);
 
             var materialNameLabel = new Label();
@@ -46,7 +49,8 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             materialNameValue = new Label();
             materialNameValue.Location = new Point(materialNameLabel.Location.X + materialNameLabel.Width + 15, materialNameLabel.Location.Y);
-            materialNameValue.Text = ((BlockItemDB)materialReceiving.Material).Name;
+            materialNameValue.Text = materialReceiving.Material.Name;
+            materialNameValue.Width = 200;
             Controls.Add(materialNameValue);
 
 
@@ -113,14 +117,19 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
         private void EditReceivingButtonOnClick(object? sender, EventArgs e)
         {
-            var editReceivingForm = new EditMaterialReceivingForm(_materialReceiving, _inputOperations);
+            var editReceivingForm = formFactory.CreateEditMaterialReceivingForm(_materialReceiving, this);
             editReceivingForm.ShowDialog();
 
-            topLabel.Text = ((BlockItemDB)_materialReceiving).Name;
+            topLabel.Text = _materialReceiving.Name;
             quantityValue.Text = _materialReceiving.Quantity.ToString();
             costValue.Text = _materialReceiving.Cost.ToString();
             remainderValue.Text = _materialReceiving.Remainder.ToString();
             noteValue.Text = _materialReceiving.Note;
+        }
+
+        public void UpdateMeterialReceiving(IMaterialReceiving materialReceiving)
+        {
+            _materialReceiving = materialReceiving;
         }
     }
 }

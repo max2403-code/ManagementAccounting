@@ -18,14 +18,14 @@ namespace ManagementAccounting
         public decimal MaxPrice => MaxUnitPrice * Quantity;
         public int Quantity { get; }
 
-        public PreOrderItem(IMaterial material, decimal materialUnitСonsumption, decimal minUnitPrice, decimal maxUnitPrice, int quantity, bool isRemainderNotAvailable)
+        public PreOrderItem(IMaterial material, decimal materialUnitСonsumption, decimal minMaterialPrice, decimal maxMaterialPrice, int quantity, bool isRemainderNotAvailable)
         {
             IsRemainderNotAvailable = isRemainderNotAvailable;
             Material = material;
-            Name = ((BlockItemDB)Material).Name;
+            Name = Material.Name;
             MaterialUnitСonsumption = materialUnitСonsumption;
-            MinUnitPrice = minUnitPrice;
-            MaxUnitPrice = maxUnitPrice;
+            MinUnitPrice = minMaterialPrice * materialUnitСonsumption ;
+            MaxUnitPrice = maxMaterialPrice * materialUnitСonsumption;
             Quantity = quantity;
         }
     }

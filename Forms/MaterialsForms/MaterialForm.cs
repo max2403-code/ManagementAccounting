@@ -32,10 +32,10 @@ namespace ManagementAccounting
         private MaterialReceivingNotEmptyCollectionCreator creatorNotEmpty { get; }
         private IOperationsWithUserInput _inputOperations { get; }
 
-        public MaterialForm(IMaterial material, MaterialReceivingCollectionCreator creator, MaterialReceivingNotEmptyCollectionCreator creatorNotEmpty, IOperationsWithUserInput inputOperations, IFormFactory formFactory)
+        public MaterialForm(IMaterial material, ICreatorFactory creatorFactory, IOperationsWithUserInput inputOperations, IFormFactory formFactory)
         {
-            this.creatorNotEmpty = creatorNotEmpty;
-            this.creator = creator;
+            creatorNotEmpty = creatorFactory.CreateMaterialReceivingNotEmptyCreator(material, 5);
+            creator = creatorFactory.CreateMaterialReceivingCreator(material, 5);
             _material = material;
             _inputOperations = inputOperations;
             this.formFactory = formFactory;
@@ -44,7 +44,7 @@ namespace ManagementAccounting
             Size = new Size(400, 600);
 
             nameLabel = new Label();
-            nameLabel.Text = ((BlockItemDB)material).Name;
+            nameLabel.Text = material.Name;
             nameLabel.Location = new Point(10, 10);
             Controls.Add(nameLabel);
 
@@ -114,7 +114,7 @@ namespace ManagementAccounting
         {
             var editForm = formFactory.CreateEditMaterialForm(_material);
             editForm.ShowDialog();
-            nameLabel.Text = ((BlockItemDB)_material).Name;
+            nameLabel.Text = _material.Name;
             typeLabel.Text = _inputOperations.TranslateType(_material.MaterialType.ToString());
         }
 

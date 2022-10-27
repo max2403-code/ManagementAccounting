@@ -10,14 +10,18 @@ using NpgsqlTypes;
 
 namespace ManagementAccounting
 {
-    public class Material : BlockItemDB, IMaterial
+    public class Material : EditingBlockItemDB, IMaterial
     {
+        public string Name { get; private set; }
+        public int Index { get; private set; }
         public UnitOfMaterial Unit { get; private set; }
         public MaterialType MaterialType { get; private set; }
         private IItemsFactory itemsFactory { get; }
 
-        public Material(MaterialType materialType, string name, UnitOfMaterial unit, int index, IDataBase dataBase, IItemsFactory itemsFactory) : base(index, name, dataBase)
+        public Material(MaterialType materialType, string name, UnitOfMaterial unit, int index, IDataBase dataBase, IItemsFactory itemsFactory) : base(dataBase)
         {
+            Name = name;
+            Index = index;
             Unit = unit;
             MaterialType = materialType;
             this.itemsFactory = itemsFactory;
@@ -45,9 +49,9 @@ namespace ManagementAccounting
             Index = (int)index["IdM"];
         }
 
-        private protected override IBlockItem GetCopyItem()
+        private protected override T GetCopyItem<T>()
         {
-            return itemsFactory.CreateMaterial(MaterialType, Name, Unit, Index);
+            return (T)itemsFactory.CreateMaterial(MaterialType, Name, Unit, Index);
         }
 
         private protected override string GetEditItemCommandText()
@@ -72,11 +76,11 @@ namespace ManagementAccounting
             AssignParametersToAddCommand(cmd);
         }
 
-        private protected override void UndoValues(IBlockItem copyItem)
+        private protected override void UndoValues<T>(T copyItem)
         {
             var material = copyItem as IMaterial;
+            Name = material.Name;
             MaterialType = material.MaterialType;
-            Name = ((BlockItemDB)material).Name;
             Unit = material.Unit;
         }
 

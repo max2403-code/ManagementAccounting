@@ -12,7 +12,7 @@ namespace ManagementAccounting.Classes.ItemCreators
     {
         private IItemsFactory itemsFactory { get; }
 
-        public CalculationCollectionCreator(IDataBase dataBase, IItemsFactory itemsFactory) : base(5, dataBase)
+        public CalculationCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
             this.itemsFactory = itemsFactory;
         }

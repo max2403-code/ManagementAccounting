@@ -17,11 +17,11 @@ namespace ManagementAccounting
         private ComboBox unitTypes { get; }
         private TextBox nameLine { get; }
         private IMaterial _material { get; }
-        private IOperationsWithUserInput _inputOperations { get; }
+        private IOperationsWithUserInput inputOperations { get; }
 
         public EditMaterialForm(IMaterial material, IOperationsWithUserInput inputOperations)
         {
-            _inputOperations = inputOperations;
+            this.inputOperations = inputOperations;
             _material = material;
             
             Size = new Size(400, 600);
@@ -53,7 +53,7 @@ namespace ManagementAccounting
             materialTypes = new ComboBox();
             materialTypes.DropDownStyle = ComboBoxStyle.DropDownList;
             materialTypes.Location = new Point(typeLabel.Location.X + typeLabel.Width + 10, typeLabel.Location.Y);
-            materialTypes.Items.AddRange(_inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(MaterialType))));
+            materialTypes.Items.AddRange(inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(MaterialType))));
             Controls.Add(materialTypes);
 
             var unitLabel = new Label();
@@ -65,7 +65,7 @@ namespace ManagementAccounting
             unitTypes = new ComboBox();
             unitTypes.DropDownStyle = ComboBoxStyle.DropDownList;
             unitTypes.Location = new Point(unitLabel.Location.X + unitLabel.Width + 10, unitLabel.Location.Y);
-            unitTypes.Items.AddRange(_inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(UnitOfMaterial))));
+            unitTypes.Items.AddRange(inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(UnitOfMaterial))));
             Controls.Add(unitTypes);
 
             editButton = new Button();
@@ -93,8 +93,7 @@ namespace ManagementAccounting
             var materialType = materialTypes.SelectedItem;
             var unitType = unitTypes.SelectedItem;
 
-            var name = nameLine.Text;
-            if (!_inputOperations.IsNameCorrect(name) || materialType == null || unitType == null)
+            if (materialType == null || unitType == null)
             {
                 MessageBox.Show("Наименование материала и(или) тип введены неверно", "Внимание");
                 return;
@@ -102,7 +101,9 @@ namespace ManagementAccounting
 
             try
             {
-                await ((BlockItemDB)_material).EditItemInDataBase(Enum.Parse<MaterialType>(_inputOperations.TranslateType((string)materialType)), name, Enum.Parse<UnitOfMaterial>(_inputOperations.TranslateType((string)unitType)));
+                var name = inputOperations.GetNotEmptyName(nameLine.Text, 50) ;
+
+                await ((EditingBlockItemDB)_material).EditItemInDataBase<IMaterial>(Enum.Parse<MaterialType>(inputOperations.TranslateType((string)materialType)), name, Enum.Parse<UnitOfMaterial>(inputOperations.TranslateType((string)unitType)));
             }
             catch (Exception exception)
             {

@@ -6,10 +6,10 @@ using Npgsql;
 
 namespace ManagementAccounting
 {
-    public interface IEditable : IIndexable
+    public interface IEditable 
     {
         //void AssignParametersToEditCommand(NpgsqlCommand cmd);
 
-        Task EditItemInDataBase(params object[] parameters);
+        Task EditItemInDataBase<T>(params object[] parameters);
     }
 }

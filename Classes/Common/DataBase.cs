@@ -47,7 +47,7 @@ namespace ManagementAccounting
             return task;
         }
         
-        public Task ExecuteNonQueryAndReaderAsync(IIndexable item, string commandText, string exceptionMessage, Action<NpgsqlCommand> assignItemParameters = null, Action<DbDataRecord> assignId = null)
+        public Task ExecuteNonQueryAndReaderAsync(IExceptionable item, string commandText, string exceptionMessage, Action<NpgsqlCommand> assignItemParameters = null, Action<DbDataRecord> assignId = null)
         {
             var task = new Task(() =>
             {
@@ -80,7 +80,7 @@ namespace ManagementAccounting
             return task;
         }
 
-        //public Task ExecuteIdReaderAsync(IIndexable blockItem, Action<DbDataRecord> assignId, string commandText, string textMessage)
+        //public Task ExecuteIdReaderAsync(IExceptionable blockItem, Action<DbDataRecord> assignId, string commandText, string textMessage)
         //{
         //    var task = new Task(() =>
         //    {
@@ -176,23 +176,23 @@ namespace ManagementAccounting
                         cmd.CommandText = $"CREATE TABLE materials (IdM SERIAL PRIMARY KEY, MaterialTypeM INTEGER, MaterialNameM CHARACTER VARYING(50) UNIQUE, UnitM INTEGER)";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX MaterialTypeIndex ON materials (MaterialTypeM);";
+                        cmd.CommandText = "CREATE INDEX MaterialTypeMIndex ON materials (MaterialTypeM);";
                         await cmd.ExecuteNonQueryAsync();
 
                         cmd.CommandText =
                             "CREATE TABLE materialreceiving (IdMR SERIAL PRIMARY KEY, MaterialIdMR INTEGER REFERENCES materials (IdM) ON DELETE CASCADE, QuantityMR NUMERIC CHECK(QuantityMR > 0), ReceiveDateMR DATE, TotalCostMR NUMERIC CHECK(TotalCostMR >= 0), RemainderMR NUMERIC CHECK(RemainderMR >= 0), NoteMR CHARACTER VARYING(50), SearchNameMR CHARACTER VARYING(10))";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX MaterialIdIndex ON materialreceiving (MaterialIdMR);";
+                        cmd.CommandText = "CREATE INDEX MaterialIdMRIndex ON materialreceiving (MaterialIdMR);";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX RemainderIndex ON materialreceiving (RemainderMR);";
+                        cmd.CommandText = "CREATE INDEX RemainderMRIndex ON materialreceiving (RemainderMR);";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX SearchNameIndex ON materialreceiving (SearchNameMR);";
+                        cmd.CommandText = "CREATE INDEX SearchNameMRIndex ON materialreceiving (SearchNameMR);";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX ReceiveDateIndex ON materialreceiving (ReceiveDateMR);";
+                        cmd.CommandText = "CREATE INDEX ReceiveDateMRIndex ON materialreceiving (ReceiveDateMR);";
                         await cmd.ExecuteNonQueryAsync();
 
                         cmd.CommandText =
@@ -200,57 +200,64 @@ namespace ManagementAccounting
                         await cmd.ExecuteNonQueryAsync();
 
                         cmd.CommandText =
-                            "CREATE TABLE calculationitems (IdCI SERIAL PRIMARY KEY, CalculationIdCI INTEGER REFERENCES calculations (IdC) ON DELETE CASCADE, MaterialIdCI INTEGER REFERENCES materials (IdM) ON DELETE RESTRICT, ConsumptionCI NUMERIC CHECK(ConsumptionCI > 0))";
+                            "CREATE TABLE calculationitems (IdCI SERIAL PRIMARY KEY, CalculationIdCI INTEGER REFERENCES calculations (IdC) ON DELETE CASCADE, MaterialIdCI INTEGER REFERENCES materials (IdM) ON DELETE RESTRICT, ConsumptionCI NUMERIC CHECK(ConsumptionCI > 0), UNIQUE(CalculationIdCI, MaterialIdCI))";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX CalculationIdIndex ON calculationitems (CalculationIdCI);";
+                        cmd.CommandText = "CREATE INDEX CalculationIdCIIndex ON calculationitems (CalculationIdCI);";
                         await cmd.ExecuteNonQueryAsync();
 
                         cmd.CommandText =
                             "CREATE TABLE preorders (IdPO SERIAL PRIMARY KEY, CalculationIdPO INTEGER REFERENCES calculations (IdC) ON DELETE RESTRICT, QuantityPO INTEGER CHECK(QuantityPO > 0), CreationDatePO DATE, SearchNamePO CHARACTER VARYING(64))";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX CalculationIdIndex ON preorders (CalculationIdPO);";
+                        cmd.CommandText = "CREATE INDEX CalculationIdPOIndex ON preorders (CalculationIdPO);";
                         await cmd.ExecuteNonQueryAsync();
 
-                        cmd.CommandText = "CREATE INDEX SearchNameIndex ON preorders (SearchNamePO);";
+                        cmd.CommandText = "CREATE INDEX SearchNamePOIndex ON preorders (SearchNamePO);";
+                        await cmd.ExecuteNonQueryAsync();
+                        
+                        cmd.CommandText =
+                            "CREATE TABLE orders (IdO SERIAL PRIMARY KEY, CreationDateO DATE, OrderNameO CHARACTER VARYING(50), QuantityO INTEGER CHECK(QuantityO > 0), SearchNameO CHARACTER VARYING(64))";
                         await cmd.ExecuteNonQueryAsync();
 
+                        cmd.CommandText = "CREATE INDEX SearchNameOIndex ON orders (SearchNameO);";
+                        await cmd.ExecuteNonQueryAsync();
 
+                        cmd.CommandText = "CREATE INDEX CreationDateOIndex ON orders (CreationDateO);";
+                        await cmd.ExecuteNonQueryAsync();
 
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        cmd.CommandText =
+                            "CREATE TABLE orderitems (IdOI SERIAL PRIMARY KEY, OrderIdOI INTEGER REFERENCES orders (IdO) ON DELETE CASCADE, MaterialIdOI INTEGER REFERENCES materials (IdM) ON DELETE RESTRICT, ConsumptionOI NUMERIC CHECK(ConsumptionOI >= 0), TotalConsumptionOI NUMERIC CHECK(TotalConsumptionOI > 0))";
+                        await cmd.ExecuteNonQueryAsync();
 
+                        cmd.CommandText = "CREATE INDEX ConsumptionOIIndex ON orderitems (ConsumptionOI);";
+                        await cmd.ExecuteNonQueryAsync();
 
+                        cmd.CommandText = "CREATE INDEX OrderIdOIIndex ON orderitems (OrderIdOI);";
+                        await cmd.ExecuteNonQueryAsync();
 
+                        cmd.CommandText = "CREATE INDEX MaterialIdOIIndex ON orderitems (MaterialIdOI);";
+                        await cmd.ExecuteNonQueryAsync();
 
-                        //cmd.CommandText =
-                        //    "CREATE TABLE orders (IdO SERIAL PRIMARY KEY, CreationDateO TIMESTAMP UNIQUE, OrderNameO CHARACTER VARYING(50), QuantityO INTEGER CHECK(QuantityO > 0), SearchNameO CHARACTER VARYING(64))";
-                        //await cmd.ExecuteNonQueryAsync();
+                        cmd.CommandText =
+                            "CREATE TABLE ordermaterialreceiving (IdOMR SERIAL PRIMARY KEY, OrderItemIdOMR INTEGER REFERENCES orderitems (IdOI) ON DELETE CASCADE, MaterialReceivingIdOMR INTEGER REFERENCES materialreceiving (IdMR) ON DELETE RESTRICT, ConsumptionOMR NUMERIC CHECK(ConsumptionOMR > 0))";
+                        await cmd.ExecuteNonQueryAsync();
 
-                        //cmd.CommandText = "CREATE INDEX SearchNameIndex ON orders (SearchNameO);";
-                        //await cmd.ExecuteNonQueryAsync();
+                        cmd.CommandText = "CREATE INDEX OrderItemIdOMRIndex ON ordermaterialreceiving (OrderItemIdOMR);";
+                        await cmd.ExecuteNonQueryAsync();
 
-                        //cmd.CommandText = "CREATE INDEX CreationDateIndex ON orders (CreationDateO);";
-                        //await cmd.ExecuteNonQueryAsync();
+                        cmd.CommandText = "CREATE INDEX MaterialReceivingIdOMRIndex ON ordermaterialreceiving (MaterialReceivingIdOMR);";
+                        await cmd.ExecuteNonQueryAsync();
 
-                        //cmd.CommandText =
-                        //    "CREATE TABLE orderitems (IdOI SERIAL PRIMARY KEY, OrderIdOI INTEGER REFERENCES orders (IdO) ON DELETE CASCADE, MaterialIdOI INTEGER REFERENCES remainders (IdM) ON DELETE RESTRICT, QuantityOI NUMERIC CHECK(QuantityOI > 0))";
-                        //await cmd.ExecuteNonQueryAsync();
-
-                        //cmd.CommandText = "CREATE INDEX OrderIdIndex ON orderitems (OrderIdOI);";
-                        //await cmd.ExecuteNonQueryAsync();
-
-                        //cmd.CommandText = "CREATE INDEX MaterialIdIndex ON orderitems (MaterialIdOI);";
-                        //await cmd.ExecuteNonQueryAsync();
-
-                        //cmd.CommandText =
-                        //    "CREATE TABLE ordermaterialreceiving (IdOMR SERIAL PRIMARY KEY, OrderItemIdOMR INTEGER REFERENCES orderitems (IdOI) ON DELETE CASCADE, MaterialReceivingIdOMR INTEGER REFERENCES materialreceiving (IdMR) ON DELETE RESTRICT, QuantityOMR NUMERIC CHECK(QuantityOMR > 0))";
-                        //await cmd.ExecuteNonQueryAsync();
-
-                        //cmd.CommandText = "CREATE INDEX OrderItemIdIndex ON ordermaterialreceiving (OrderItemIdOMR);";
-                        //await cmd.ExecuteNonQueryAsync();
-
-                        //cmd.CommandText = "CREATE INDEX MaterialReceivingIdIndex ON ordermaterialreceiving (MaterialReceivingIdOMR);";
-                        //await cmd.ExecuteNonQueryAsync();
+                        cmd.CommandText = "CREATE TABLE temporderitems (IdTOI INTEGER)";
+                        await cmd.ExecuteNonQueryAsync();
                     }
                 }
             }

@@ -94,8 +94,7 @@ namespace ManagementAccounting
         {
             var materialType = materialTypes.SelectedItem;
             var unitType = unitTypes.SelectedItem;
-            var name = nameLine.Text;
-            if (!inputOperations.IsNameCorrect(name) || materialType == null || unitType == null) 
+            if (materialType == null || unitType == null) 
             {
                 MessageBox.Show("Наименование материала и(или) тип введены неверно", "Внимание");
                 return;
@@ -103,7 +102,9 @@ namespace ManagementAccounting
 
             try
             {
-                var material = itemsFactory.CreateMaterial(Enum.Parse<MaterialType>(inputOperations.TranslateType((string)materialType)), name, Enum.Parse < UnitOfMaterial > (inputOperations.TranslateType((string)unitType)));
+                var name = inputOperations.GetNotEmptyName(nameLine.Text, 50) ;
+
+                var material = itemsFactory.CreateMaterial(Enum.Parse<MaterialType>(inputOperations.TranslateType((string)materialType)), name, Enum.Parse < UnitOfMaterial > (inputOperations.TranslateType((string)unitType))) as EditingBlockItemDB;
                 await material.AddItemToDataBase();
             }
             catch (Exception exception)

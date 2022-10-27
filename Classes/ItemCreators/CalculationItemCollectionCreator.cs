@@ -11,10 +11,10 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class CalculationItemCollectionCreator : BlockItemsCollectionCreator
     {
-        private BlockItemDB calculation { get; }
+        private ICalculation calculation { get; }
         private IItemsFactory itemsFactory { get; }
 
-        public CalculationItemCollectionCreator(BlockItemDB calculation, IDataBase dataBase, IItemsFactory itemsFactory) : base(5, dataBase)
+        public CalculationItemCollectionCreator(ICalculation calculation, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
             this.itemsFactory = itemsFactory;
             this.calculation = calculation;

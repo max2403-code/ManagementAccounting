@@ -5,6 +5,10 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Classes.Common;
+using ManagementAccounting.Interfaces.Common;
+using Npgsql;
 
 namespace ManagementAccounting
 {
@@ -20,9 +24,12 @@ namespace ManagementAccounting
         private Button addReceivingButton { get; }
         private Button cancelButton { get; }
         private IItemsFactory itemsFactory { get; }
+        private ISystemMaterialReceivingOperations materialReceivingOperations { get; }
+        private IMaterialReceiving materialReceiving { get; set; }
 
-        public AddMaterialReceivingForm(IMaterial material, IItemsFactory itemsFactory, IOperationsWithUserInput inputOperations)
+        public AddMaterialReceivingForm(IMaterial material, IItemsFactory itemsFactory, IOperationsWithUserInput inputOperations, ISystemMaterialReceivingOperations materialReceivingOperations)
         {
+            this.materialReceivingOperations = materialReceivingOperations;
             this.itemsFactory = itemsFactory;
             this.material = material;
             this.inputOperations = inputOperations;
@@ -104,17 +111,26 @@ namespace ManagementAccounting
         {
             try
             {
-                var dateArray = dateTextBox.Text.Split(".", StringSplitOptions.RemoveEmptyEntries);
-                var date = new DateTime(int.Parse(dateArray[2]), int.Parse(dateArray[1]), int.Parse(dateArray[0]));
-                var quantity = decimal.Parse(quantityTextBox.Text);
-                var cost = decimal.Parse(costTextBox.Text);
+               
+                var date = inputOperations.GetCorrectData(dateTextBox.Text);
+                var quantity = inputOperations.GetPositiveDecimal(quantityTextBox.Text);
+                var cost = inputOperations.GetPositiveDecimalorZero(costTextBox.Text);
                 var remainder = quantity;
-                var note = noteTextBox.Text;
-                var receiving = itemsFactory.CreateMaterialReceiving(material, date, quantity, cost, remainder, note);
-                await receiving.AddItemToDataBase();
+                var note = inputOperations.GetNotEmptyName(noteTextBox.Text, 50) ;
+                materialReceiving =
+                    itemsFactory.CreateMaterialReceiving(material, date, quantity, cost, remainder, note);
+                await materialReceivingOperations.Insert(materialReceiving);
+            }
+            catch (OrderItemOperationException exception)
+            {
+                await materialReceivingOperations.Remove(materialReceiving);
+
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
             }
             catch (Exception exception)
             {
+
                 MessageBox.Show("Введены некорректные данные", "Внимание");
                 return;
             }

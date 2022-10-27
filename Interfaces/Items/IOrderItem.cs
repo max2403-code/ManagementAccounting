@@ -4,10 +4,13 @@ using System.Text;
 
 namespace ManagementAccounting
 {
-    public interface IOrderItem : IProgramBlock, IBlockItem
+    public interface IOrderItem : IBlockItem
     {
+        public int Index { get; }
         public IMaterial Material { get; }
         public IOrder Order { get; }
+        public decimal Consumption { get; }
+        public decimal TotalConsumption { get; }
 
     }
 }

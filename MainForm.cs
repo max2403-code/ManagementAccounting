@@ -4,24 +4,27 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Factory;
+using ManagementAccounting.Interfaces.Items;
 
 namespace ManagementAccounting
 {
     public partial class MainForm : Form
     {
         public bool LoginCompleted { get; set; }
-    
         private IBlockItemFormsCollection _formsCollection { get; }
-
-
         private Label label { get; }
         private Button remaindersButton { get; }
+        private Button calculationsButton { get; }
+        private Button preOrdersButton { get; }
+
+
         private List<Button> mainButtonsHashSet { get; }
         private List<Control> activeTempControls { get; }
         private List<Control> activeItemTempControls { get; }
@@ -76,6 +79,26 @@ namespace ManagementAccounting
             remaindersButton.Click += MaterialsButtonOnClick;
             mainButtonsHashSet.Add(remaindersButton);
             Controls.Add(remaindersButton);
+
+            calculationsButton = new Button();
+            calculationsButton.Location = new Point(remaindersButton.Location.X + remaindersButton.Width + 10, remaindersButton.Location.Y);
+            calculationsButton.Enabled = false;
+            calculationsButton.AutoSize = true;
+            calculationsButton.Text = "Калькуляции";
+            calculationsButton.Tag = blocks[1];
+            calculationsButton.Click += CalculationsButtonOnClick;
+            mainButtonsHashSet.Add(calculationsButton);
+            Controls.Add(calculationsButton);
+
+            preOrdersButton = new Button();
+            preOrdersButton.Location = new Point(calculationsButton.Location.X + calculationsButton.Width + 10, calculationsButton.Location.Y);
+            preOrdersButton.Enabled = false;
+            preOrdersButton.AutoSize = true;
+            preOrdersButton.Text = "Предзаказы";
+            preOrdersButton.Tag = blocks[2];
+            preOrdersButton.Click += PreOrdersButtonOnClick;
+            mainButtonsHashSet.Add(preOrdersButton);
+            Controls.Add(preOrdersButton);
 
             addItem = new Button();
             addItem.Location = new Point(10, signIn.Location.Y + signIn.Height + 25);
@@ -154,9 +177,7 @@ namespace ManagementAccounting
 
             addAction = AddMaterialButtonOnClick;
             addItem.Click += addAction;
-
             
-
             itemAction = ItemMaterialLabel_Click;
 
 
@@ -171,6 +192,65 @@ namespace ManagementAccounting
             nextListButton.Tag = 0;
             nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
         }
+
+        private void CalculationsButtonOnClick(object? sender, EventArgs e)
+        {
+            ShowEmptyList("Введите наименование");
+            var control = (Control)sender;
+            block = (BlockItemsCollectionCreator)control.Tag;
+
+            if (addAction != null)
+            {
+                addItem.Click -= addAction;
+            }
+
+            addAction = AddCalculationButtonOnClick;
+            addItem.Click += addAction;
+
+            itemAction = ItemCalcLabel_Click;
+
+
+            addItem.Text = "Добавить калькуляцию";
+            allItems.Text = "Показать все калькуляции";
+            foreach (var ctrl in activeTempControls)
+                ctrl.Enabled = true;
+
+            previousListButton.Tag = 0;
+            previousListButton.Location = new Point(20 + allItems.Location.X + allItems.Width, allItems.Location.Y);
+
+            nextListButton.Tag = 0;
+            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
+        }
+
+        private void PreOrdersButtonOnClick(object? sender, EventArgs e)
+        {
+            ShowEmptyList("Введите наименование");
+            var control = (Control)sender;
+            block = (BlockItemsCollectionCreator)control.Tag;
+
+            if (addAction != null)
+            {
+                addItem.Click -= addAction;
+            }
+
+            addAction = AddPreOrderButtonOnClick;
+            addItem.Click += addAction;
+
+            itemAction = ItemPreOrderLabel_Click;
+
+
+            addItem.Text = "Добавить предзаказ";
+            allItems.Text = "Показать все предзаказы";
+            foreach (var ctrl in activeTempControls)
+                ctrl.Enabled = true;
+
+            previousListButton.Tag = 0;
+            previousListButton.Location = new Point(20 + allItems.Location.X + allItems.Width, allItems.Location.Y);
+
+            nextListButton.Tag = 0;
+            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
+        }
+
 
         //public bool CheckNextOffset(List<IBlockItem> itemsList)
         //{
@@ -282,7 +362,7 @@ namespace ManagementAccounting
         {
             var itemLabel = new Label();
             itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 10);
-            itemLabel.Width = 100;
+            itemLabel.Width = 200;
             itemLabel.Click += itemAction;
             Controls.Add(itemLabel);
             activeItemTempControls.Add(itemLabel);
@@ -297,21 +377,58 @@ namespace ManagementAccounting
         {
             var label = (Label) sender;
             var material = (IMaterial) label.Tag;
-            var creator = creatorFactory.CreateMaterialReceivingCreator((BlockItemDB) material);
-            var creatorNotEmpty = creatorFactory.CreateMaterialReceivingNotEmptyCreator((BlockItemDB)material);
-
-            var form = formFactory.CreateMaterialForm(material, creator, creatorNotEmpty);
+            
+            var form = formFactory.CreateMaterialForm(material);
 
             form.ShowDialog();
 
             ShowItems(_offset);
         }
 
-        
-
         private void AddMaterialButtonOnClick(object? sender, EventArgs e)
         {
             var form = formFactory.CreateAddMaterialForm();
+            form.ShowDialog();
+
+            ShowItems(_offset);
+        }
+
+
+        private void AddCalculationButtonOnClick(object? sender, EventArgs e)
+        {
+            var form = formFactory.CreateAddCalculationForm();
+            form.ShowDialog();
+
+            ShowItems(_offset);
+        }
+
+        private void ItemCalcLabel_Click(object sender, EventArgs e)
+        {
+            var label = (Label)sender;
+            var calculation = (ICalculation)label.Tag;
+
+            var form = formFactory.CreateCalculationForm(calculation);
+
+            form.ShowDialog();
+
+            ShowItems(_offset);
+        }
+
+        private void AddPreOrderButtonOnClick(object? sender, EventArgs e)
+        {
+            var form = formFactory.CreateAddPreOrderForm();
+            form.ShowDialog();
+
+            ShowItems(_offset);
+        }
+
+        private void ItemPreOrderLabel_Click(object sender, EventArgs e)
+        {
+            var label = (Label)sender;
+            var preOrder = (IPreOrder)label.Tag;
+
+            var form = formFactory.CreatePreOrderForm(preOrder);
+
             form.ShowDialog();
 
             ShowItems(_offset);

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ManagementAccounting
 {
-    public interface IRemovable : IIndexable
+    public interface IRemovable
     {
         Task RemoveItemFromDataBase();
     }

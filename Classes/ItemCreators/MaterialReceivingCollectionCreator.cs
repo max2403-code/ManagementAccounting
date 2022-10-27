@@ -10,10 +10,10 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class MaterialReceivingCollectionCreator : BlockItemsCollectionCreator
     {
-        private BlockItemDB material { get; }
+        private IMaterial material { get; }
         private IItemsFactory itemsFactory { get; }
         
-        public MaterialReceivingCollectionCreator(BlockItemDB material, IDataBase dataBase, IItemsFactory itemsFactory) : base(5, dataBase)
+        public MaterialReceivingCollectionCreator(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
             this.itemsFactory = itemsFactory;
             this.material = material;
@@ -28,13 +28,14 @@ namespace ManagementAccounting.Classes.ItemCreators
             var note = (string)item["Notemr"];
             var index = (int)item["Idmr"];
 
-            return itemsFactory.CreateMaterialReceiving((IMaterial)material, date, quantity, cost, remainder, note, index);
+            return itemsFactory.CreateMaterialReceiving(material, date, quantity, cost, remainder, note, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)
         {
-            return
-                $"SELECT * FROM materialreceiving AS mr, materials AS m WHERE mr.MaterialIdmr = {material.Index} AND mr.SearchNamemr LIKE '%{searchCriterion}%' AND mr.MaterialIdmr = m.IdM ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
+            return $"SELECT * FROM materialreceiving WHERE MaterialIdmr = {material.Index} AND SearchNamemr LIKE '%{searchCriterion}%' ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
+
+            //return $"SELECT * FROM materialreceiving AS mr, materials AS m WHERE mr.MaterialIdmr = {material.Index} AND mr.SearchNamemr LIKE '%{searchCriterion}%' AND mr.MaterialIdmr = m.IdM ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
         }
     }
 }

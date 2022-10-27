@@ -11,16 +11,21 @@ using NpgsqlTypes;
 
 namespace ManagementAccounting
 {
-    public class PreOrder : BlockItemDB, IPreOrder 
+    public class PreOrder : EditingBlockItemDB, IPreOrder 
     {
+        public string Name { get; private set; }
+        public int Index { get; private set; }
         public DateTime CreationDate { get; private set; }
-        public BlockItemDB Calculation { get; }
+        public ICalculation Calculation { get; }
         public int Quantity { get; private set; }
         private IItemsFactory itemsFactory { get; }
 
-        public PreOrder(BlockItemDB calculation, int quantity, DateTime creationDate, int index, IItemsFactory itemsFactory, IDataBase dataBase) 
-            : base(index, string.Join(' ', calculation.Name, "от", creationDate.ToString("dd/MM/yyyy")), dataBase)
+        public PreOrder(ICalculation calculation, int quantity, DateTime creationDate, int index, IItemsFactory itemsFactory, IDataBase dataBase) 
+            : base(dataBase)
         {
+            Index = index;
+            Name = string.Join(' ', calculation.Name, "от", creationDate.ToString("dd/MM/yyyy"));
+            Quantity = quantity;
             Calculation = calculation;
             CreationDate = creationDate;
             Index = index;
@@ -175,9 +180,9 @@ namespace ManagementAccounting
             Index = (int)index["IdPO"];
         }
 
-        private protected override IBlockItem GetCopyItem()
+        private protected override T GetCopyItem<T>()
         {
-            return itemsFactory.CreatePreOrder(Calculation, Quantity, CreationDate, Index);
+            return (T) itemsFactory.CreatePreOrder(Calculation, Quantity, CreationDate, Index);
         }
 
         private protected override string GetEditItemCommandText()
@@ -204,11 +209,12 @@ namespace ManagementAccounting
             cmd.Parameters.AddWithValue("SearchNamePO", NpgsqlDbType.Varchar, 64, Name);
         }
 
-        private protected override void UndoValues(IBlockItem copyItem)
+        private protected override void UndoValues<T>(T copyItem)
         {
-            Quantity = ((IPreOrder)copyItem).Quantity;
-            CreationDate = ((IPreOrder)copyItem).CreationDate;
-            Name = copyItem.Name;
+            var copyPreOrder = copyItem as IPreOrder;
+            Quantity = copyPreOrder.Quantity;
+            CreationDate = copyPreOrder.CreationDate;
+            Name = copyPreOrder.Name;
         }
 
         private protected override string GetRemoveItemCommandText()

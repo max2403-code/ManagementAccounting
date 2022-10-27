@@ -9,17 +9,21 @@ using NpgsqlTypes;
 
 namespace ManagementAccounting
 {
-    public class CalculationItem : BlockItemDB, ICalculationItem
+    public class CalculationItem : EditingBlockItemDB, ICalculationItem
     {
+        public string Name { get;  }
+        public int Index { get; private set; }
         public int CalculationId { get; }
         public IMaterial Material { get; }
         public decimal Consumption { get; private set; }
         private IItemsFactory itemsFactory;
 
 
-        public CalculationItem(IMaterial material,  decimal consumption, int calculationId, int index,  IDataBase dataBase, IItemsFactory itemsFactory) : base(index, ((BlockItemDB)material).Name, dataBase)
+        public CalculationItem(IMaterial material,  decimal consumption, int calculationId, int index,  IDataBase dataBase, IItemsFactory itemsFactory) : base(dataBase)
         {
+            Index = index;
             Material = material;
+            Name = Material.Name;
             CalculationId = calculationId;
             Consumption = consumption;
             this.itemsFactory = itemsFactory;
@@ -38,7 +42,7 @@ namespace ManagementAccounting
 
         private protected override void AssignParametersToAddCommand(NpgsqlCommand cmd)
         {
-            cmd.Parameters.AddWithValue("MaterialIdci", NpgsqlDbType.Integer, ((BlockItemDB)Material).Index);
+            cmd.Parameters.AddWithValue("MaterialIdci", NpgsqlDbType.Integer, Material.Index);
             cmd.Parameters.AddWithValue("CalculationIdci", NpgsqlDbType.Integer, CalculationId);
             AssignParametersToEditCommand(cmd);
         }
@@ -48,9 +52,9 @@ namespace ManagementAccounting
             Index = (int)index["IdCI"];
         }
 
-        private protected override IBlockItem GetCopyItem()
+        private protected override T GetCopyItem<T>()
         {
-            return itemsFactory.CreateCalculationItem(Material, Consumption, CalculationId, Index);
+            return (T) itemsFactory.CreateCalculationItem(Material, Consumption, CalculationId, Index);
         }
 
         private protected override string GetEditItemCommandText()
@@ -73,7 +77,7 @@ namespace ManagementAccounting
             cmd.Parameters.AddWithValue("ConsumptionCI", NpgsqlDbType.Numeric, Consumption);
         }
 
-        private protected override void UndoValues(IBlockItem copyItem)
+        private protected override void UndoValues<T>(T copyItem)
         {
             var copyCalculationItem = copyItem as ICalculationItem;
             Consumption = copyCalculationItem.Consumption;

@@ -7,17 +7,17 @@ using Npgsql;
 
 namespace ManagementAccounting.Classes.Abstract
 {
-    public abstract class BlockItemDB : IBlockItem, IAddable, IEditable, IRemovable
+    public abstract class BlockItemDB : IAddable, IRemovable, IExceptionable
     {
         public event Action ExceptionEvent;
-        public string Name { get; private protected set; }
-        public int Index { get; private protected set; }
+        //public string Name { get; private protected set; }
+        //public int Index { get; private protected set; }
         private IDataBase dataBase { get; }
 
-        protected BlockItemDB(int index, string name, IDataBase dataBase)
+        protected BlockItemDB(IDataBase dataBase)
         {
-            Index = index;
-            Name = name;
+            //Index = index;
+            //Name = name;
             this.dataBase = dataBase;
         }
 
@@ -38,33 +38,33 @@ namespace ManagementAccounting.Classes.Abstract
 
         #endregion
 
-        public async Task EditItemInDataBase(params object[] parameters)
-        {
-            var copyItem = GetCopyItem();
-            var commandText = GetEditItemCommandText();
-            UpdateItem(parameters);
-            
-            if (ExceptionEvent != null) ExceptionEvent = null;
-            await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, GetEditExceptionMessage(), AssignParametersToEditCommand);
+        //public async Task EditItemInDataBase(params object[] parameters)
+        //{
+        //    var copyItem = GetCopyItem();
+        //    var commandText = GetEditItemCommandText();
+        //    UpdateItem(parameters);
 
-            if (ExceptionEvent != null)
-            {
-                UndoValues(copyItem);
-                ExceptionEvent.Invoke();
-            }
-        }
+        //    if (ExceptionEvent != null) ExceptionEvent = null;
+        //    await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, GetEditExceptionMessage(), AssignParametersToEditCommand);
 
-        #region EditItem
+        //    if (ExceptionEvent != null)
+        //    {
+        //        UndoValues(copyItem);
+        //        ExceptionEvent.Invoke();
+        //    }
+        //}
 
-        private protected abstract IBlockItem GetCopyItem();
-        private protected abstract string GetEditItemCommandText();
-        private protected abstract void UpdateItem(object[] parameters);
-        private protected abstract string GetEditExceptionMessage();
-        private protected abstract void AssignParametersToEditCommand(NpgsqlCommand cmd);
-        private protected abstract void UndoValues(IBlockItem copyItem);
+        //#region EditItem
 
-        #endregion
-        
+        //private protected abstract IBlockItem GetCopyItem();
+        //private protected abstract string GetEditItemCommandText();
+        //private protected abstract void UpdateItem(object[] parameters);
+        //private protected abstract string GetEditExceptionMessage();
+        //private protected abstract void AssignParametersToEditCommand(NpgsqlCommand cmd);
+        //private protected abstract void UndoValues(IBlockItem copyItem);
+
+        //#endregion
+
         public async Task RemoveItemFromDataBase()
         {
             var commandText = GetRemoveItemCommandText();

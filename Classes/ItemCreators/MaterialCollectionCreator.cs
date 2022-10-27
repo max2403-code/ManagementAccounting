@@ -12,7 +12,7 @@ namespace ManagementAccounting.Classes.ItemCreators
     {
         private IItemsFactory itemsFactory { get; }
 
-        public MaterialCollectionCreator(IDataBase dataBase, IItemsFactory itemsFactory) : base(5, dataBase)
+        public MaterialCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
             this.itemsFactory = itemsFactory;
         }
@@ -29,7 +29,7 @@ namespace ManagementAccounting.Classes.ItemCreators
 
         private protected override string GetCommandText(int offset, string searchCriterion)
         {
-            return $"SELECT * FROM materials WHERE lower(MaterialNameM) LIKE '%{searchCriterion}%' ORDER BY MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
+            return $"SELECT * FROM materials WHERE lower(MaterialNameM) LIKE '%{searchCriterion}%' ORDER BY MaterialTypeM, MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
         }
     }
 }

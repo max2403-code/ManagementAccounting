@@ -10,9 +10,9 @@ namespace ManagementAccounting
     public interface IDataBase
     {
         Task<List<T>> ExecuteReaderAsync<T>(Func<DbDataRecord, T> getItem, string commandText);
-        Task ExecuteNonQueryAndReaderAsync(IIndexable item, string commandText, string exceptionMessage, Action<NpgsqlCommand> assignItemParameters = null, Action<DbDataRecord> assignId = null);
+        Task ExecuteNonQueryAndReaderAsync(IExceptionable item, string commandText, string exceptionMessage, Action<NpgsqlCommand> assignItemParameters = null, Action<DbDataRecord> assignId = null);
 
-        //public Task ExecuteIdReaderAsync(IIndexable item, Action<DbDataRecord> assignId, string commandText, string textMessage);
+        //public Task ExecuteIdReaderAsync(IExceptionable item, Action<DbDataRecord> assignId, string commandText, string textMessage);
         Task<decimal> GetSum(string commandText);
         Task SignIn(string login, string password);
 

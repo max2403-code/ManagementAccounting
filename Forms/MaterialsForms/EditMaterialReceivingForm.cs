@@ -6,23 +6,33 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Classes.Common;
+using ManagementAccounting.Interfaces.Common;
 
 namespace ManagementAccounting.Forms.RemaindersForms
 {
     public partial class EditMaterialReceivingForm : Form
     {
-        private IMaterialReceiving _materialReceiving { get; }
-        private IOperationsWithUserInput _inputOperations { get; }
+        private IMaterialReceiving _materialReceiving { get; set; }
+        private IMaterialReceiving newMaterialReceiving { get; set; }
+        private IOperationsWithUserInput inputOperations { get; }
+        private ISystemMaterialReceivingOperations materialReceivingOperations { get; }
+        private IItemsFactory itemsFactory { get; }
         private TextBox dateValue { get; }
         private TextBox quantityValue { get; }
         private TextBox costValue { get; }
         private TextBox noteValue { get; }
         private Button editButton { get; }
         private Button cancelButton { get; }
+        private MaterialReceivingForm materialReceivingForm { get; }
 
-        public EditMaterialReceivingForm(IMaterialReceiving materialReceiving, IOperationsWithUserInput inputOperations)
+        public EditMaterialReceivingForm(IMaterialReceiving materialReceiving, MaterialReceivingForm materialReceivingForm, IItemsFactory itemsFactory, IOperationsWithUserInput inputOperations, ISystemMaterialReceivingOperations materialReceivingOperations)
         {
-            _inputOperations = inputOperations;
+            this.materialReceivingForm = materialReceivingForm;
+            this.inputOperations = inputOperations;
+            this.itemsFactory = itemsFactory;
+            this.materialReceivingOperations = materialReceivingOperations;
+
             _materialReceiving = materialReceiving;
 
             Size = new Size(400, 600);
@@ -96,14 +106,22 @@ namespace ManagementAccounting.Forms.RemaindersForms
         {
             try
             {
-                var dateArray = dateValue.Text.Split(".", StringSplitOptions.RemoveEmptyEntries);
-                var date = new DateTime(int.Parse(dateArray[2]), int.Parse(dateArray[1]), int.Parse(dateArray[0]));
-                var quantity = decimal.Parse(quantityValue.Text);
-                var cost = decimal.Parse(costValue.Text);
+                var date = inputOperations.GetCorrectData(dateValue.Text);
+                var quantity = inputOperations.GetPositiveDecimal(quantityValue.Text);
+                var cost = inputOperations.GetPositiveDecimalorZero(costValue.Text);
                 var remainder = quantity;
-                var note = noteValue.Text;
-                await ((BlockItemDB)_materialReceiving).EditItemInDataBase(date, quantity, cost, note);
+                var note = inputOperations.GetNotEmptyName(noteValue.Text, 50);
+                newMaterialReceiving =
+                    itemsFactory.CreateMaterialReceiving(_materialReceiving.Material, date, quantity, cost, remainder, note, _materialReceiving.Index);
+                await materialReceivingOperations.Edit(_materialReceiving, newMaterialReceiving);
+                materialReceivingForm.UpdateMeterialReceiving(newMaterialReceiving);
+            }
+            catch (OrderItemOperationException exception)
+            {
+                await materialReceivingOperations.Default(newMaterialReceiving, _materialReceiving);
 
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
             }
             catch (Exception exception)
             {

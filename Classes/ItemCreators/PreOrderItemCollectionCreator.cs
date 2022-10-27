@@ -11,7 +11,7 @@ namespace ManagementAccounting.Classes.ItemCreators
         private IPreOrder preOrder { get; }
         private IItemsFactory itemsFactory { get; }
         
-        public PreOrderItemCollectionCreator(IPreOrder preOrder, IDataBase dataBase, IItemsFactory itemsFactory) : base(5, dataBase)
+        public PreOrderItemCollectionCreator(IPreOrder preOrder, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
             this.itemsFactory = itemsFactory;
             this.preOrder = preOrder;

@@ -10,8 +10,10 @@ using NpgsqlTypes;
 
 namespace ManagementAccounting
 {
-    public class MaterialReceiving : BlockItemDB, IMaterialReceiving
+    public class MaterialReceiving : EditingBlockItemDB, IMaterialReceiving
     {
+        public string Name { get; private set; }
+        public int Index { get; private set; }
         public IMaterial Material { get; }
         public DateTime Date { get; private set; }
         public decimal Quantity { get; private set; }
@@ -22,8 +24,10 @@ namespace ManagementAccounting
         private IItemsFactory itemsFactory { get; }
 
         public MaterialReceiving(IMaterial material, DateTime date, decimal quantity, decimal cost, decimal remainder, string note, int index, IDataBase dataBase, IItemsFactory itemsFactory)
-            : base(index, $"Поступление от {date.ToString("dd/MM/yyyy")}", dataBase)
+            : base(dataBase)
         {
+            Name = $"Поступление от {date.ToString("dd/MM/yyyy")}";
+            Index = index;
             Material = material;
             Date = date;
             Quantity = quantity;
@@ -45,7 +49,7 @@ namespace ManagementAccounting
 
         private protected override void AssignParametersToAddCommand(NpgsqlCommand cmd)
         {
-            cmd.Parameters.AddWithValue("MaterialIdmr", NpgsqlDbType.Integer, ((BlockItemDB)Material).Index);
+            cmd.Parameters.AddWithValue("MaterialIdmr", NpgsqlDbType.Integer, Material.Index);
             AssignParametersToEditCommand(cmd);
         }
 
@@ -54,9 +58,9 @@ namespace ManagementAccounting
             Index = (int)index["IdMR"];
         }
 
-        private protected override IBlockItem GetCopyItem()
+        private protected override T GetCopyItem<T>()
         {
-            return itemsFactory.CreateMaterialReceiving(Material, Date, Quantity, Cost, Remainder, Note, Index);
+            return (T) itemsFactory.CreateMaterialReceiving(Material, Date, Quantity, Cost, Remainder, Note, Index);
         }
 
         private protected override string GetEditItemCommandText()
@@ -69,14 +73,14 @@ namespace ManagementAccounting
             Date = (DateTime)parameters[0];
             Quantity = (decimal)parameters[1];
             Cost = (decimal)parameters[2];
-            Note = (string)parameters[3];
+            Remainder = (decimal)parameters[3];
+            Note = (string)parameters[4];
             Name = $"Поступление от {Date.ToString("dd/MM/yyyy")}";
-            Remainder = Quantity;
         }
 
         private protected override string GetEditExceptionMessage()
         {
-            return $"UPDATE materialreceiving SET Quantitymr = @Quantitymr, ReceiveDatemr = @ReceiveDatemr, TotalCostmr = @TotalCostmr, Remaindermr = @Remaindermr, Notemr = @Notemr, SearchNamemr = @SearchNamemr WHERE idmr = {Index}";
+            return "Проблемы с БД";
         }
 
         private protected override void AssignParametersToEditCommand(NpgsqlCommand cmd)
@@ -89,7 +93,7 @@ namespace ManagementAccounting
             cmd.Parameters.AddWithValue("SearchNamemr", NpgsqlDbType.Varchar, 10, Date.ToString("dd/MM/yyyy"));
         }
 
-        private protected override void UndoValues(IBlockItem copyItem)
+        private protected override void UndoValues<T>(T copyItem)
         {
             var copyMaterialReceiving = copyItem as IMaterialReceiving;
             Date = copyMaterialReceiving.Date;
@@ -97,7 +101,7 @@ namespace ManagementAccounting
             Cost = copyMaterialReceiving.Cost;
             Remainder = copyMaterialReceiving.Remainder;
             Note = copyMaterialReceiving.Note;
-            Name = ((BlockItemDB)copyMaterialReceiving).Name;
+            Name = copyMaterialReceiving.Name;
         }
 
         private protected override string GetRemoveItemCommandText()

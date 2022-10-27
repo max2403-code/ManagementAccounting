@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace ManagementAccounting
 {
-    public interface IAddable :IIndexable
+    public interface IAddable 
     {
         //void AssignParametersToAddCommand(NpgsqlCommand cmd);
 

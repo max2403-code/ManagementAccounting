@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Classes.ItemCreators;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.ItemCreators;
 using ManagementAccounting.Interfaces.Items;
@@ -24,7 +26,11 @@ namespace ManagementAccounting
             var container = new StandardKernel();
             container.Bind<IDataBase>().To<DataBase>().InSingletonScope();
 
-            container.Bind<BlockItemsCollectionCreator>().To<MaterialCollectionCreator>();
+            container.Bind<BlockItemsCollectionCreator>().To<MaterialCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
+            container.Bind<BlockItemsCollectionCreator>().To<CalculationCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
+            container.Bind<BlockItemsCollectionCreator>().To<PreOrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
+
+
 
             //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingCollectionCreator>();
             //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingNotEmptyCollectionCreator>();
@@ -35,20 +41,29 @@ namespace ManagementAccounting
             //container.Bind<IProgramBlock>().To<PreOrders>();
 
 
-            //container.Bind<IMaterial>().To<Material>();
-            //container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
-            //container.Bind<Calculation>().To<Calculation>();
-            //container.Bind<ICalculationItem>().To<CalculationItem>();
-            //container.Bind<IPreOrder>().To<PreOrder>();
-            //container.Bind<IPreOrderItem>().To<PreOrderItem>();
+            container.Bind<IMaterial>().To<Material>();
+            container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
+            container.Bind<ICalculation>().To<Calculation>();
+            container.Bind<ICalculationItem>().To<CalculationItem>();
+            container.Bind<IPreOrder>().To<PreOrder>();
+            container.Bind<IPreOrderItem>().To<PreOrderItem>();
+            container.Bind<IOrder>().To<Order>();
+            container.Bind<IOrderItem>().To<OrderItem>();
+            container.Bind<IOrderMaterialReceiving>().To<OrderMaterialReceiving>();
 
-
+            container.Bind<IFromPreOrderToOrderConverter>().To<FromPreOrderToOrderConverter>();
+            container.Bind<IOrderCostPrice>().To<OrderCostPrice>();
+            container.Bind<IOrderItemCostPrice>().To<OrderItemCostPrice>();
+            container.Bind<IOrderItemOperations>().To<OrderItemOperations>();
+            container.Bind<IPreOrderCostPrice>().To<PreOrderCostPrice>();
+            container.Bind<ISystemMaterialReceivingOperations>().To<SystemMaterialReceivingOperations>();
+            container.Bind<ISystemOrderItemOperations>().To<SystemOrderItemOperations>();
+            container.Bind<ISystemOrderOperations>().To<SystemOrderOperations>();
+            
             container.Bind<ICreatorFactory>().ToFactory();
             container.Bind<IItemsFactory>().ToFactory();
             container.Bind<IFormFactory>().ToFactory();
-
-
-
+            
             container.Bind<IOperationsWithUserInput>().To<OperationsWithUserInput>().InSingletonScope();
             
             container.Bind<Dictionary<string, string>>().ToSelf().WhenInjectedExactlyInto<OperationsWithUserInput>()
