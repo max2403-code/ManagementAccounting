@@ -37,3 +37,6 @@ C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\Managem
 C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.PreOrdersForms.AddPreOrderForm.resources
 C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.PreOrdersForms.EditPreOrderForm.resources
 C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.PreOrdersForms.PreOrderForm.resources
+C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.OrderForm.resources
+C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.CreateOrderForm.resources
+C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.EditOrderForm.resources

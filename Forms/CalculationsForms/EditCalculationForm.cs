@@ -12,17 +12,18 @@ namespace ManagementAccounting.Forms.CalculationsForms
 {
     public partial class EditCalculationForm : Form
     {
-        private Button editButton { get; }
-        private Button closeButton { get; }
-        
-        private TextBox nameLine { get; }
-        private ICalculation calculation { get; }
-        private IOperationsWithUserInput inputOperations { get; }
+        private Button EditButton { get; }
+        private Button CloseButton { get; }
+        private List<Button> Buttons { get; }
+        private TextBox NameLine { get; }
+        private ICalculation Calculation { get; }
+        private IOperationsWithUserInput InputOperations { get; }
 
         public EditCalculationForm(ICalculation calculation, IOperationsWithUserInput inputOperations)
         {
-            this.inputOperations = inputOperations;
-            this.calculation = calculation;
+            InputOperations = inputOperations;
+            Calculation = calculation;
+            Buttons = new List<Button>();
 
             Size = new Size(400, 600);
 
@@ -36,28 +37,30 @@ namespace ManagementAccounting.Forms.CalculationsForms
             var nameLabel = new Label();
             nameLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 50);
             nameLabel.Width = 100;
-            nameLabel.Text = "Наименование калькуляции:";
+            nameLabel.Text = "Наименование:";
             Controls.Add(nameLabel);
 
-            nameLine = new TextBox();
-            nameLine.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
-            nameLine.Width = 200;
-            Controls.Add(nameLine);
+            NameLine = new TextBox();
+            NameLine.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
+            NameLine.Width = 200;
+            Controls.Add(NameLine);
 
             
-            editButton = new Button();
-            editButton.Location = new Point(50, nameLabel.Location.Y + nameLabel.Height + 25);
-            editButton.Text = "Изменить";
-            editButton.AutoSize = true;
-            editButton.Click += EditButtonOnClick;
-            Controls.Add(editButton);
+            EditButton = new Button();
+            EditButton.Location = new Point(50, nameLabel.Location.Y + nameLabel.Height + 25);
+            EditButton.Text = "Изменить";
+            EditButton.AutoSize = true;
+            EditButton.Click += EditButtonOnClick;
+            Controls.Add(EditButton);
+            Buttons.Add(EditButton);
 
-            closeButton = new Button();
-            closeButton.Location = new Point(editButton.Location.X + editButton.Width + 20, editButton.Location.Y);
-            closeButton.Text = "Отмена";
-            closeButton.AutoSize = true;
-            closeButton.Click += CloseButtonOnClick;
-            Controls.Add(closeButton);
+            CloseButton = new Button();
+            CloseButton.Location = new Point(EditButton.Location.X + EditButton.Width + 20, EditButton.Location.Y);
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Click += CloseButtonOnClick;
+            Controls.Add(CloseButton);
+            Buttons.Add(CloseButton);
         }
 
         private void CloseButtonOnClick(object sender, EventArgs e)
@@ -67,18 +70,38 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private async void EditButtonOnClick(object sender, EventArgs e)
         {
+            DisableButtons();
+            var isNameCorrect = InputOperations.TryGetNotEmptyName(NameLine.Text, 50, out var name);
+
+            if (!isNameCorrect)
+            {
+                MessageBox.Show("Наименование введено неверно", "Внимание");
+                EnableButtons();
+                return;
+            }
+
             try
             {
-                var name = inputOperations.GetNotEmptyName(nameLine.Text, 50);
-
-                await ((EditingBlockItemDB)calculation).EditItemInDataBase<ICalculation>(name);
+                await ((EditingBlockItemDB)Calculation).EditItemInDataBase<ICalculation>(name);
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
                 return;
             }
             Close();
+        }
+        private void EnableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = true;
+        }
+
+        private void DisableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = false;
         }
     }
 }

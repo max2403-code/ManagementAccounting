@@ -12,42 +12,42 @@ namespace ManagementAccounting.Classes.Common
     public class SystemOrderOperations : ISystemOrderOperations
     {
 
-        private ICreatorFactory creatorFactory { get; }
-        private ISystemOrderItemOperations orderItemOperations { get; }
-        private IItemsFactory itemsFactory { get; }
+        private ICreatorFactory CreatorFactory { get; }
+        private ISystemOrderItemOperations OrderItemOperations { get; }
+        private IItemsFactory ItemsFactory { get; }
 
         public SystemOrderOperations(ICreatorFactory creatorFactory, ISystemOrderItemOperations orderItemOperations, IItemsFactory itemsFactory)
         {
-            this.creatorFactory = creatorFactory;
-            this.orderItemOperations = orderItemOperations;
-            this.itemsFactory = itemsFactory;
+            CreatorFactory = creatorFactory;
+            OrderItemOperations = orderItemOperations;
+            ItemsFactory = itemsFactory;
         }
 
         public async Task Insert(IOrder order)
         {
-            var orderItemsCreator = creatorFactory.CreateOrderItemCollectionCreator(order, 5);
-            await DoInsertOperationsWithItemsList(orderItemOperations.Insert, orderItemsCreator, "");
+            var orderItemsCreator = CreatorFactory.CreateOrderItemCollectionCreator(order, 5);
+            await DoInsertOperationsWithItemsList(OrderItemOperations.Insert, orderItemsCreator, "");
         }
 
         public async Task Remove(IOrder order) // можно ускорить алгоритм
         {
-            var orderItemsCreator = creatorFactory.CreateOrderItemCollectionCreator(order, 5);
-            await DoInsertOperationsWithItemsList(orderItemOperations.Remove, orderItemsCreator, "");
+            var orderItemsCreator = CreatorFactory.CreateOrderItemCollectionCreator(order, 5);
+            await DoInsertOperationsWithItemsList(OrderItemOperations.Remove, orderItemsCreator, "");
         }
 
         public async Task Edit(IOrder order, IOrder newOrder)
         {
-            var orderItemsCreator = creatorFactory.CreateOrderItemCollectionCreator(order, 5);
+            var orderItemsCreator = CreatorFactory.CreateOrderItemCollectionCreator(order, 5);
             await ((EditingBlockItemDB) newOrder).EditItemInDataBase<IOrder>(newOrder.CreationDate);
-            await DoEditOperationsWithItemsList(orderItemOperations.Edit, newOrder, orderItemsCreator, "");
+            await DoEditOperationsWithItemsList(OrderItemOperations.Edit, newOrder, orderItemsCreator, "");
         }
 
         public async Task Default(IOrder order, IOrder previousOrder)
         {
-            var orderItemsCreator = creatorFactory.CreateOrderItemCollectionCreator(order, 5);
+            var orderItemsCreator = CreatorFactory.CreateOrderItemCollectionCreator(order, 5);
             await ((EditingBlockItemDB)previousOrder).EditItemInDataBase<IOrder>(previousOrder.CreationDate);
 
-            await DoEditOperationsWithItemsList(orderItemOperations.Default, previousOrder, orderItemsCreator, "");
+            await DoEditOperationsWithItemsList(OrderItemOperations.Default, previousOrder, orderItemsCreator, "");
         }
 
         private async Task DoInsertOperationsWithItemsList(Func<IOrderItem, Task> operations, BlockItemsCollectionCreator orderItemCreator, string searchCriterion)
@@ -83,7 +83,7 @@ namespace ManagementAccounting.Classes.Common
 
                 foreach (var orderItem in itemsList.Cast<IOrderItem>())
                 {
-                    var editedOrderItem = itemsFactory.CreateOrderItem(editedOrder, orderItem.Material,
+                    var editedOrderItem = ItemsFactory.CreateOrderItem(editedOrder, orderItem.Material,
                         orderItem.TotalConsumption, orderItem.TotalConsumption, orderItem.Index);
                     await operations(orderItem, editedOrderItem);
                 }

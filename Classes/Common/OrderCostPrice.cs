@@ -10,21 +10,22 @@ namespace ManagementAccounting.Classes.Common
 {
     public class OrderCostPrice : IOrderCostPrice
     {
-        private ICreatorFactory creatorFactory { get; }
-        private IOrderItemCostPrice orderItemCostPrice { get; }
+        private ICreatorFactory CreatorFactory { get; }
+        private IOrderItemCostPrice OrderItemCostPrice { get; }
 
         public OrderCostPrice(ICreatorFactory creatorFactory, IOrderItemCostPrice orderItemCostPrice)
         {
-            this.creatorFactory = creatorFactory;
-            this.orderItemCostPrice = orderItemCostPrice;
+            CreatorFactory = creatorFactory;
+            OrderItemCostPrice = orderItemCostPrice;
         }
 
-        public async Task<decimal> GetOrderCostPrice(IOrder order)
+        public async Task<decimal[]> GetOrderCostPrice(IOrder order)
         {
             var orderCostPrice = 0m;
             var orderItemCreator =
-                creatorFactory.CreateOrderItemCollectionCreator(order, 5);
+                CreatorFactory.CreateOrderItemCollectionCreator(order, 5);
             var offset = 0;
+            var prices = new decimal[2];
 
             while (true)
             {
@@ -36,12 +37,16 @@ namespace ManagementAccounting.Classes.Common
 
                 foreach (var orderItem in itemsList.Cast<IOrderItem>())
                 {
-                    orderCostPrice += await orderItemCostPrice.GetOrderItemCostPrice(orderItem);
+                    var orderItemCostPrices = await OrderItemCostPrice.GetOrderItemCostPrice(orderItem);
+                    orderCostPrice += orderItemCostPrices[1];
                 }
                 if (!isThereMoreOfItems) break;
             }
 
-            return orderCostPrice;
+            prices[0] = orderCostPrice / order.Quantity;
+            prices[1] = orderCostPrice;
+
+            return prices;
         }
     }
 }

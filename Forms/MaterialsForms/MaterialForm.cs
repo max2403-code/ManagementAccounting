@@ -15,116 +15,145 @@ namespace ManagementAccounting
 {
     public partial class MaterialForm : Form
     {
-        private int _offset { get; set; }
-        private Label nameLabel { get; }
-        private Label typeLabel { get; }
-        private TextBox nameLine { get; }
-        private CheckBox checkBox { get; }
-        private Button nextListButton { get; }
-        private Button previousListButton { get; }
-        private Button addReceivingButton { get; }
-        private Button editMaterialButton { get; }
-        private Button removeMaterialButton { get; }
-        private List<Control> activeItemTempControls { get; }
-        private IMaterial _material { get; }
-        private IFormFactory formFactory{ get; }
-        private MaterialReceivingCollectionCreator creator { get; }
-        private MaterialReceivingNotEmptyCollectionCreator creatorNotEmpty { get; }
-        private IOperationsWithUserInput _inputOperations { get; }
+        private int Offset { get; set; }
+        private Label NameValue { get; }
+        private Label TypeValue { get; }
+        private TextBox NameLine { get; }
+        private CheckBox CheckBox { get; }
+        private Button NextListButton { get; }
+        private Button PreviousListButton { get; }
+        private Button AddReceivingButton { get; }
+        private Button EditMaterialButton { get; }
+        private Button RemoveMaterialButton { get; }
+        private List<Control> ActiveItemTempControls { get; }
+        private IMaterial Material { get; }
+        private IFormFactory FormFactory{ get; }
+        private MaterialReceivingCollectionCreator Creator { get; }
+        private MaterialReceivingNotEmptyCollectionCreator CreatorNotEmpty { get; }
+        private IOperationsWithUserInput InputOperations { get; }
 
         public MaterialForm(IMaterial material, ICreatorFactory creatorFactory, IOperationsWithUserInput inputOperations, IFormFactory formFactory)
         {
-            creatorNotEmpty = creatorFactory.CreateMaterialReceivingNotEmptyCreator(material, 5);
-            creator = creatorFactory.CreateMaterialReceivingCreator(material, 5);
-            _material = material;
-            _inputOperations = inputOperations;
-            this.formFactory = formFactory;
-            activeItemTempControls = new List<Control>();
+            CreatorNotEmpty = creatorFactory.CreateMaterialReceivingNotEmptyCreator(material, 5);
+            Creator = creatorFactory.CreateMaterialReceivingCreator(material, 5);
+            Material = material;
+            InputOperations = inputOperations;
+            FormFactory = formFactory;
+            ActiveItemTempControls = new List<Control>();
 
             Size = new Size(400, 600);
 
-            nameLabel = new Label();
-            nameLabel.Text = material.Name;
-            nameLabel.Location = new Point(10, 10);
+            var topLabel = new Label();
+            topLabel.TextAlign = ContentAlignment.MiddleCenter;
+            topLabel.Dock = DockStyle.Top;
+            topLabel.Text = "Материал";
+            Controls.Add(topLabel);
+
+            var nameLabel = new Label();
+            nameLabel.Text = "Наименование:";
+            nameLabel.Width = 100;
+            nameLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 20);
             Controls.Add(nameLabel);
 
-            typeLabel = new Label();
-            typeLabel.Text = inputOperations.TranslateType(material.MaterialType.ToString());
-            typeLabel.Location = new Point(nameLabel.Location.X, nameLabel.Location.Y + nameLabel.Height + 15);
+            NameValue = new Label();
+            NameValue.Text = material.Name;
+            NameValue.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
+            Controls.Add(NameValue);
+
+            var typeLabel = new Label();
+            typeLabel.Text = "Тип:";
+            typeLabel.Width = 100;
+            typeLabel.Location = new Point(10, nameLabel.Location.Y + nameLabel.Height + 20);
             Controls.Add(typeLabel);
 
-            addReceivingButton = new Button();
-            addReceivingButton.Text = "Добавить поступление";
-            addReceivingButton.Location = new Point(typeLabel.Location.X, typeLabel.Location.Y + typeLabel.Height + 15);
-            addReceivingButton.Click += AddReceivingButton_Click;
-            Controls.Add(addReceivingButton);
+            TypeValue = new Label();
+            TypeValue.Text = inputOperations.TranslateType(material.MaterialType.ToString());
+            TypeValue.Location = new Point(typeLabel.Location.X + typeLabel.Width + 10, typeLabel.Location.Y);
+            Controls.Add(TypeValue);
 
-            editMaterialButton = new Button();
-            editMaterialButton.Text = "Изменить материал";
-            editMaterialButton.Location = new Point(addReceivingButton.Location.X + addReceivingButton.Width + 15,
-                addReceivingButton.Location.Y);
-            editMaterialButton.Click += EditMaterialButtonOnClick;
-            Controls.Add(editMaterialButton);
+            AddReceivingButton = new Button();
+            AddReceivingButton.Text = "Добавить пост-е";
+            AddReceivingButton.AutoSize = true;
+            AddReceivingButton.Location = new Point(typeLabel.Location.X, typeLabel.Location.Y + typeLabel.Height + 15);
+            AddReceivingButton.Click += AddReceivingButton_Click;
+            Controls.Add(AddReceivingButton);
 
-            removeMaterialButton = new Button();
-            removeMaterialButton.Text = "Удалить материал";
-            removeMaterialButton.Location = new Point(editMaterialButton.Location.X + editMaterialButton.Width + 15,
-                editMaterialButton.Location.Y);
-            removeMaterialButton.Click += RemoveMaterialButtonOnClick;
-            Controls.Add(removeMaterialButton);
+            EditMaterialButton = new Button();
+            EditMaterialButton.Text = "Изменить мат-л";
+            EditMaterialButton.AutoSize = true;
+            EditMaterialButton.Location = new Point(AddReceivingButton.Location.X + AddReceivingButton.Width + 15,
+                AddReceivingButton.Location.Y);
+            EditMaterialButton.Click += EditMaterialButtonOnClick;
+            Controls.Add(EditMaterialButton);
 
-            nameLine = new TextBox();
-            nameLine.Location = new Point(addReceivingButton.Location.X, addReceivingButton.Location.Y + addReceivingButton.Height + 15);
-            nameLine.Width = 300;
-            nameLine.TextChanged += NameLine_TextChanged;
-            Controls.Add(nameLine);
+            RemoveMaterialButton = new Button();
+            RemoveMaterialButton.Text = "Удалить мат-л";
+            RemoveMaterialButton.AutoSize = true;
+            RemoveMaterialButton.Location = new Point(EditMaterialButton.Location.X + EditMaterialButton.Width + 15,
+                EditMaterialButton.Location.Y);
+            RemoveMaterialButton.Click += RemoveMaterialButtonOnClick;
+            Controls.Add(RemoveMaterialButton);
 
-            previousListButton = new Button();
-            previousListButton.Text = "Назад";
-            previousListButton.Location = new Point(20 + nameLine.Location.X, nameLine.Location.Y + nameLine.Height + 15);
-            previousListButton.Enabled = false;
-            previousListButton.Click += PreviousNext_Click;
-            Controls.Add(previousListButton);
+            NameLine = new TextBox();
+            NameLine.Location = new Point(AddReceivingButton.Location.X, AddReceivingButton.Location.Y + AddReceivingButton.Height + 15);
+            NameLine.Width = 300;
+            NameLine.TextChanged += NameLine_TextChanged;
+            Controls.Add(NameLine);
 
-            nextListButton = new Button();
-            nextListButton.Text = "Вперед";
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
-            nextListButton.Enabled = false;
-            nextListButton.Click += PreviousNext_Click;
-            Controls.Add(nextListButton);
+            PreviousListButton = new Button();
+            PreviousListButton.Text = "Назад";
+            PreviousListButton.Location = new Point(20 + NameLine.Location.X, NameLine.Location.Y + NameLine.Height + 15);
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Click += PreviousNext_Click;
+            Controls.Add(PreviousListButton);
 
-            checkBox = new CheckBox();
-            checkBox.Text = "есть на складе";
-            checkBox.AutoSize = true;
-            checkBox.Location = new Point(20 + nextListButton.Location.X + nextListButton.Width, nextListButton.Location.Y);
-            checkBox.CheckedChanged += NameLine_TextChanged;
-            Controls.Add(checkBox);
+            NextListButton = new Button();
+            NextListButton.Text = "Вперед";
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
+            NextListButton.Enabled = false;
+            NextListButton.Click += PreviousNext_Click;
+            Controls.Add(NextListButton);
+
+            CheckBox = new CheckBox();
+            CheckBox.Text = "есть на складе";
+            CheckBox.AutoSize = true;
+            CheckBox.Location = new Point(20 + NextListButton.Location.X + NextListButton.Width, NextListButton.Location.Y);
+            CheckBox.CheckedChanged += NameLine_TextChanged;
+            Controls.Add(CheckBox);
 
         }
 
-        private async void RemoveMaterialButtonOnClick(object? sender, EventArgs e)
+        private async void RemoveMaterialButtonOnClick(object sender, EventArgs e)
         {
             var dialogResult = MessageBox.Show("Удалить материал?", "Внимание", MessageBoxButtons.YesNo);
             if(dialogResult == DialogResult.No) return;
-            await ((BlockItemDB)_material).RemoveItemFromDataBase();
+            try
+            {
+                await ((BlockItemDB)Material).RemoveItemFromDataBase();
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
+            }
+
             Close();
         }
 
-        private void EditMaterialButtonOnClick(object? sender, EventArgs e)
+        private void EditMaterialButtonOnClick(object sender, EventArgs e)
         {
-            var editForm = formFactory.CreateEditMaterialForm(_material);
+            var editForm = FormFactory.CreateEditMaterialForm(Material);
             editForm.ShowDialog();
-            nameLabel.Text = _material.Name;
-            typeLabel.Text = _inputOperations.TranslateType(_material.MaterialType.ToString());
+            NameValue.Text = Material.Name;
+            TypeValue.Text = InputOperations.TranslateType(Material.MaterialType.ToString());
         }
 
-        private void AddReceivingButton_Click(object sender, EventArgs e)
+        private async void AddReceivingButton_Click(object sender, EventArgs e)
         {
-            //var addReceivingForm = new AddMaterialReceivingForm(_material, _inputOperations);
-            var addReceivingForm = formFactory.CreateAddMaterialReceivingForm(_material);
+            var addReceivingForm = FormFactory.CreateAddMaterialReceivingForm(Material);
 
             addReceivingForm.ShowDialog();
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
         
         private async void PreviousNext_Click(object sender, EventArgs e)
@@ -142,26 +171,24 @@ namespace ManagementAccounting
 
         private async Task ShowItems(int offset)
         {
-            var block = checkBox.Checked ? creator : creatorNotEmpty;
+            var block = CheckBox.Checked ? CreatorNotEmpty : Creator;
             var maxShowItemsCount = block.LengthOfItemsList;
-            var resultOfGettingItemsList = await block.GetItemsList(offset, nameLine.Text.ToLower());
+            var resultOfGettingItemsList = await block.GetItemsList(offset, NameLine.Text.ToLower());
             var itemsList = resultOfGettingItemsList.Item1;
             var isThereMoreOfItems = resultOfGettingItemsList.Item2;
 
-            //var itemsList = checkBox.Checked ? await _material.GetItemsList(offset, nameLine.Text) : await _material.GetItemsList(offset, "all", nameLine.Text);
-            _offset = offset;
+            Offset = offset;
 
             if (itemsList.Count == 0)
             {
                 if (offset > 0)
                 {
                     offset -= maxShowItemsCount;
-                    _offset = offset;
+                    Offset = offset;
 
-                    resultOfGettingItemsList = await block.GetItemsList(offset, nameLine.Text.ToLower());
+                    resultOfGettingItemsList = await block.GetItemsList(offset, NameLine.Text.ToLower());
                     itemsList = resultOfGettingItemsList.Item1;
                     isThereMoreOfItems = resultOfGettingItemsList.Item2;
-                    //itemsList = checkBox.Checked ? await _material.GetItemsList(offset, nameLine.Text) : await _material.GetItemsList(offset, "all", nameLine.Text);
                 }
                 else
                 {
@@ -172,16 +199,16 @@ namespace ManagementAccounting
 
             if (isThereMoreOfItems)
             {
-                nextListButton.Enabled = true;
-                nextListButton.Tag = offset + maxShowItemsCount;
+                NextListButton.Enabled = true;
+                NextListButton.Tag = offset + maxShowItemsCount;
             }
             else
                 DefaultNextButton();
 
             if (offset > 0)
             {
-                previousListButton.Enabled = true;
-                previousListButton.Tag = offset - maxShowItemsCount;
+                PreviousListButton.Enabled = true;
+                PreviousListButton.Tag = offset - maxShowItemsCount;
             }
             else
                 DefaultPreviousButton();
@@ -191,9 +218,9 @@ namespace ManagementAccounting
 
         private void RefreshActiveItemTempControl(List<IBlockItem> itemsList)
         {
-            var lastControl = (Control)previousListButton;
+            var lastControl = (Control)PreviousListButton;
 
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
             foreach (var item in itemsList)
                 lastControl = DisplayItems(item, lastControl);
         }
@@ -201,14 +228,14 @@ namespace ManagementAccounting
         private void ShowEmptyList(string message)
         {
             DefaultPreviousNextButtons();
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
-            var lastControl = previousListButton;
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
+            var lastControl = PreviousListButton;
             var label = new Label();
             label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 25);
             label.Text = message;
             label.AutoSize = true;
             Controls.Add(label);
-            activeItemTempControls.Add(label);
+            ActiveItemTempControls.Add(label);
         }
 
         private Control DisplayItems(IBlockItem item, Control lastControl)
@@ -218,41 +245,41 @@ namespace ManagementAccounting
             itemLabel.AutoSize = true;
             itemLabel.Click += ItemLabel_Click;
             Controls.Add(itemLabel);
-            activeItemTempControls.Add(itemLabel);
+            ActiveItemTempControls.Add(itemLabel);
 
             itemLabel.Text = item.Name;
             itemLabel.Tag = item;
 
             return itemLabel;
         }
-        private void ItemLabel_Click(object sender, EventArgs e)
+        private async void ItemLabel_Click(object sender, EventArgs e)
         {
             var control = (Control) sender;
             var receiving = (IMaterialReceiving) control.Tag;
-            var receivingForm = formFactory.CreateMaterialReceivingForm(receiving);
+            var receivingForm = FormFactory.CreateMaterialReceivingForm(receiving);
             receivingForm.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
         private void ClearActiveItemTempControls()
         {
-            foreach (var activeItemControl in activeItemTempControls)
+            foreach (var activeItemControl in ActiveItemTempControls)
             {
                 Controls.Remove(activeItemControl);
             }
-            activeItemTempControls.Clear();
+            ActiveItemTempControls.Clear();
         }
 
         private void DefaultPreviousButton()
         {
-            previousListButton.Enabled = false;
-            previousListButton.Tag = null;
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Tag = null;
         }
         private void DefaultNextButton()
         {
-            nextListButton.Enabled = false;
-            nextListButton.Tag = null;
+            NextListButton.Enabled = false;
+            NextListButton.Tag = null;
         }
         private void DefaultPreviousNextButtons()
         {

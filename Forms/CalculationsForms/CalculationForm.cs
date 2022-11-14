@@ -15,58 +15,86 @@ namespace ManagementAccounting.Forms.CalculationsForms
 {
     public partial class CalculationForm : Form
     {
-        private int _offset { get; set; }
-        private Label nameLabel { get; }
+        private int Offset { get; set; }
+        private Label NameValue { get; }
+        private Label TableColumnName { get; }
+
         //private TextBox nameLine { get; }
-        private Button nextListButton { get; }
-        private Button previousListButton { get; }
-        private Button addCalculationItemButton { get; }
-        private Button editCalculationButton { get; }
-        private Button removeCalculationButton { get; }
-        private List<Control> activeItemTempControls { get; }
-        private ICalculation calculation { get; }
-        private IFormFactory formFactory { get; }
-        private CalculationItemCollectionCreator creator { get; }
-        private IOperationsWithUserInput _inputOperations { get; }
+        private Button NextListButton { get; }
+        private Button PreviousListButton { get; }
+        private Button AddCalculationItemButton { get; }
+        private Button EditCalculationButton { get; }
+        private Button ShowCalculationItemButton { get; }
+        private Button RemoveCalculationButton { get; }
+        private List<Control> ActiveItemTempControls { get; }
+        private ICalculation Calculation { get; }
+        private IFormFactory FormFactory { get; }
+        private CalculationItemCollectionCreator Creator { get; }
+        private IOperationsWithUserInput InputOperations { get; }
 
         public CalculationForm(ICalculation calculation, ICreatorFactory creatorFactory, IOperationsWithUserInput inputOperations, IFormFactory formFactory)
         {
-            this.calculation = calculation;
-            _inputOperations = inputOperations;
-            this.formFactory = formFactory;
-            creator = creatorFactory.CreateCalculationItemCollectionCreator(calculation, 5);
-            activeItemTempControls = new List<Control>();
+            Calculation = calculation;
+            InputOperations = inputOperations;
+            FormFactory = formFactory;
+            Creator = creatorFactory.CreateCalculationItemCollectionCreator(calculation, 5);
+            ActiveItemTempControls = new List<Control>();
 
-            Size = new Size(400, 600);
+            Size = new Size(500, 600);
 
-            nameLabel = new Label();
-            nameLabel.Text = calculation.Name;
-            nameLabel.Width = 200;
-            nameLabel.Click += NameLine_TextChanged;
-            nameLabel.Location = new Point(10, 10);
+            var topLabel = new Label();
+            topLabel.TextAlign = ContentAlignment.MiddleCenter;
+            topLabel.Dock = DockStyle.Top;
+            topLabel.Text = "Калькуляция";
+            Controls.Add(topLabel);
+
+            var nameLabel = new Label();
+            nameLabel.Text = "Наименование:";
+            nameLabel.Width = 100;
+            nameLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 20);
             Controls.Add(nameLabel);
 
-            
+            NameValue = new Label();
+            NameValue.Text = calculation.Name;
+            NameValue.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
+            Controls.Add(NameValue);
 
-            addCalculationItemButton = new Button();
-            addCalculationItemButton.Text = "Добавить статью калькуляции";
-            addCalculationItemButton.Location = new Point(nameLabel.Location.X, nameLabel.Location.Y + nameLabel.Height + 15);
-            addCalculationItemButton.Click += AddCalculationItemButton_Click;
-            Controls.Add(addCalculationItemButton);
+            //nameLabel = new Label();
+            //nameLabel.Text = calculation.Name;
+            //nameLabel.Width = 200;
+            //nameLabel.Click += NameLine_TextChanged;
+            //nameLabel.Location = new Point(10, 10);
+            //Controls.Add(nameLabel);
 
-            editCalculationButton = new Button();
-            editCalculationButton.Text = "Изменить калькуляцию";
-            editCalculationButton.Location = new Point(addCalculationItemButton.Location.X + addCalculationItemButton.Width + 15,
-                addCalculationItemButton.Location.Y);
-            editCalculationButton.Click += EditCalculationButtonOnClick;
-            Controls.Add(editCalculationButton);
+            ShowCalculationItemButton = new Button();
+            ShowCalculationItemButton.Text = "Показать статьи калькуляции";
+            ShowCalculationItemButton.AutoSize = true;
+            ShowCalculationItemButton.Location = new Point(nameLabel.Location.X, nameLabel.Location.Y + nameLabel.Height + 15);
+            ShowCalculationItemButton.Click += NameLine_TextChanged;
+            Controls.Add(ShowCalculationItemButton);
 
-            removeCalculationButton = new Button();
-            removeCalculationButton.Text = "Удалить калькуляцию";
-            removeCalculationButton.Location = new Point(editCalculationButton.Location.X + editCalculationButton.Width + 15,
-                editCalculationButton.Location.Y);
-            removeCalculationButton.Click += RemoveCalculationButtonOnClick;
-            Controls.Add(removeCalculationButton);
+            AddCalculationItemButton = new Button();
+            AddCalculationItemButton.Text = "Добавить статью кальк-и";
+            AddCalculationItemButton.AutoSize = true;
+            AddCalculationItemButton.Location = new Point(ShowCalculationItemButton.Location.X, ShowCalculationItemButton.Location.Y + ShowCalculationItemButton.Height + 15);
+            AddCalculationItemButton.Click += AddCalculationItemButton_Click;
+            Controls.Add(AddCalculationItemButton);
+
+            EditCalculationButton = new Button();
+            EditCalculationButton.Text = "Изменить кальк-ю";
+            EditCalculationButton.AutoSize = true;
+            EditCalculationButton.Location = new Point(AddCalculationItemButton.Location.X + AddCalculationItemButton.Width + 15,
+                AddCalculationItemButton.Location.Y);
+            EditCalculationButton.Click += EditCalculationButtonOnClick;
+            Controls.Add(EditCalculationButton);
+
+            RemoveCalculationButton = new Button();
+            RemoveCalculationButton.Text = "Удалить кальк-ю";
+            RemoveCalculationButton.AutoSize = true;
+            RemoveCalculationButton.Location = new Point(EditCalculationButton.Location.X + EditCalculationButton.Width + 15,
+                EditCalculationButton.Location.Y);
+            RemoveCalculationButton.Click += RemoveCalculationButtonOnClick;
+            Controls.Add(RemoveCalculationButton);
 
             //nameLine = new TextBox();
             //nameLine.Location = new Point(addCalculationItemButton.Location.X, addCalculationItemButton.Location.Y + addCalculationItemButton.Height + 15);
@@ -74,42 +102,62 @@ namespace ManagementAccounting.Forms.CalculationsForms
             //nameLine.TextChanged += NameLine_TextChanged;
             //Controls.Add(nameLine);
 
-            previousListButton = new Button();
-            previousListButton.Text = "Назад";
-            previousListButton.Location = new Point(20 + addCalculationItemButton.Location.X, addCalculationItemButton.Location.Y + addCalculationItemButton.Height + 15);
-            previousListButton.Enabled = false;
-            previousListButton.Click += PreviousNext_Click;
-            Controls.Add(previousListButton);
+            PreviousListButton = new Button();
+            PreviousListButton.Text = "Назад";
+            PreviousListButton.Location = new Point(20 + AddCalculationItemButton.Location.X, AddCalculationItemButton.Location.Y + AddCalculationItemButton.Height + 15);
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Click += PreviousNext_Click;
+            Controls.Add(PreviousListButton);
 
-            nextListButton = new Button();
-            nextListButton.Text = "Вперед";
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
-            nextListButton.Enabled = false;
-            nextListButton.Click += PreviousNext_Click;
-            Controls.Add(nextListButton);
+            NextListButton = new Button();
+            NextListButton.Text = "Вперед";
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
+            NextListButton.Enabled = false;
+            NextListButton.Click += PreviousNext_Click;
+            Controls.Add(NextListButton);
+
+            TableColumnName = new Label();
+            TableColumnName.Location = new Point(10, PreviousListButton.Location.Y + PreviousListButton.Height + 10);
+            TableColumnName.Text = "Название материала";
+            TableColumnName.Width = 200;
+            Controls.Add(TableColumnName);
+
+            var unitConsumptionColumnName = new Label();
+            unitConsumptionColumnName.Location = new Point(10 + TableColumnName.Location.X + TableColumnName.Width, TableColumnName.Location.Y);
+            unitConsumptionColumnName.Text = "Норма расхода на ед.";
+            unitConsumptionColumnName.Width = 80;
+            Controls.Add(unitConsumptionColumnName);
         }
 
-        private async void RemoveCalculationButtonOnClick(object? sender, EventArgs e)
+        private async void RemoveCalculationButtonOnClick(object sender, EventArgs e)
         {
             var dialogResult = MessageBox.Show("Удалить калькуляцию?", "Внимание", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.No) return;
-            await ((BlockItemDB)calculation).RemoveItemFromDataBase();
+            try
+            {
+                await ((BlockItemDB)Calculation).RemoveItemFromDataBase();
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
+            }
             Close();
         }
 
-        private void EditCalculationButtonOnClick(object? sender, EventArgs e)
+        private void EditCalculationButtonOnClick(object sender, EventArgs e)
         {
-            var editForm = formFactory.CreateEditCalculationForm(calculation);
+            var editForm = FormFactory.CreateEditCalculationForm(Calculation);
             editForm.ShowDialog();
-            nameLabel.Text = calculation.Name;
+            NameValue.Text = Calculation.Name;
         }
 
         private async void AddCalculationItemButton_Click(object sender, EventArgs e)
         {
-            var addCalculationItemForm = formFactory.CreateAddCalculationItemForm(calculation);
+            var addCalculationItemForm = FormFactory.CreateAddCalculationItemForm(Calculation);
 
             addCalculationItemForm.ShowDialog();
-            await ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
         private async void PreviousNext_Click(object sender, EventArgs e)
@@ -127,21 +175,21 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private async Task ShowItems(int offset)
         {
-            var maxShowItemsCount = creator.LengthOfItemsList;
-            var resultOfGettingItemsList = await creator.GetItemsList(offset, "");
+            var maxShowItemsCount = Creator.LengthOfItemsList;
+            var resultOfGettingItemsList = await Creator.GetItemsList(offset, "");
             var itemsList = resultOfGettingItemsList.Item1;
             var isThereMoreOfItems = resultOfGettingItemsList.Item2;
 
-            _offset = offset;
+            Offset = offset;
 
             if (itemsList.Count == 0)
             {
                 if (offset > 0)
                 {
                     offset -= maxShowItemsCount;
-                    _offset = offset;
+                    Offset = offset;
 
-                    resultOfGettingItemsList = await creator.GetItemsList(offset, "");
+                    resultOfGettingItemsList = await Creator.GetItemsList(offset, "");
                     itemsList = resultOfGettingItemsList.Item1;
                     isThereMoreOfItems = resultOfGettingItemsList.Item2;
                 }
@@ -154,16 +202,16 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
             if (isThereMoreOfItems)
             {
-                nextListButton.Enabled = true;
-                nextListButton.Tag = offset + maxShowItemsCount;
+                NextListButton.Enabled = true;
+                NextListButton.Tag = offset + maxShowItemsCount;
             }
             else
                 DefaultNextButton();
 
             if (offset > 0)
             {
-                previousListButton.Enabled = true;
-                previousListButton.Tag = offset - maxShowItemsCount;
+                PreviousListButton.Enabled = true;
+                PreviousListButton.Tag = offset - maxShowItemsCount;
             }
             else
                 DefaultPreviousButton();
@@ -173,9 +221,9 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private void RefreshActiveItemTempControl(List<IBlockItem> itemsList)
         {
-            var lastControl = (Control)previousListButton;
+            var lastControl = (Control)TableColumnName;
 
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
             foreach (var item in itemsList)
                 lastControl = DisplayItems(item, lastControl);
         }
@@ -183,67 +231,69 @@ namespace ManagementAccounting.Forms.CalculationsForms
         private void ShowEmptyList(string message)
         {
             DefaultPreviousNextButtons();
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
-            var lastControl = previousListButton;
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
+            var lastControl = TableColumnName;
             var label = new Label();
-            label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 25);
+            label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
             label.Text = message;
             label.AutoSize = true;
             Controls.Add(label);
-            activeItemTempControls.Add(label);
+            ActiveItemTempControls.Add(label);
         }
 
         private Control DisplayItems(IBlockItem item, Control lastControl)
         {
+            var calculationItem = (ICalculationItem) item;
             var itemLabel = new Label();
-            itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 10);
-            itemLabel.Width = 200;
-            //itemLabel.AutoSize = true;
+            itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
+            itemLabel.MaximumSize = new Size(200, 0);
+            itemLabel.AutoSize = true;
             itemLabel.Click += ItemLabel_Click;
             Controls.Add(itemLabel);
-            activeItemTempControls.Add(itemLabel);
+            ActiveItemTempControls.Add(itemLabel);
 
-            itemLabel.Text = item.Name;
-            itemLabel.Tag = item;
+            itemLabel.Text = calculationItem.Name;
+            itemLabel.Tag = calculationItem;
 
             var consumptionLabel = new Label();
-            consumptionLabel.Text = ((ICalculationItem) itemLabel.Tag).Consumption.ToString();
-            consumptionLabel.Location = new Point(itemLabel.Width + itemLabel.Location.X + 10, itemLabel.Location.Y );
-            consumptionLabel.Width = 50;
+            consumptionLabel.Text = string.Join(' ', calculationItem.Consumption.ToString(), InputOperations.TranslateType(calculationItem.Material.Unit.ToString())) ;
+            consumptionLabel.Location = new Point(200 + itemLabel.Location.X + 10, itemLabel.Location.Y );
+            consumptionLabel.AutoSize = true;
             Controls.Add(consumptionLabel);
-            activeItemTempControls.Add(consumptionLabel);
+            ActiveItemTempControls.Add(consumptionLabel);
+
             return itemLabel;
         }
 
-        private void ItemLabel_Click(object sender, EventArgs e)
+        private async void ItemLabel_Click(object sender, EventArgs e)
         {
             var control = (Control)sender;
             var calculationItem = (ICalculationItem)control.Tag;
-            var receivingForm = formFactory.CreateCalculationItemForm(calculationItem);
+            var receivingForm = FormFactory.CreateCalculationItemForm(calculationItem);
             receivingForm.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
 
         private void ClearActiveItemTempControls()
         {
-            foreach (var activeItemControl in activeItemTempControls)
+            foreach (var activeItemControl in ActiveItemTempControls)
             {
                 Controls.Remove(activeItemControl);
             }
-            activeItemTempControls.Clear();
+            ActiveItemTempControls.Clear();
         }
 
         private void DefaultPreviousButton()
         {
-            previousListButton.Enabled = false;
-            previousListButton.Tag = null;
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Tag = null;
         }
         private void DefaultNextButton()
         {
-            nextListButton.Enabled = false;
-            nextListButton.Tag = null;
+            NextListButton.Enabled = false;
+            NextListButton.Tag = null;
         }
         private void DefaultPreviousNextButtons()
         {

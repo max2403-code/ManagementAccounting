@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -16,20 +17,20 @@ namespace ManagementAccounting
         public int CalculationId { get; }
         public IMaterial Material { get; }
         public decimal Consumption { get; private set; }
-        private IItemsFactory itemsFactory;
+        private IItemsFactory ItemsFactory { get; }
 
 
-        public CalculationItem(IMaterial material,  decimal consumption, int calculationId, int index,  IDataBase dataBase, IItemsFactory itemsFactory) : base(dataBase)
+        public CalculationItem(IMaterial material,  decimal consumption, int calculationId, int index,  IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Index = index;
             Material = material;
             Name = Material.Name;
             CalculationId = calculationId;
             Consumption = consumption;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
         
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return
                 "INSERT INTO calculationitems (CalculationIdci, MaterialIdci, ConsumptionCI) VALUES (@CalculationIdci, @MaterialIdci, @ConsumptionCI) RETURNING IdCI";
@@ -54,7 +55,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T) itemsFactory.CreateCalculationItem(Material, Consumption, CalculationId, Index);
+            return (T) ItemsFactory.CreateCalculationItem(Material, Consumption, CalculationId, Index);
         }
 
         private protected override string GetEditItemCommandText()

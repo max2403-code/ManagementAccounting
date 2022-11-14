@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.Items;
 
@@ -18,149 +19,135 @@ namespace ManagementAccounting
     public partial class MainForm : Form
     {
         public bool LoginCompleted { get; set; }
-        private IBlockItemFormsCollection _formsCollection { get; }
-        private Label label { get; }
-        private Button remaindersButton { get; }
-        private Button calculationsButton { get; }
-        private Button preOrdersButton { get; }
+        private Button RemaindersButton { get; }
+        private Button CalculationsButton { get; }
+        private Button PreOrdersButton { get; }
+        private Button OrdersButton { get; }
 
-
-        private List<Button> mainButtonsHashSet { get; }
-        private List<Control> activeTempControls { get; }
-        private List<Control> activeItemTempControls { get; }
-        private Button nextListButton { get; }
-        private Button previousListButton { get; }
-        private Button allItems { get; }
-        private Button addItem { get; }
-        private TextBox searchNameLine { get; set; }
-        private Button signIn { get; } 
-
-        private int _offset { get; set; }
-
-        private EventHandler addAction { get; set; }
-        private EventHandler itemAction { get; set; }
-
-        private IOperationsWithUserInput inputOperations { get; }
-        private IDataBase dataBase { get; }
-        private ICreatorFactory creatorFactory { get; }
-        private IFormFactory formFactory { get; }
-
-
-        private BlockItemsCollectionCreator block { get; set; }
+        private List<Button> MainButtonsHashSet { get; }
+        private List<Control> ActiveTempControls { get; }
+        private List<Control> ActiveItemTempControls { get; }
+        private Button NextListButton { get; }
+        private Button PreviousListButton { get; }
+        private Button AllItems { get; }
+        private Button AddItem { get; }
+        private TextBox SearchNameLine { get; }
+        private Button SignIn { get; } 
+        private int Offset { get; set; }
+        private EventHandler AddAction { get; set; }
+        private EventHandler ItemAction { get; set; }
+        private IFormFactory FormFactory { get; }
+        private BlockItemsCollectionCreator Block { get; set; }
          
-        public MainForm(BlockItemsCollectionCreator[] blocks, IFormFactory formFactory, ICreatorFactory creatorFactory, IDataBase dataBase, IOperationsWithUserInput inputOperations)
+        public MainForm(BlockItemsCollectionCreator[] blocks, IFormFactory formFactory)
         {
-            this.dataBase = dataBase;
-            this.formFactory = formFactory;
-            this.inputOperations = inputOperations;
-            this.creatorFactory = creatorFactory;
+            this.FormFactory = formFactory;
 
-            mainButtonsHashSet = new List<Button>();
-            activeTempControls = new List<Control>();
-            activeItemTempControls = new List<Control>();
+            MainButtonsHashSet = new List<Button>();
+            ActiveTempControls = new List<Control>();
+            ActiveItemTempControls = new List<Control>();
 
             AutoScroll = true;
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
             Size = new Size(600, 600);
 
-            signIn = new Button();
-            signIn.AutoSize = true;
-            signIn.Click += SignInOnClick;
-            signIn.Text = "Войти в базу данных";
-            Controls.Add(signIn);
+            SignIn = new Button();
+            SignIn.AutoSize = true;
+            SignIn.Click += SignInOnClick;
+            SignIn.Text = "Войти в базу данных";
+            Controls.Add(SignIn);
 
-            remaindersButton = new Button();
-            remaindersButton.Location = new Point(signIn.Location.X + signIn.Width + 10, signIn.Location.Y);
-            remaindersButton.Enabled = false;
-            remaindersButton.AutoSize = true;
-            remaindersButton.Text = "Остатки материалов";
-            remaindersButton.Tag = blocks[0];
-            remaindersButton.Click += MaterialsButtonOnClick;
-            mainButtonsHashSet.Add(remaindersButton);
-            Controls.Add(remaindersButton);
+            RemaindersButton = new Button();
+            RemaindersButton.Location = new Point(SignIn.Location.X + SignIn.Width + 10, SignIn.Location.Y);
+            RemaindersButton.Enabled = false;
+            RemaindersButton.AutoSize = true;
+            RemaindersButton.Text = "Остатки материалов";
+            RemaindersButton.Tag = blocks[0];
+            RemaindersButton.Click += MaterialsButtonOnClick;
+            MainButtonsHashSet.Add(RemaindersButton);
+            Controls.Add(RemaindersButton);
 
-            calculationsButton = new Button();
-            calculationsButton.Location = new Point(remaindersButton.Location.X + remaindersButton.Width + 10, remaindersButton.Location.Y);
-            calculationsButton.Enabled = false;
-            calculationsButton.AutoSize = true;
-            calculationsButton.Text = "Калькуляции";
-            calculationsButton.Tag = blocks[1];
-            calculationsButton.Click += CalculationsButtonOnClick;
-            mainButtonsHashSet.Add(calculationsButton);
-            Controls.Add(calculationsButton);
+            CalculationsButton = new Button();
+            CalculationsButton.Location = new Point(RemaindersButton.Location.X + RemaindersButton.Width + 10, RemaindersButton.Location.Y);
+            CalculationsButton.Enabled = false;
+            CalculationsButton.AutoSize = true;
+            CalculationsButton.Text = "Калькуляции";
+            CalculationsButton.Tag = blocks[1];
+            CalculationsButton.Click += CalculationsButtonOnClick;
+            MainButtonsHashSet.Add(CalculationsButton);
+            Controls.Add(CalculationsButton);
 
-            preOrdersButton = new Button();
-            preOrdersButton.Location = new Point(calculationsButton.Location.X + calculationsButton.Width + 10, calculationsButton.Location.Y);
-            preOrdersButton.Enabled = false;
-            preOrdersButton.AutoSize = true;
-            preOrdersButton.Text = "Предзаказы";
-            preOrdersButton.Tag = blocks[2];
-            preOrdersButton.Click += PreOrdersButtonOnClick;
-            mainButtonsHashSet.Add(preOrdersButton);
-            Controls.Add(preOrdersButton);
+            PreOrdersButton = new Button();
+            PreOrdersButton.Location = new Point(CalculationsButton.Location.X + CalculationsButton.Width + 10, CalculationsButton.Location.Y);
+            PreOrdersButton.Enabled = false;
+            PreOrdersButton.AutoSize = true;
+            PreOrdersButton.Text = "Предзаказы";
+            PreOrdersButton.Tag = blocks[2];
+            PreOrdersButton.Click += PreOrdersButtonOnClick;
+            MainButtonsHashSet.Add(PreOrdersButton);
+            Controls.Add(PreOrdersButton);
 
-            addItem = new Button();
-            addItem.Location = new Point(10, signIn.Location.Y + signIn.Height + 25);
-            addItem.Text = "Добавить";
-            addItem.AutoSize = true;
-            addItem.Enabled = false;
-            activeTempControls.Add(addItem);
-            Controls.Add(addItem);
+            OrdersButton = new Button();
+            OrdersButton.Location = new Point(PreOrdersButton.Location.X + PreOrdersButton.Width + 10, PreOrdersButton.Location.Y);
+            OrdersButton.Enabled = false;
+            OrdersButton.AutoSize = true;
+            OrdersButton.Text = "Заказы";
+            OrdersButton.Tag = blocks[3];
+            OrdersButton.Click += OrdersButtonOnClick;
+            MainButtonsHashSet.Add(OrdersButton);
+            Controls.Add(OrdersButton);
 
-            searchNameLine = new TextBox();
-            searchNameLine.Location = new Point(10, addItem.Location.Y + addItem.Height + 10);
-            searchNameLine.TextChanged += NameLine_TextChanged;
-            searchNameLine.Width = 450;
-            searchNameLine.Tag = TypeOfItem.Material;
-            searchNameLine.Enabled = false;
-            activeTempControls.Add(searchNameLine);
-            Controls.Add(searchNameLine);
+            AddItem = new Button();
+            AddItem.Location = new Point(10, SignIn.Location.Y + SignIn.Height + 25);
+            AddItem.Text = "Добавить";
+            AddItem.AutoSize = true;
+            AddItem.Enabled = false;
+            ActiveTempControls.Add(AddItem);
+            Controls.Add(AddItem);
 
-            allItems = new Button();
-            allItems.Location = new Point(10, searchNameLine.Location.Y + searchNameLine.Height + 10);
-            allItems.Click += AllItems_Click;
-            allItems.AutoSize = true;
-            allItems.Text = "Показать";
-            allItems.Tag = TypeOfItem.Material;
-            allItems.Enabled = false;
-            activeTempControls.Add(allItems);
-            Controls.Add(allItems);
+            SearchNameLine = new TextBox();
+            SearchNameLine.Location = new Point(10, AddItem.Location.Y + AddItem.Height + 10);
+            SearchNameLine.TextChanged += NameLine_TextChanged;
+            SearchNameLine.Width = 450;
+            SearchNameLine.Tag = TypeOfItem.Material;
+            SearchNameLine.Enabled = false;
+            ActiveTempControls.Add(SearchNameLine);
+            Controls.Add(SearchNameLine);
 
-            previousListButton = new Button();
-            previousListButton.Text = "Назад";
-            previousListButton.Location = new Point(20 + allItems.Location.X + allItems.Width, allItems.Location.Y);
-            previousListButton.Enabled = false;
-            previousListButton.Click += PreviousNext_Click;
-            Controls.Add(previousListButton);
+            AllItems = new Button();
+            AllItems.Location = new Point(10, SearchNameLine.Location.Y + SearchNameLine.Height + 10);
+            AllItems.Click += AllItems_Click;
+            AllItems.AutoSize = true;
+            AllItems.Text = "Показать";
+            AllItems.Tag = TypeOfItem.Material;
+            AllItems.Enabled = false;
+            ActiveTempControls.Add(AllItems);
+            Controls.Add(AllItems);
 
-            nextListButton = new Button();
-            nextListButton.Text = "Вперед";
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
-            nextListButton.Enabled = false;
-            nextListButton.Click += PreviousNext_Click;
-            Controls.Add(nextListButton);
+            PreviousListButton = new Button();
+            PreviousListButton.Text = "Назад";
+            PreviousListButton.Location = new Point(20 + AllItems.Location.X + AllItems.Width, AllItems.Location.Y);
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Click += PreviousNext_Click;
+            Controls.Add(PreviousListButton);
 
-            //var scrollBar = new VScrollBar();
-            //scrollBar.Dock = DockStyle.Right;
-            //Controls.Add(scrollBar);
-
-
-        }
-
-        private void ScrollBarOnScroll(object sender, ScrollEventArgs e)
-        {
-            throw new NotImplementedException();
+            NextListButton = new Button();
+            NextListButton.Text = "Вперед";
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
+            NextListButton.Enabled = false;
+            NextListButton.Click += PreviousNext_Click;
+            Controls.Add(NextListButton);
         }
 
         private void SignInOnClick(object? sender, EventArgs e)
         {
-            var loginForm = new LoginForm(this, dataBase);
+            var loginForm = FormFactory.CreateLoginForm(this);
             loginForm.ShowDialog();
             if(!LoginCompleted) return;
-            Controls.Remove(signIn);
+            Controls.Remove(SignIn);
 
-            foreach (var button in mainButtonsHashSet)
+            foreach (var button in MainButtonsHashSet)
                 button.Enabled = true;
         }
 
@@ -168,104 +155,114 @@ namespace ManagementAccounting
         {
             ShowEmptyList("Введите наименование");
             var control = (Control) sender;
-            block = (BlockItemsCollectionCreator) control.Tag;
+            Block = (BlockItemsCollectionCreator) control.Tag;
 
-            if (addAction != null)
+            if (AddAction != null)
             {
-                addItem.Click -= addAction;
+                AddItem.Click -= AddAction;
             }
 
-            addAction = AddMaterialButtonOnClick;
-            addItem.Click += addAction;
+            AddAction = AddMaterialButtonOnClick;
+            AddItem.Click += AddAction;
             
-            itemAction = ItemMaterialLabel_Click;
-
-
-            addItem.Text = "Добавить материал";
-            allItems.Text = "Показать все материалы";
-            foreach (var ctrl in activeTempControls)
+            ItemAction = ItemMaterialLabel_Click;
+            
+            AddItem.Text = "Добавить материал";
+            AllItems.Text = "Показать все материалы";
+            foreach (var ctrl in ActiveTempControls)
                 ctrl.Enabled = true;
 
-            previousListButton.Tag = 0;
-            previousListButton.Location = new Point(20 + allItems.Location.X + allItems.Width, allItems.Location.Y);
+            PreviousListButton.Tag = 0;
+            PreviousListButton.Location = new Point(20 + AllItems.Location.X + AllItems.Width, AllItems.Location.Y);
 
-            nextListButton.Tag = 0;
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
+            NextListButton.Tag = 0;
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
         }
 
         private void CalculationsButtonOnClick(object? sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control)sender;
-            block = (BlockItemsCollectionCreator)control.Tag;
+            Block = (BlockItemsCollectionCreator)control.Tag;
 
-            if (addAction != null)
+            if (AddAction != null)
             {
-                addItem.Click -= addAction;
+                AddItem.Click -= AddAction;
             }
 
-            addAction = AddCalculationButtonOnClick;
-            addItem.Click += addAction;
+            AddAction = AddCalculationButtonOnClick;
+            AddItem.Click += AddAction;
 
-            itemAction = ItemCalcLabel_Click;
-
-
-            addItem.Text = "Добавить калькуляцию";
-            allItems.Text = "Показать все калькуляции";
-            foreach (var ctrl in activeTempControls)
+            ItemAction = ItemCalcLabel_Click;
+            
+            AddItem.Text = "Добавить калькуляцию";
+            AllItems.Text = "Показать все калькуляции";
+            foreach (var ctrl in ActiveTempControls)
                 ctrl.Enabled = true;
 
-            previousListButton.Tag = 0;
-            previousListButton.Location = new Point(20 + allItems.Location.X + allItems.Width, allItems.Location.Y);
+            PreviousListButton.Tag = 0;
+            PreviousListButton.Location = new Point(20 + AllItems.Location.X + AllItems.Width, AllItems.Location.Y);
 
-            nextListButton.Tag = 0;
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
+            NextListButton.Tag = 0;
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
         }
 
         private void PreOrdersButtonOnClick(object? sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control)sender;
-            block = (BlockItemsCollectionCreator)control.Tag;
+            Block = (BlockItemsCollectionCreator)control.Tag;
 
-            if (addAction != null)
+            if (AddAction != null)
             {
-                addItem.Click -= addAction;
+                AddItem.Click -= AddAction;
             }
 
-            addAction = AddPreOrderButtonOnClick;
-            addItem.Click += addAction;
+            AddAction = AddPreOrderButtonOnClick;
+            AddItem.Click += AddAction;
 
-            itemAction = ItemPreOrderLabel_Click;
-
-
-            addItem.Text = "Добавить предзаказ";
-            allItems.Text = "Показать все предзаказы";
-            foreach (var ctrl in activeTempControls)
+            ItemAction = ItemPreOrderLabel_Click;
+            
+            AddItem.Text = "Добавить предзаказ";
+            AllItems.Text = "Показать все предзаказы";
+            foreach (var ctrl in ActiveTempControls)
                 ctrl.Enabled = true;
 
-            previousListButton.Tag = 0;
-            previousListButton.Location = new Point(20 + allItems.Location.X + allItems.Width, allItems.Location.Y);
+            PreviousListButton.Tag = 0;
+            PreviousListButton.Location = new Point(20 + AllItems.Location.X + AllItems.Width, AllItems.Location.Y);
 
-            nextListButton.Tag = 0;
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
+            NextListButton.Tag = 0;
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
         }
 
+        private void OrdersButtonOnClick(object? sender, EventArgs e)
+        {
+            ShowEmptyList("Введите наименование");
+            var control = (Control)sender;
+            Block = (BlockItemsCollectionCreator)control.Tag;
 
-        //public bool CheckNextOffset(List<IBlockItem> itemsList)
-        //{
-        //    var indexOfLastItem = block.LengthOfItemsList;
-        //    var lengthOfItemList = indexOfLastItem + 1;
+            if (AddAction != null)
+            {
+                AddItem.Click -= AddAction;
+            }
 
-        //    if (itemsList.Count != lengthOfItemList) return false;
-        //    itemsList.RemoveAt(indexOfLastItem);
-        //    return true;
-        //}
+            //AddAction = AddOrderButtonOnClick;
+            //AddItem.Click += AddAction;
 
-        //public bool CheckPreviousOffset(int offset)
-        //{
-        //    return offset > 0;
-        //}
+            ItemAction = ItemOrderLabel_Click;
+
+            AddItem.Text = "Добавить";
+            AllItems.Text = "Показать все заказы";
+            foreach (var ctrl in ActiveTempControls)
+                ctrl.Enabled = true;
+            AddItem.Enabled = false;
+
+            PreviousListButton.Tag = 0;
+            PreviousListButton.Location = new Point(20 + AllItems.Location.X + AllItems.Width, AllItems.Location.Y);
+
+            NextListButton.Tag = 0;
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
+        }
 
         private async void PreviousNext_Click(object sender, EventArgs e)
         {
@@ -276,13 +273,13 @@ namespace ManagementAccounting
 
         private async void AllItems_Click(object sender, EventArgs e)
         {
-            searchNameLine.Text = "";
+            SearchNameLine.Text = "";
             await ShowItems(0);
         }
 
         private async void NameLine_TextChanged(object sender, EventArgs e)
         {
-            if (searchNameLine.Text == "")
+            if (SearchNameLine.Text == "")
             {
                 DefaultPreviousNextButtons();
                 ShowEmptyList("Введите наименование");
@@ -293,20 +290,20 @@ namespace ManagementAccounting
 
         private async Task ShowItems(int offset)
         {
-            var maxShowItemsCount = block.LengthOfItemsList;
-            var resultOfGettingItemsList = await block.GetItemsList(offset, searchNameLine.Text.ToLower());
+            var maxShowItemsCount = Block.LengthOfItemsList;
+            var resultOfGettingItemsList = await Block.GetItemsList(offset, SearchNameLine.Text.ToLower());
             var itemsList = resultOfGettingItemsList.Item1;
             var isThereMoreOfItems = resultOfGettingItemsList.Item2;
 
-            _offset = offset;
+            Offset = offset;
 
             if (itemsList.Count == 0)
             {
                 if (offset > 0)
                 {
                     offset -= maxShowItemsCount;
-                    _offset = offset;
-                    resultOfGettingItemsList = await block.GetItemsList(offset, searchNameLine.Text.ToLower());
+                    Offset = offset;
+                    resultOfGettingItemsList = await Block.GetItemsList(offset, SearchNameLine.Text.ToLower());
                     itemsList = resultOfGettingItemsList.Item1;
                     isThereMoreOfItems = resultOfGettingItemsList.Item2;
                 }
@@ -319,16 +316,16 @@ namespace ManagementAccounting
 
             if (isThereMoreOfItems)
             {
-                nextListButton.Enabled = true;
-                nextListButton.Tag = offset + maxShowItemsCount;
+                NextListButton.Enabled = true;
+                NextListButton.Tag = offset + maxShowItemsCount;
             }
             else
                 DefaultNextButton();
 
             if (offset > 0)
             {
-                previousListButton.Enabled = true;
-                previousListButton.Tag = offset - maxShowItemsCount;
+                PreviousListButton.Enabled = true;
+                PreviousListButton.Tag = offset - maxShowItemsCount;
             }
             else
                 DefaultPreviousButton();
@@ -338,9 +335,9 @@ namespace ManagementAccounting
 
         private void RefreshActiveItemTempControl(List<IBlockItem> itemsList)
         {
-            var lastControl = (Control) allItems;
+            var lastControl = (Control) AllItems;
             
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
             foreach (var item in itemsList)
                 lastControl = DisplayItems(item, lastControl);
         }
@@ -348,24 +345,24 @@ namespace ManagementAccounting
         private void ShowEmptyList(string message)
         {
             DefaultPreviousNextButtons();
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
-            var lastControl = allItems;
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
+            var lastControl = AllItems;
             var label = new Label();
-            label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 25);
+            label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
             label.Text = message;
             label.AutoSize = true;
             Controls.Add(label);
-            activeItemTempControls.Add(label);
+            ActiveItemTempControls.Add(label);
         }
 
         private Control DisplayItems(IBlockItem item, Control lastControl)
         {
             var itemLabel = new Label();
-            itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 10);
+            itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
             itemLabel.Width = 200;
-            itemLabel.Click += itemAction;
+            itemLabel.Click += ItemAction;
             Controls.Add(itemLabel);
-            activeItemTempControls.Add(itemLabel);
+            ActiveItemTempControls.Add(itemLabel);
 
             itemLabel.Text = item.Name;
             itemLabel.Tag = item;
@@ -373,85 +370,97 @@ namespace ManagementAccounting
             return itemLabel;
         }
 
-        private void ItemMaterialLabel_Click(object sender, EventArgs e)
+        private async void ItemMaterialLabel_Click(object sender, EventArgs e)
         {
             var label = (Label) sender;
             var material = (IMaterial) label.Tag;
             
-            var form = formFactory.CreateMaterialForm(material);
+            var form = FormFactory.CreateMaterialForm(material);
 
             form.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
-        private void AddMaterialButtonOnClick(object? sender, EventArgs e)
+        private async void AddMaterialButtonOnClick(object? sender, EventArgs e)
         {
-            var form = formFactory.CreateAddMaterialForm();
+            var form = FormFactory.CreateAddMaterialForm();
             form.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
 
-        private void AddCalculationButtonOnClick(object? sender, EventArgs e)
+        private async void AddCalculationButtonOnClick(object? sender, EventArgs e)
         {
-            var form = formFactory.CreateAddCalculationForm();
+            var form = FormFactory.CreateAddCalculationForm();
             form.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
-        private void ItemCalcLabel_Click(object sender, EventArgs e)
+        private async void ItemCalcLabel_Click(object sender, EventArgs e)
         {
             var label = (Label)sender;
             var calculation = (ICalculation)label.Tag;
 
-            var form = formFactory.CreateCalculationForm(calculation);
+            var form = FormFactory.CreateCalculationForm(calculation);
 
             form.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
-        private void AddPreOrderButtonOnClick(object? sender, EventArgs e)
+        private async void AddPreOrderButtonOnClick(object? sender, EventArgs e)
         {
-            var form = formFactory.CreateAddPreOrderForm();
+            var form = FormFactory.CreateAddPreOrderForm();
             form.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
         }
 
-        private void ItemPreOrderLabel_Click(object sender, EventArgs e)
+        private async void ItemPreOrderLabel_Click(object sender, EventArgs e)
         {
             var label = (Label)sender;
             var preOrder = (IPreOrder)label.Tag;
 
-            var form = formFactory.CreatePreOrderForm(preOrder);
+            var form = FormFactory.CreatePreOrderForm(preOrder);
 
             form.ShowDialog();
 
-            ShowItems(_offset);
+            await ShowItems(Offset);
+        }
+
+        private async void ItemOrderLabel_Click(object sender, EventArgs e)
+        {
+            var label = (Label)sender;
+            var order = (IOrder)label.Tag;
+
+            var form = FormFactory.CreateOrderForm(order);
+
+            form.ShowDialog();
+
+            await ShowItems(Offset);
         }
 
         private void ClearActiveItemTempControls()
         {
-            foreach (var activeItemControl in activeItemTempControls)
+            foreach (var activeItemControl in ActiveItemTempControls)
             {
                 Controls.Remove(activeItemControl);
             }
-            activeItemTempControls.Clear();
+            ActiveItemTempControls.Clear();
         }
 
         private void DefaultPreviousButton()
         {
-            previousListButton.Enabled = false;
-            previousListButton.Tag = null;
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Tag = null;
         }
         private void DefaultNextButton()
         {
-            nextListButton.Enabled = false;
-            nextListButton.Tag = null;
+            NextListButton.Enabled = false;
+            NextListButton.Tag = null;
         }
         private void DefaultPreviousNextButtons()
         {

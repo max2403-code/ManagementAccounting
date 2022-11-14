@@ -8,11 +8,11 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class OrderCollectionCreator : BlockItemsCollectionCreator
     {
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
         public OrderCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
         private protected override IBlockItem GetItemFromDataBase(DbDataRecord item)
@@ -22,7 +22,7 @@ namespace ManagementAccounting.Classes.ItemCreators
             var creationDate = (DateTime)item["CreationDateO"];
             var index = (int)item["IdO"];
 
-            return itemsFactory.CreateOrder(shortName, creationDate, quantity, index);
+            return ItemsFactory.CreateOrder(shortName, creationDate, quantity, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)

@@ -13,15 +13,14 @@ namespace ManagementAccounting
 
         public string[] GetTranslateTypesNames(string[] types);
 
-        public string GetNotEmptyName(string input, int inputMaxLength);
+        public bool TryGetNotEmptyName(string input, int inputMaxLength, out string result);
 
-        public decimal GetPositiveDecimal(string input);
+        public bool TryGetPositiveDecimal(string input, out decimal result);
 
-        public decimal GetPositiveDecimalorZero(string input);
+        public bool TryGetPositiveDecimalOrZero(string input, out decimal result);
 
-        public int GetPositiveInt(string input);
-        
-        public DateTime GetCorrectData(string input);
+        public bool TryGetPositiveInt(string input, out int result);
 
+        public bool TryGetCorrectData(string input, out DateTime result);
     }
 }

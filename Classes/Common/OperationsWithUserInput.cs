@@ -7,75 +7,59 @@ namespace ManagementAccounting
 {
     public class OperationsWithUserInput : IOperationsWithUserInput
     {
-        private Dictionary<string, string> _translateTypes { get; }
+        private Dictionary<string, string> TranslateTypes { get; }
 
         public OperationsWithUserInput(Dictionary<string, string> translateTypes)
         {
-            _translateTypes = translateTypes;
+            TranslateTypes = translateTypes;
         }
-
-        public bool IsNameCorrect(string name)
+        
+        public bool TryGetNotEmptyName(string input, int inputMaxLength, out string result)
         {
-            var pattern = @"\S+";
-            return Regex.IsMatch(name, pattern);
+            var isCorrectValue = input.Length <= inputMaxLength && !string.IsNullOrWhiteSpace(input);
+            result = isCorrectValue ? input : null;
+            return isCorrectValue;
         }
 
-        public string GetNotEmptyName(string input, int inputMaxLength)
+        public bool TryGetPositiveDecimal(string input, out decimal result)
         {
-            var pattern = @"\S+";
-            if (!Regex.IsMatch(input, pattern) || input.Length > inputMaxLength) throw new Exception($"Введены некорретные данные: {input}");
-            return input;
+            var isCorrectValue = decimal.TryParse(input, out result) && result > 0;
+            return isCorrectValue;
         }
 
-        public decimal GetPositiveDecimal(string input)
+        public bool TryGetPositiveDecimalOrZero(string input, out decimal result)
         {
-            var result = decimal.Parse(input);
-            if (result <= 0) throw new Exception($"Введены некорретные данные: {input}");
-
-            return result;
+            var isCorrectValue = decimal.TryParse(input, out result) && result >= 0;
+            return isCorrectValue;
         }
 
-        public decimal GetPositiveDecimalorZero(string input)
+        public bool TryGetPositiveInt(string input, out int result)
         {
-            var result = decimal.Parse(input);
-            if (result < 0) throw new Exception($"Введены некорретные данные: {input}");
-
-            return result;
+            var isCorrectValue = int.TryParse(input, out result) && result > 0;
+            return isCorrectValue;
         }
 
-        public int GetPositiveInt(string input)
+        public bool TryGetCorrectData(string input, out DateTime result)
         {
-            var result = int.Parse(input);
-            if (result <= 0) throw new Exception($"Введены некорретные данные: {input}");
-
-            return result;
+            var isCorrectValue = input.Length == 10 & DateTime.TryParse(input, out result);
+            return isCorrectValue;
         }
-
-        public DateTime GetCorrectData(string input)
-        {
-            var dateArray = input.Split(".", StringSplitOptions.RemoveEmptyEntries);
-            var date = new DateTime(int.Parse(dateArray[2]), int.Parse(dateArray[1]), int.Parse(dateArray[0]));
-
-            return date;
-        }
-
+        
         public string TranslateType(string type)
         {
-            return _translateTypes[type];
+            return TranslateTypes[type];
         }
-
-
+        
         public string[] GetTranslateTypesNames(string[] types)
         {
             var result = new string[types.Length];
 
             for (var i = 0; i < types.Length; i++)
             {
-                result[i] = _translateTypes[types[i]];
+                result[i] = TranslateTypes[types[i]];
             }
 
             return result;
         }
-
     }
 }

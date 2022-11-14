@@ -29,6 +29,8 @@ namespace ManagementAccounting
             container.Bind<BlockItemsCollectionCreator>().To<MaterialCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
             container.Bind<BlockItemsCollectionCreator>().To<CalculationCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
             container.Bind<BlockItemsCollectionCreator>().To<PreOrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
+            container.Bind<BlockItemsCollectionCreator>().To<OrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
+
 
 
 
@@ -59,7 +61,15 @@ namespace ManagementAccounting
             container.Bind<ISystemMaterialReceivingOperations>().To<SystemMaterialReceivingOperations>();
             container.Bind<ISystemOrderItemOperations>().To<SystemOrderItemOperations>();
             container.Bind<ISystemOrderOperations>().To<SystemOrderOperations>();
-            
+            container.Bind<ISignIn>().To<SignIn>().InSingletonScope();
+            container.Bind<IExceptionChecker>().To<ExceptionChecker>();
+            container.Bind<IEmptyCalculationChecker>().To<EmptyCalculationChecker>();
+            //container.Bind<IFromPreOrderToOrderConverter>().To<FromPreOrderToOrderConverter>();
+
+
+
+
+
             container.Bind<ICreatorFactory>().ToFactory();
             container.Bind<IItemsFactory>().ToFactory();
             container.Bind<IFormFactory>().ToFactory();

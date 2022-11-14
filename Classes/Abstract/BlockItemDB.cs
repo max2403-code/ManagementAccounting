@@ -3,74 +3,48 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 
 namespace ManagementAccounting.Classes.Abstract
 {
-    public abstract class BlockItemDB : IAddable, IRemovable, IExceptionable
+    public abstract class BlockItemDB : IAddable, IRemovable
     {
-        public event Action ExceptionEvent;
-        //public string Name { get; private protected set; }
-        //public int Index { get; private protected set; }
-        private IDataBase dataBase { get; }
+        protected IExceptionChecker ExceptionChecker { get; }
+        protected IDataBase DataBase { get; }
 
-        protected BlockItemDB(IDataBase dataBase)
+        protected BlockItemDB(IDataBase dataBase, IExceptionChecker exceptionChecker)
         {
-            //Index = index;
-            //Name = name;
-            this.dataBase = dataBase;
+            DataBase = dataBase;
+            ExceptionChecker = exceptionChecker;
         }
 
-        public async Task AddItemToDataBase()
+        public async Task AddItemToDataBase(bool isPreviouslyExistingItem = false)
         {
-            var commandText = GetAddItemCommandText();
-            if (ExceptionEvent != null) ExceptionEvent = null;
-            await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, GetAddExceptionMessage(), AssignParametersToAddCommand, AssignIndex);
-            ExceptionEvent?.Invoke();
+            var commandText = GetAddItemCommandText(isPreviouslyExistingItem);
+            ExceptionChecker.IsExceptionHappened = false;
+            if(isPreviouslyExistingItem)
+                await DataBase.ExecuteNonQueryAndReaderAsync(ExceptionChecker, commandText,  AssignParametersToAddCommand);
+            else
+                await DataBase.ExecuteNonQueryAndReaderAsync(ExceptionChecker, commandText, AssignParametersToAddCommand, AssignIndex);
+            if(ExceptionChecker.IsExceptionHappened) ExceptionChecker.DoException(GetAddExceptionMessage());
         }
 
         #region AddItem
 
-        private protected abstract string GetAddItemCommandText();
+        private protected abstract string GetAddItemCommandText(bool isPreviouslyExistingItem = false);
         private protected abstract string GetAddExceptionMessage();
         private protected abstract void AssignParametersToAddCommand(NpgsqlCommand cmd);
         private protected abstract void AssignIndex(DbDataRecord index);
 
         #endregion
 
-        //public async Task EditItemInDataBase(params object[] parameters)
-        //{
-        //    var copyItem = GetCopyItem();
-        //    var commandText = GetEditItemCommandText();
-        //    UpdateItem(parameters);
-
-        //    if (ExceptionEvent != null) ExceptionEvent = null;
-        //    await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, GetEditExceptionMessage(), AssignParametersToEditCommand);
-
-        //    if (ExceptionEvent != null)
-        //    {
-        //        UndoValues(copyItem);
-        //        ExceptionEvent.Invoke();
-        //    }
-        //}
-
-        //#region EditItem
-
-        //private protected abstract IBlockItem GetCopyItem();
-        //private protected abstract string GetEditItemCommandText();
-        //private protected abstract void UpdateItem(object[] parameters);
-        //private protected abstract string GetEditExceptionMessage();
-        //private protected abstract void AssignParametersToEditCommand(NpgsqlCommand cmd);
-        //private protected abstract void UndoValues(IBlockItem copyItem);
-
-        //#endregion
-
         public async Task RemoveItemFromDataBase()
         {
             var commandText = GetRemoveItemCommandText();
-            if (ExceptionEvent != null) ExceptionEvent = null;
-            await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, GetRemoveExceptionMessage());
-            ExceptionEvent?.Invoke();
+            ExceptionChecker.IsExceptionHappened = false;
+            await DataBase.ExecuteNonQueryAndReaderAsync(ExceptionChecker, commandText);
+            if(ExceptionChecker.IsExceptionHappened) ExceptionChecker.DoException(GetRemoveExceptionMessage());
         }
 
         #region Remove

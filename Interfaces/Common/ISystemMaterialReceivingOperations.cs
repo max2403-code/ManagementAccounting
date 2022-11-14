@@ -7,7 +7,7 @@ namespace ManagementAccounting.Interfaces.Common
 {
     public interface ISystemMaterialReceivingOperations
     {
-        Task Insert(IMaterialReceiving materialReceiving);
+        Task Insert(IMaterialReceiving materialReceiving, bool isPreviouslyExistingItem = false);
         Task Remove(IMaterialReceiving materialReceiving);
         Task Edit(IMaterialReceiving materialReceiving, IMaterialReceiving newMaterialReceiving);
         Task Default(IMaterialReceiving materialReceiving, IMaterialReceiving previousMaterialReceiving);

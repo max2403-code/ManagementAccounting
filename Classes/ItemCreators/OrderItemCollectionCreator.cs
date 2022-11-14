@@ -8,13 +8,13 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class OrderItemCollectionCreator : BlockItemsCollectionCreator
     {
-        private IItemsFactory itemsFactory { get; }
-        private IOrder order { get; }
+        private IItemsFactory ItemsFactory { get; }
+        private IOrder Order { get; }
 
         public OrderItemCollectionCreator(IOrder order, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
-            this.order = order;
-            this.itemsFactory = itemsFactory;
+            Order = order;
+            ItemsFactory = itemsFactory;
         }
 
         private protected override IBlockItem GetItemFromDataBase(DbDataRecord item)
@@ -24,17 +24,17 @@ namespace ManagementAccounting.Classes.ItemCreators
             var unitOfMaterial = (UnitOfMaterial)(int)item["UnitM"];
             var indexMaterial = (int)item["IdM"];
 
-            var material = itemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, indexMaterial);
+            var material = ItemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, indexMaterial);
             var consumption = (decimal)item["ConsumptionOI"];
             var totalConsumption = (decimal)item["TotalConsumptionOI"];
             var index = (int)item["IdOI"];
 
-            return itemsFactory.CreateOrderItem(order, material, consumption,totalConsumption, index);
+            return ItemsFactory.CreateOrderItem(Order, material, consumption,totalConsumption, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)
         {
-            return $"SELECT * FROM orderitems AS oi, materials AS m WHERE oi.OrderIdOI = {order.Index} AND oi.MaterialIdOI = m.IdM ORDER BY m.MaterialTypeM, m.MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
+            return $"SELECT * FROM orderitems AS oi, materials AS m WHERE oi.OrderIdOI = {Order.Index} AND oi.MaterialIdOI = m.IdM ORDER BY m.MaterialTypeM, m.MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
         }
     }
 }

@@ -14,29 +14,33 @@ namespace ManagementAccounting.Forms.CalculationsForms
 {
     public partial class AddCalculationItemForm : Form
     {
-        private int _offset { get; set; }
-        private BlockItemsCollectionCreator creator { get; }
-        private TextBox nameLine { get; }
-        private Button nextListButton { get; }
-        private Button previousListButton { get; }
-        private Button addButton { get; }
-        private Button closeButton { get; }
-        private Label materialValue { get; }
-        private TextBox quantityValue { get; }
-        private List<Control> activeItemTempControls { get; }
+        private BlockItemsCollectionCreator Creator { get; }
+        private TextBox NameLine { get; }
+        private Button NextListButton { get; }
+        private Button PreviousListButton { get; }
+        private Button AddButton { get; }
+        private Button CloseButton { get; }
+        private Button AllMaterials { get; }
+        private Label MaterialValue { get; }
+        private TextBox QuantityValue { get; }
+        private Label QuantityLabel { get; }
 
-        private IOperationsWithUserInput inputOperations { get; }
-        private IItemsFactory itemsFactory { get; }
-        private ICalculation calculation { get; }
+
+        //private List<Button> Buttons { get; }
+        private List<Control> ActiveItemTempControls { get; }
+        private IOperationsWithUserInput InputOperations { get; }
+        private IItemsFactory ItemsFactory { get; }
+        private ICalculation Calculation { get; }
 
 
         public AddCalculationItemForm(ICalculation calculation, IOperationsWithUserInput inputOperations, IItemsFactory itemsFactory, ICreatorFactory creatorFactory)
         {
-            this.itemsFactory = itemsFactory;
-            this.inputOperations = inputOperations;
-            this.calculation = calculation;
-            creator = creatorFactory.CreateMaterialCollectionCreator(5);
-            activeItemTempControls = new List<Control>();
+            this.ItemsFactory = itemsFactory;
+            this.InputOperations = inputOperations;
+            this.Calculation = calculation;
+            //Buttons = new List<Button>();
+            Creator = creatorFactory.CreateMaterialCollectionCreator(5);
+            ActiveItemTempControls = new List<Control>();
             Size = new Size(500, 500);
             var topLabel = new Label();
             topLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -46,60 +50,75 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
             var materialLabel = new Label();
             materialLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 50);
-            materialLabel.Width = 100;
-            materialLabel.Text = "Наименование материала:";
+            materialLabel.Width = 130;
+            materialLabel.Text = "Наименование мат-а:";
             Controls.Add(materialLabel);
 
-            materialValue = new Label();
-            materialValue.Location = new Point(materialLabel.Location.X + materialLabel.Width + 10, materialLabel.Location.Y);
-            materialValue.Width = 200;
-            Controls.Add(materialValue);
+            MaterialValue = new Label();
+            MaterialValue.Location = new Point(materialLabel.Location.X + materialLabel.Width + 10, materialLabel.Location.Y);
+            MaterialValue.Width = 200;
+            Controls.Add(MaterialValue);
 
-            var quantityLabel = new Label();
-            quantityLabel.Location = new Point(10, materialLabel.Location.Y + materialLabel.Height + 50);
-            quantityLabel.Width = 100;
-            quantityLabel.Text = "Количество:";
-            Controls.Add(quantityLabel);
+            QuantityLabel = new Label();
+            QuantityLabel.Location = new Point(10, materialLabel.Location.Y + materialLabel.Height + 50);
+            QuantityLabel.Width = 130;
+            QuantityLabel.Text = "Норма расхода:";
+            Controls.Add(QuantityLabel);
 
-            quantityValue = new TextBox();
-            quantityValue.Location = new Point(quantityLabel.Location.X + quantityLabel.Width + 10, quantityLabel.Location.Y);
-            quantityValue.Width = 200;
-            Controls.Add(quantityValue);
+            QuantityValue = new TextBox();
+            QuantityValue.Location = new Point(QuantityLabel.Location.X + QuantityLabel.Width + 10, QuantityLabel.Location.Y);
+            QuantityValue.Width = 200;
+            Controls.Add(QuantityValue);
 
-            addButton = new Button();
-            addButton.Location = new Point(50, quantityLabel.Location.Y + quantityLabel.Height + 25);
-            addButton.Text = "Добавить";
-            addButton.AutoSize = true;
-            addButton.Click += AddButtonOnClick;
-            Controls.Add(addButton);
+            
 
-            closeButton = new Button();
-            closeButton.Location = new Point(addButton.Location.X + addButton.Width + 20, addButton.Location.Y);
-            closeButton.Text = "Отмена";
-            closeButton.AutoSize = true;
-            closeButton.Click += CloseButtonOnClick;
-            Controls.Add(closeButton);
-
-            nameLine = new TextBox();
-            nameLine.Location = new Point(addButton.Location.X, addButton.Location.Y + addButton.Height + 15);
-            nameLine.Width = 300;
-            nameLine.TextChanged += NameLine_TextChanged;
-            Controls.Add(nameLine);
+            AddButton = new Button();
+            AddButton.Location = new Point(50, QuantityLabel.Location.Y + QuantityLabel.Height + 25);
+            AddButton.Text = "Добавить";
+            AddButton.AutoSize = true;
+            AddButton.Click += AddButtonOnClick;
+            Controls.Add(AddButton);
 
 
-            previousListButton = new Button();
-            previousListButton.Text = "Назад";
-            previousListButton.Location = new Point(20 + nameLine.Location.X, nameLine.Location.Y + nameLine.Height + 15);
-            previousListButton.Enabled = false;
-            previousListButton.Click += PreviousNext_Click;
-            Controls.Add(previousListButton);
+            CloseButton = new Button();
+            CloseButton.Location = new Point(AddButton.Location.X + AddButton.Width + 20, AddButton.Location.Y);
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Click += CloseButtonOnClick;
+            Controls.Add(CloseButton);
 
-            nextListButton = new Button();
-            nextListButton.Text = "Вперед";
-            nextListButton.Location = new Point(20 + previousListButton.Location.X + previousListButton.Width, previousListButton.Location.Y);
-            nextListButton.Enabled = false;
-            nextListButton.Click += PreviousNext_Click;
-            Controls.Add(nextListButton);
+            NameLine = new TextBox();
+            NameLine.Location = new Point(AddButton.Location.X, AddButton.Location.Y + AddButton.Height + 15);
+            NameLine.Width = 300;
+            NameLine.TextChanged += NameLine_TextChanged;
+            Controls.Add(NameLine);
+
+            AllMaterials = new Button();
+            AllMaterials.Text = "Все материалы";
+            AllMaterials.AutoSize = true;
+            AllMaterials.Location = new Point(NameLine.Location.X, NameLine.Location.Y + NameLine.Height + 15);
+            AllMaterials.Click += AllMaterialsOnClick;
+            Controls.Add(AllMaterials);
+
+            PreviousListButton = new Button();
+            PreviousListButton.Text = "Назад";
+            PreviousListButton.Location = new Point(20 + AllMaterials.Location.X + AllMaterials.Width, NameLine.Location.Y + NameLine.Height + 15);
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Click += PreviousNext_Click;
+            Controls.Add(PreviousListButton);
+
+            NextListButton = new Button();
+            NextListButton.Text = "Вперед";
+            NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
+            NextListButton.Enabled = false;
+            NextListButton.Click += PreviousNext_Click;
+            Controls.Add(NextListButton);
+        }
+
+        private async void AllMaterialsOnClick(object sender, EventArgs e)
+        {
+            NameLine.Text = "";
+            await ShowItems(0);
         }
 
         private void CloseButtonOnClick(object sender, EventArgs e)
@@ -109,22 +128,25 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private async void AddButtonOnClick(object sender, EventArgs e)
         {
-            var material = materialValue.Tag;
-            if (material == null)
+            DisableButtons();
+            var material = MaterialValue.Tag;
+            var isQuantityCorrect = InputOperations.TryGetPositiveDecimal(QuantityValue.Text, out var quantity);
+
+            if (material == null || !isQuantityCorrect)
             {
-                MessageBox.Show("Не выбран материал", "Внимание");
+                MessageBox.Show("Введены некорректные данные", "Внимание");
+                EnableButtons();
                 return;
             }
             try
             {
-                var quantity = inputOperations.GetPositiveDecimal(this.quantityValue.Text);
-
-                var calculationItem = itemsFactory.CreateCalculationItem((IMaterial)material, quantity, calculation.Index) as EditingBlockItemDB;
+                var calculationItem = ItemsFactory.CreateCalculationItem((IMaterial)material, quantity, Calculation.Index) as EditingBlockItemDB;
                 await calculationItem.AddItemToDataBase();
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
                 return;
             }
             Close();
@@ -140,26 +162,27 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private async void NameLine_TextChanged(object sender, EventArgs e)
         {
+            if (NameLine.Text == "")
+            {
+                ShowEmptyList("Введите название материала");
+                return;
+            }
             await ShowItems(0);
         }
 
         private async Task ShowItems(int offset)
         {
-            var maxShowItemsCount = creator.LengthOfItemsList;
-            var resultOfGettingItemsList = await creator.GetItemsList(offset, nameLine.Text.ToLower());
+            var maxShowItemsCount = Creator.LengthOfItemsList;
+            var resultOfGettingItemsList = await Creator.GetItemsList(offset, NameLine.Text.ToLower());
             var itemsList = resultOfGettingItemsList.Item1;
             var isThereMoreOfItems = resultOfGettingItemsList.Item2;
-
-            _offset = offset;
 
             if (itemsList.Count == 0)
             {
                 if (offset > 0)
                 {
                     offset -= maxShowItemsCount;
-                    _offset = offset;
-
-                    resultOfGettingItemsList = await creator.GetItemsList(offset, nameLine.Text.ToLower());
+                    resultOfGettingItemsList = await Creator.GetItemsList(offset, NameLine.Text.ToLower());
                     itemsList = resultOfGettingItemsList.Item1;
                     isThereMoreOfItems = resultOfGettingItemsList.Item2;
                 }
@@ -172,16 +195,16 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
             if (isThereMoreOfItems)
             {
-                nextListButton.Enabled = true;
-                nextListButton.Tag = offset + maxShowItemsCount;
+                NextListButton.Enabled = true;
+                NextListButton.Tag = offset + maxShowItemsCount;
             }
             else
                 DefaultNextButton();
 
             if (offset > 0)
             {
-                previousListButton.Enabled = true;
-                previousListButton.Tag = offset - maxShowItemsCount;
+                PreviousListButton.Enabled = true;
+                PreviousListButton.Tag = offset - maxShowItemsCount;
             }
             else
                 DefaultPreviousButton();
@@ -191,9 +214,9 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private void RefreshActiveItemTempControl(List<IBlockItem> itemsList)
         {
-            var lastControl = (Control)previousListButton;
+            var lastControl = (Control)PreviousListButton;
 
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
             foreach (var item in itemsList)
                 lastControl = DisplayItems(item, lastControl);
         }
@@ -201,24 +224,24 @@ namespace ManagementAccounting.Forms.CalculationsForms
         private void ShowEmptyList(string message)
         {
             DefaultPreviousNextButtons();
-            if (activeItemTempControls.Count > 0) ClearActiveItemTempControls();
-            var lastControl = previousListButton;
+            if (ActiveItemTempControls.Count > 0) ClearActiveItemTempControls();
+            var lastControl = PreviousListButton;
             var label = new Label();
-            label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 25);
+            label.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
             label.Text = message;
             label.AutoSize = true;
             Controls.Add(label);
-            activeItemTempControls.Add(label);
+            ActiveItemTempControls.Add(label);
         }
 
         private Control DisplayItems(IBlockItem item, Control lastControl)
         {
             var itemLabel = new Label();
-            itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 10);
+            itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
             itemLabel.AutoSize = true;
             itemLabel.Click += ItemLabel_Click;
             Controls.Add(itemLabel);
-            activeItemTempControls.Add(itemLabel);
+            ActiveItemTempControls.Add(itemLabel);
 
             itemLabel.Text = item.Name;
             itemLabel.Tag = item;
@@ -229,34 +252,52 @@ namespace ManagementAccounting.Forms.CalculationsForms
         {
             var label = (Label)sender;
             var material = (IMaterial)label.Tag;
-            this.materialValue.Tag = material;
-            this.materialValue.Text = material.Name;
-            nameLine.Text = "";
+            MaterialValue.Tag = material;
+            MaterialValue.Text = material.Name;
+            QuantityLabel.Text = $"Норма расхода, {InputOperations.TranslateType(material.Unit.ToString())}:";
+            NameLine.Text = "";
         }
 
         private void ClearActiveItemTempControls()
         {
-            foreach (var activeItemControl in activeItemTempControls)
+            foreach (var activeItemControl in ActiveItemTempControls)
             {
                 Controls.Remove(activeItemControl);
             }
-            activeItemTempControls.Clear();
+            ActiveItemTempControls.Clear();
         }
 
         private void DefaultPreviousButton()
         {
-            previousListButton.Enabled = false;
-            previousListButton.Tag = null;
+            PreviousListButton.Enabled = false;
+            PreviousListButton.Tag = null;
         }
         private void DefaultNextButton()
         {
-            nextListButton.Enabled = false;
-            nextListButton.Tag = null;
+            NextListButton.Enabled = false;
+            NextListButton.Tag = null;
         }
         private void DefaultPreviousNextButtons()
         {
             DefaultPreviousButton();
             DefaultNextButton();
+        }
+        private void EnableButtons()
+        {
+            foreach (var control in Controls)
+            {
+                if (control is Button button && !(button.Equals(NextListButton)  || button.Equals(PreviousListButton) ))
+                    button.Enabled = true;
+            }
+        }
+
+        private void DisableButtons()
+        {
+            foreach (var control in Controls)
+            {
+                if (control is Button button && !(button.Equals(NextListButton) || button.Equals(PreviousListButton)))
+                    button.Enabled = false;
+            }
         }
     }
 }

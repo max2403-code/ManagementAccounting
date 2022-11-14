@@ -10,6 +10,6 @@ namespace ManagementAccounting
     {
         //void AssignParametersToAddCommand(NpgsqlCommand cmd);
 
-        Task AddItemToDataBase();
+        Task AddItemToDataBase(bool isPreviouslyExistingItem = false);
     }
 }

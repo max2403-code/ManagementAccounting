@@ -6,23 +6,29 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Factory;
+using ManagementAccounting.Interfaces.Items;
 
 namespace ManagementAccounting.Forms.CalculationsForms
 {
     public partial class AddCalculationForm : Form
     {
-        private Button addButton { get; }
-        private Button closeButton { get; }
-        private TextBox nameLine { get; }
-        private IOperationsWithUserInput inputOperations { get; }
-        private IItemsFactory itemsFactory { get; }
+        private Button AddButton { get; }
+        private Button CloseButton { get; }
+        private TextBox NameLine { get; }
+        private List<Button> Buttons { get; }
+        private IOperationsWithUserInput InputOperations { get; }
+        private IItemsFactory ItemsFactory { get; }
+        private IFormFactory FormFactory { get; }
 
-        public AddCalculationForm(IOperationsWithUserInput inputOperations, IItemsFactory itemsFactory)
+
+        public AddCalculationForm(IOperationsWithUserInput inputOperations, IItemsFactory itemsFactory, IFormFactory formFactory)
         {
-            this.itemsFactory = itemsFactory;
-            this.inputOperations = inputOperations;
+            FormFactory = formFactory;
+            ItemsFactory = itemsFactory;
+            InputOperations = inputOperations;
             Size = new Size(500, 500);
-
+            Buttons = new List<Button>();
             var topLabel = new Label();
             topLabel.TextAlign = ContentAlignment.MiddleCenter;
             topLabel.Dock = DockStyle.Top;
@@ -31,28 +37,30 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
             var nameLabel = new Label();
             nameLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 50);
-            nameLabel.Width = 100;
-            nameLabel.Text = "Наименование калькуляции:";
+            nameLabel.Width = 150;
+            nameLabel.Text = "Наименование кальк-ии:";
             Controls.Add(nameLabel);
 
-            nameLine = new TextBox();
-            nameLine.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
-            nameLine.Width = 200;
-            Controls.Add(nameLine);
+            NameLine = new TextBox();
+            NameLine.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
+            NameLine.Width = 200;
+            Controls.Add(NameLine);
 
-            addButton = new Button();
-            addButton.Location = new Point(50, nameLabel.Location.Y + nameLabel.Height + 25);
-            addButton.Text = "Добавить";
-            addButton.AutoSize = true;
-            addButton.Click += AddButtonOnClick;
-            Controls.Add(addButton);
+            AddButton = new Button();
+            AddButton.Location = new Point(50, nameLabel.Location.Y + nameLabel.Height + 25);
+            AddButton.Text = "Добавить";
+            AddButton.AutoSize = true;
+            AddButton.Click += AddButtonOnClick;
+            Controls.Add(AddButton);
+            Buttons.Add(AddButton);
 
-            closeButton = new Button();
-            closeButton.Location = new Point(addButton.Location.X + addButton.Width + 20, addButton.Location.Y);
-            closeButton.Text = "Отмена";
-            closeButton.AutoSize = true;
-            closeButton.Click += CloseButtonOnClick;
-            Controls.Add(closeButton);
+            CloseButton = new Button();
+            CloseButton.Location = new Point(AddButton.Location.X + AddButton.Width + 20, AddButton.Location.Y);
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Click += CloseButtonOnClick;
+            Controls.Add(CloseButton);
+            Buttons.Add(CloseButton);
         }
 
         private void CloseButtonOnClick(object sender, EventArgs e)
@@ -62,19 +70,44 @@ namespace ManagementAccounting.Forms.CalculationsForms
 
         private async void AddButtonOnClick(object sender, EventArgs e)
         {
+            DisableButtons();
+            var isNameCorrect = InputOperations.TryGetNotEmptyName(NameLine.Text, 50, out var name);
+
+            if (!isNameCorrect)
+            {
+                MessageBox.Show("Наименование введено неверно", "Внимание");
+                EnableButtons();
+                return;
+            }
+            
+            var calculation = ItemsFactory.CreateCalculation(name) as EditingBlockItemDB;
+
             try
             {
-                var name = inputOperations.GetNotEmptyName(nameLine.Text, 50);
-
-                var calculation = itemsFactory.CreateCalculation(name) as EditingBlockItemDB;
                 await calculation.AddItemToDataBase();
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
                 return;
             }
+
+            var calculationForm = FormFactory.CreateCalculationForm((ICalculation) calculation);
+            calculationForm.ShowDialog();
             Close();
+        }
+
+        private void EnableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = true;
+        }
+
+        private void DisableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = false;
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Items;
 using Npgsql;
 using NpgsqlTypes;
@@ -18,10 +19,9 @@ namespace ManagementAccounting
         public DateTime CreationDate { get; private set; }
         public ICalculation Calculation { get; }
         public int Quantity { get; private set; }
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
-        public PreOrder(ICalculation calculation, int quantity, DateTime creationDate, int index, IItemsFactory itemsFactory, IDataBase dataBase) 
-            : base(dataBase)
+        public PreOrder(ICalculation calculation, int quantity, DateTime creationDate, int index, IItemsFactory itemsFactory, IDataBase dataBase, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Index = index;
             Name = string.Join(' ', calculation.Name, "от", creationDate.ToString("dd/MM/yyyy"));
@@ -29,7 +29,7 @@ namespace ManagementAccounting
             Calculation = calculation;
             CreationDate = creationDate;
             Index = index;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
         //public void AssignParametersToAddCommand(NpgsqlCommand cmd)
@@ -159,7 +159,7 @@ namespace ManagementAccounting
         //{
 
         //}
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO preorders (CalculationIdPO, QuantityPO, CreationDatePO, SearchNamePO) VALUES (@CalculationIdPO, @QuantityPO, @CreationDatePO, @SearchNamePO) RETURNING IdPO";
         }
@@ -182,7 +182,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T) itemsFactory.CreatePreOrder(Calculation, Quantity, CreationDate, Index);
+            return (T) ItemsFactory.CreatePreOrder(Calculation, Quantity, CreationDate, Index);
         }
 
         private protected override string GetEditItemCommandText()

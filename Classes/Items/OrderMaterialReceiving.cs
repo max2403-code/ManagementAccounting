@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -18,8 +19,7 @@ namespace ManagementAccounting
         public decimal Consumption { get; }
         //private IItemsFactory itemsFactory { get; }
 
-        public OrderMaterialReceiving(IOrderItem orderItem, IMaterialReceiving materialReceiving, decimal consumption, int index, IDataBase dataBase)
-            : base(dataBase)
+        public OrderMaterialReceiving(IOrderItem orderItem, IMaterialReceiving materialReceiving, decimal consumption, int index, IDataBase dataBase, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Index = index;
             OrderItem = orderItem;
@@ -54,7 +54,7 @@ namespace ManagementAccounting
         //}
 
 
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO ordermaterialreceiving (OrderItemIdOMR, MaterialReceivingIdOMR, ConsumptionOMR) VALUES (@OrderItemIdOMR, @MaterialReceivingIdOMR, @ConsumptionOMR) RETURNING IdOMR";
         }

@@ -7,6 +7,6 @@ namespace ManagementAccounting.Interfaces.Common
 {
     public interface IPreOrderCostPrice
     {
-        Task<(decimal, decimal, bool)> GetPreOrderCostPrice(IPreOrder preOrder);
+        Task<(decimal[], bool)> GetPreOrderCostPrice(IPreOrder preOrder, DateTime orderDate);
     }
 }

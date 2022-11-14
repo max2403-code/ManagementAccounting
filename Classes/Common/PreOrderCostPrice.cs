@@ -10,24 +10,26 @@ namespace ManagementAccounting.Classes.Common
 {
     public class PreOrderCostPrice : IPreOrderCostPrice
     {
-        private ICreatorFactory creatorFactory { get; }
+        private ICreatorFactory CreatorFactory { get; }
 
         public PreOrderCostPrice(ICreatorFactory creatorFactory)
         {
-            this.creatorFactory = creatorFactory;
+            CreatorFactory = creatorFactory;
         }
 
-        public async Task<(decimal, decimal, bool)> GetPreOrderCostPrice(IPreOrder preOrder)
+        public async Task<(decimal[], bool)> GetPreOrderCostPrice(IPreOrder preOrder, DateTime orderDate)
         {
-            var preOrderItemCreator = creatorFactory.CreatePreOrderItemCollectionCreator(preOrder, 5);
+            var preOrderItemCreator = CreatorFactory.CreatePreOrderItemCollectionCreator(preOrder, 5);
             var offset = 0;
             var minUnitCostPrice = 0m;
             var maxUnitCostPrice = 0m;
             var isPriceCostAvailable = true;
+            var quantity = preOrder.Quantity;
+            var prices = new decimal[4];
 
             while (true)
             {
-                var resultOfGettingItemsList = await preOrderItemCreator.GetItemsList(offset, "");
+                var resultOfGettingItemsList = await preOrderItemCreator.GetItemsList(offset, orderDate.ToString("dd/MM/yyyy"));
                 var itemsList = resultOfGettingItemsList.Item1;
                 var isThereMoreOfItems = resultOfGettingItemsList.Item2;
                 offset += preOrderItemCreator.LengthOfItemsList;
@@ -42,7 +44,12 @@ namespace ManagementAccounting.Classes.Common
                 if (!isThereMoreOfItems) break;
             }
 
-            return (minUnitCostPrice, maxUnitCostPrice, isPriceCostAvailable);
+            prices[0] = minUnitCostPrice;
+            prices[1] = maxUnitCostPrice;
+            prices[2] = minUnitCostPrice * quantity;
+            prices[3] = maxUnitCostPrice * quantity;
+
+            return (prices, isPriceCostAvailable);
         }
     }
 }

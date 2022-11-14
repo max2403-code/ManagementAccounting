@@ -7,6 +7,6 @@ namespace ManagementAccounting.Interfaces.Common
 {
     public interface IOrderItemCostPrice
     {
-        Task<decimal> GetOrderItemCostPrice(IOrderItem orderItem);
+        Task<decimal[]> GetOrderItemCostPrice(IOrderItem orderItem);
     }
 }

@@ -11,40 +11,41 @@ namespace ManagementAccounting.Classes.Common
 {
     public class FromPreOrderToOrderConverter : IFromPreOrderToOrderConverter
     {
-        private IItemsFactory itemsFactory { get; }
-        private ICreatorFactory creatorFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
+        private ICreatorFactory CreatorFactory { get; }
+
         public FromPreOrderToOrderConverter(IItemsFactory itemsFactory, ICreatorFactory creatorFactory)
         {
-            this.creatorFactory = creatorFactory;
-            this.itemsFactory = itemsFactory;
+            CreatorFactory = creatorFactory;
+            ItemsFactory = itemsFactory;
         }
 
         public async Task<IOrder> Convert(IPreOrder preOrder, DateTime creationDate)
         {
-            var order = itemsFactory.CreateOrder(preOrder.Calculation.Name, creationDate, preOrder.Quantity);
-            var preOrderItemCreator = creatorFactory.CreatePreOrderItemCollectionCreator(preOrder, 5);
+            var order = ItemsFactory.CreateOrder(preOrder.Calculation.Name, creationDate, preOrder.Quantity);
             await ((EditingBlockItemDB) order).AddItemToDataBase();
 
-            await CreateOrderItems(order, preOrderItemCreator);
+            //await CreateOrderItems(order, preOrderItemCreator);
 
             return order;
 
         }
 
-        private async Task CreateOrderItems(IOrder order, BlockItemsCollectionCreator creator)
+        public async Task CreateOrderItems(IOrder order, IPreOrder preOrder)
         {
+            var preOrderItemCreator = CreatorFactory.CreateCalculationItemCollectionCreator(preOrder.Calculation, 5);
             var offset = 0;
 
             while (true)
             {
-                var resultOfGettingItemsList = await creator.GetItemsList(offset, "");
+                var resultOfGettingItemsList = await preOrderItemCreator.GetItemsList(offset, "");
                 var itemsList = resultOfGettingItemsList.Item1;
                 var isThereMoreOfItems = resultOfGettingItemsList.Item2;
-                offset += creator.LengthOfItemsList;
+                offset += preOrderItemCreator.LengthOfItemsList;
 
-                foreach (var preOrderItem in itemsList.Cast<IPreOrderItem>())
+                foreach (var calculationItem in itemsList.Cast<ICalculationItem>())
                 {
-                    var orderItem = itemsFactory.CreateOrderItem(order, preOrderItem.Material, preOrderItem.MaterialСonsumption, preOrderItem.MaterialСonsumption);
+                    var orderItem = ItemsFactory.CreateOrderItem(order, calculationItem.Material, calculationItem.Consumption * preOrder.Quantity, calculationItem.Consumption * preOrder.Quantity);
                     await ((EditingBlockItemDB)orderItem).AddItemToDataBase();
                 }
 

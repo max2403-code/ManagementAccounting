@@ -9,11 +9,11 @@ namespace ManagementAccounting.Classes.Abstract
     public abstract class BlockItemsCollectionCreator
     {
         public int LengthOfItemsList { get; }
-        private IDataBase dataBase { get; }
+        private IDataBase DataBase { get; }
 
         protected BlockItemsCollectionCreator(int lengthOfItemsList, IDataBase dataBase)
         {
-            this.dataBase = dataBase;
+            DataBase = dataBase;
             LengthOfItemsList = lengthOfItemsList;
         }
 
@@ -21,7 +21,7 @@ namespace ManagementAccounting.Classes.Abstract
         {
             var isThereMoreOfItems = false;
             var commandText = GetCommandText(offset, searchCriterion);
-            var itemsList = await dataBase.ExecuteReaderAsync(GetItemFromDataBase, commandText);
+            var itemsList = await DataBase.ExecuteReaderAsync(GetItemFromDataBase, commandText);
 
             if (itemsList.Count != LengthOfItemsList + 1) return (itemsList, isThereMoreOfItems);
             itemsList.RemoveAt(LengthOfItemsList);

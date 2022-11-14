@@ -6,130 +6,169 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Classes.Common;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
 
 namespace ManagementAccounting.Forms.RemaindersForms
 {
     public partial class MaterialReceivingForm : Form
     {
-        private IMaterialReceiving _materialReceiving { get; set; }
-        private IOperationsWithUserInput _inputOperations { get; }
-        private Label topLabel { get; }
+        private IMaterialReceiving MaterialReceiving { get; set; }
+        private Label TopLabel { get; }
 
         //private TextBox dateTextBox { get; }
-        private Label quantityValue { get; }
-        private Label costValue { get; }
-        private Label remainderValue { get; }
-        private Label noteValue { get; }
-        private Label materialNameValue { get; }
-        private Button editReceivingButton { get; }
-        private Button removeReceivingButton { get; }
-        private IFormFactory formFactory { get; }
+        private Label QuantityValue { get; }
+        private Label CostValue { get; }
+        private Label PriceValue { get; }
+
+        private Label RemainderValue { get; }
+        private Label NoteValue { get; }
+        private Label MaterialNameValue { get; }
+        private Button EditReceivingButton { get; }
+        private Button RemoveReceivingButton { get; }
+        private IFormFactory FormFactory { get; }
+        private IOperationsWithUserInput OperationsWithUserInput { get; }
+        private ISystemMaterialReceivingOperations MaterialReceivingOperations { get; }
 
 
 
-        public MaterialReceivingForm(IMaterialReceiving materialReceiving, IFormFactory formFactory, IOperationsWithUserInput inputOperations)
+
+        public MaterialReceivingForm(IMaterialReceiving materialReceiving, IFormFactory formFactory, IOperationsWithUserInput operationsWithUserInput, ISystemMaterialReceivingOperations materialReceivingOperations)
         {
-            this.formFactory = formFactory;
-            _inputOperations = inputOperations;
-            _materialReceiving = materialReceiving;
+            FormFactory = formFactory;
+            OperationsWithUserInput = operationsWithUserInput;
+            MaterialReceiving = materialReceiving;
+            MaterialReceivingOperations = materialReceivingOperations;
 
             Size = new Size(400, 600);
 
-            topLabel = new Label();
-            topLabel.TextAlign = ContentAlignment.MiddleCenter;
-            topLabel.Dock = DockStyle.Top;
-            topLabel.Text = _materialReceiving.Name;
-            Controls.Add(topLabel);
+            TopLabel = new Label();
+            TopLabel.TextAlign = ContentAlignment.MiddleCenter;
+            TopLabel.Dock = DockStyle.Top;
+            TopLabel.Text = MaterialReceiving.Name;
+            Controls.Add(TopLabel);
 
             var materialNameLabel = new Label();
-            materialNameLabel.Text = "Материал";
-            materialNameLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 15);
+            materialNameLabel.Text = "Материал:";
+            materialNameLabel.Width = 130;
+            materialNameLabel.Location = new Point(10, TopLabel.Location.Y + TopLabel.Height + 15);
             Controls.Add(materialNameLabel);
 
-            materialNameValue = new Label();
-            materialNameValue.Location = new Point(materialNameLabel.Location.X + materialNameLabel.Width + 15, materialNameLabel.Location.Y);
-            materialNameValue.Text = materialReceiving.Material.Name;
-            materialNameValue.Width = 200;
-            Controls.Add(materialNameValue);
+            MaterialNameValue = new Label();
+            MaterialNameValue.Location = new Point(materialNameLabel.Location.X + materialNameLabel.Width + 15, materialNameLabel.Location.Y);
+            MaterialNameValue.Text = materialReceiving.Material.Name;
+            MaterialNameValue.Width = 200;
+            Controls.Add(MaterialNameValue);
 
 
             var quantityLabel = new Label();
-            quantityLabel.Text = "Количество";
+            quantityLabel.Text = "Количество:";
+            quantityLabel.Width = 130;
             quantityLabel.Location = new Point(10, materialNameLabel.Location.Y + materialNameLabel.Height + 15);
             Controls.Add(quantityLabel);
 
-            quantityValue = new Label();
-            quantityValue.Location = new Point(quantityLabel.Location.X + quantityLabel.Width + 15, quantityLabel.Location.Y);
-            quantityValue.Text = _materialReceiving.Quantity.ToString();
-            Controls.Add(quantityValue);
+            QuantityValue = new Label();
+            QuantityValue.Location = new Point(quantityLabel.Location.X + quantityLabel.Width + 15, quantityLabel.Location.Y);
+            QuantityValue.Text = string.Join(' ', MaterialReceiving.Quantity.ToString(), OperationsWithUserInput.TranslateType(MaterialReceiving.Material.Unit.ToString())) ;
+            QuantityValue.AutoSize = true;
+            Controls.Add(QuantityValue);
 
             var costLabel = new Label();
-            costLabel.Text = "Стоимость";
+            costLabel.Text = "Стоимость:";
+            costLabel.Width = 130;
             costLabel.Location = new Point(10, quantityLabel.Location.Y + quantityLabel.Height + 15);
             Controls.Add(costLabel);
 
-            costValue = new Label();
-            costValue.Location = new Point(costLabel.Location.X + costLabel.Width + 15, costLabel.Location.Y);
-            costValue.Text = _materialReceiving.Cost.ToString();
-            Controls.Add(costValue);
+            CostValue = new Label();
+            CostValue.Location = new Point(costLabel.Location.X + costLabel.Width + 15, costLabel.Location.Y);
+            CostValue.Text = string.Join(' ', MaterialReceiving.Cost.ToString(), "руб.") ;
+            CostValue.AutoSize = true;
+            Controls.Add(CostValue);
+
+            var priceLabel = new Label();
+            priceLabel.Text = "Цена за ед.:";
+            priceLabel.Width = 130;
+            priceLabel.Location = new Point(10, costLabel.Location.Y + costLabel.Height + 15);
+            Controls.Add(priceLabel);
+
+            PriceValue = new Label();
+            PriceValue.Location = new Point(priceLabel.Location.X + priceLabel.Width + 15, priceLabel.Location.Y);
+            PriceValue.Text = string.Join(' ', MaterialReceiving.Price.ToString(), "руб.") ;
+            PriceValue.AutoSize = true;
+            Controls.Add(PriceValue);
 
             var remainderLabel = new Label();
-            remainderLabel.Text = "Остаток на складе";
-            remainderLabel.Location = new Point(10, costLabel.Location.Y + costLabel.Height + 15);
+            remainderLabel.Text = "Остаток на складе:";
+            remainderLabel.Width = 130;
+            remainderLabel.Location = new Point(10, priceLabel.Location.Y + priceLabel.Height + 15);
             Controls.Add(remainderLabel);
 
-            remainderValue = new Label();
-            remainderValue.Location = new Point(remainderLabel.Location.X + remainderLabel.Width + 15, remainderLabel.Location.Y);
-            remainderValue.Text = _materialReceiving.Remainder.ToString();
-            Controls.Add(remainderValue);
+            RemainderValue = new Label();
+            RemainderValue.Location = new Point(remainderLabel.Location.X + remainderLabel.Width + 15, remainderLabel.Location.Y);
+            RemainderValue.Text = string.Join(' ', MaterialReceiving.Remainder.ToString(), OperationsWithUserInput.TranslateType(MaterialReceiving.Material.Unit.ToString())) ;
+            RemainderValue.AutoSize = true;
+            Controls.Add(RemainderValue);
 
             var noteLabel = new Label();
-            noteLabel.Text = "Заметка";
+            noteLabel.Text = "Заметка:";
+            noteLabel.Width = 130;
             noteLabel.Location = new Point(10, remainderLabel.Location.Y + remainderLabel.Height + 15);
             Controls.Add(noteLabel);
 
-            noteValue = new Label();
-            noteValue.Location = new Point(noteLabel.Location.X + noteLabel.Width + 15, noteLabel.Location.Y);
-            noteValue.Text = _materialReceiving.Note;
-            Controls.Add(noteValue);
+            NoteValue = new Label();
+            NoteValue.Location = new Point(noteLabel.Location.X + noteLabel.Width + 15, noteLabel.Location.Y);
+            NoteValue.Text = MaterialReceiving.Note;
+            Controls.Add(NoteValue);
 
-            editReceivingButton = new Button();
-            editReceivingButton.Text = "Изменить";
-            editReceivingButton.Location = new Point(30, noteLabel.Location.Y + noteLabel.Height + 15);
-            editReceivingButton.Click += EditReceivingButtonOnClick;
-            Controls.Add(editReceivingButton);
+            EditReceivingButton = new Button();
+            EditReceivingButton.Text = "Изменить";
+            EditReceivingButton.Location = new Point(30, noteLabel.Location.Y + noteLabel.Height + 15);
+            EditReceivingButton.Click += EditReceivingButtonOnClick;
+            Controls.Add(EditReceivingButton);
 
-            removeReceivingButton = new Button();
-            removeReceivingButton.Text = "Удалить";
-            removeReceivingButton.Location = new Point(editReceivingButton.Location.X + editReceivingButton.Width + 15, editReceivingButton.Location.Y);
-            removeReceivingButton.Click += RemoveReceivingButtonOnClick;
-            Controls.Add(removeReceivingButton);
+            RemoveReceivingButton = new Button();
+            RemoveReceivingButton.Text = "Удалить";
+            RemoveReceivingButton.Location = new Point(EditReceivingButton.Location.X + EditReceivingButton.Width + 15, EditReceivingButton.Location.Y);
+            RemoveReceivingButton.Click += RemoveReceivingButtonOnClick;
+            Controls.Add(RemoveReceivingButton);
         }
 
-        private async void RemoveReceivingButtonOnClick(object? sender, EventArgs e)
+        private async void RemoveReceivingButtonOnClick(object sender, EventArgs e)
         {
             var dialogResult = MessageBox.Show("Удалить поступление?", "Внимание", MessageBoxButtons.YesNo);
             if (dialogResult == DialogResult.No) return;
-            await ((BlockItemDB)_materialReceiving).RemoveItemFromDataBase();
+
+            try
+            {
+                await MaterialReceivingOperations.Remove(MaterialReceiving);
+            }
+            catch(OrderItemOperationException exception)
+            {
+                await MaterialReceivingOperations.Insert(MaterialReceiving, true);
+
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
+            }
+
             Close();
         }
 
-        private void EditReceivingButtonOnClick(object? sender, EventArgs e)
+        private void EditReceivingButtonOnClick(object sender, EventArgs e)
         {
-            var editReceivingForm = formFactory.CreateEditMaterialReceivingForm(_materialReceiving, this);
+            var editReceivingForm = FormFactory.CreateEditMaterialReceivingForm(MaterialReceiving, this);
             editReceivingForm.ShowDialog();
 
-            topLabel.Text = _materialReceiving.Name;
-            quantityValue.Text = _materialReceiving.Quantity.ToString();
-            costValue.Text = _materialReceiving.Cost.ToString();
-            remainderValue.Text = _materialReceiving.Remainder.ToString();
-            noteValue.Text = _materialReceiving.Note;
+            TopLabel.Text = MaterialReceiving.Name;
+            QuantityValue.Text = MaterialReceiving.Quantity.ToString();
+            CostValue.Text = MaterialReceiving.Cost.ToString();
+            RemainderValue.Text = MaterialReceiving.Remainder.ToString();
+            NoteValue.Text = MaterialReceiving.Note;
         }
 
-        public void UpdateMeterialReceiving(IMaterialReceiving materialReceiving)
+        public void UpdateMaterialReceiving(IMaterialReceiving materialReceiving)
         {
-            _materialReceiving = materialReceiving;
+            MaterialReceiving = materialReceiving;
         }
     }
 }

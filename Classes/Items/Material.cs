@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -16,18 +17,18 @@ namespace ManagementAccounting
         public int Index { get; private set; }
         public UnitOfMaterial Unit { get; private set; }
         public MaterialType MaterialType { get; private set; }
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
-        public Material(MaterialType materialType, string name, UnitOfMaterial unit, int index, IDataBase dataBase, IItemsFactory itemsFactory) : base(dataBase)
+        public Material(MaterialType materialType, string name, UnitOfMaterial unit, int index, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Name = name;
             Index = index;
             Unit = unit;
             MaterialType = materialType;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO materials (materialtypem, materialnamem, unitm) VALUES (@materialtypem, @materialnamem, @unitm) RETURNING IdM";
         }
@@ -51,7 +52,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T)itemsFactory.CreateMaterial(MaterialType, Name, Unit, Index);
+            return (T)ItemsFactory.CreateMaterial(MaterialType, Name, Unit, Index);
         }
 
         private protected override string GetEditItemCommandText()

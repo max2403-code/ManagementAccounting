@@ -11,38 +11,38 @@ namespace ManagementAccounting.Classes.Common
 {
     class SystemMaterialReceivingOperations : ISystemMaterialReceivingOperations
     {
-        private ICreatorFactory creatorFactory { get; }
-        private IOrderItemOperations orderItemOperations { get; }
+        private ICreatorFactory CreatorFactory { get; }
+        private IOrderItemOperations OrderItemOperations { get; }
 
         public SystemMaterialReceivingOperations(ICreatorFactory creatorFactory, IOrderItemOperations orderItemOperations)
         {
-            this.creatorFactory = creatorFactory;
-            this.orderItemOperations = orderItemOperations;
+            CreatorFactory = creatorFactory;
+            OrderItemOperations = orderItemOperations;
         }
 
-        public async Task Insert(IMaterialReceiving materialReceiving)
+        public async Task Insert(IMaterialReceiving materialReceiving, bool isPreviouslyExistingItem = false)
         {
-            var orderItemCreator = creatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(materialReceiving, 5);
-            var orderItemCreatorWithConsumption = creatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
+            var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(materialReceiving, 5);
+            var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
             //await ((EditingBlockItemDB)materialReceiving).AddItemToDataBase();
 
-            await DoOperationsWithItemsList(orderItemOperations.RemoveReceiving, orderItemCreator, ">");
-            await ((EditingBlockItemDB) materialReceiving).AddItemToDataBase();
-            await DoOperationsWithItemsList(orderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
+            await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
+            await ((EditingBlockItemDB) materialReceiving).AddItemToDataBase(isPreviouslyExistingItem);
+            await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
 
 
         }
 
         public async Task Remove(IMaterialReceiving materialReceiving)
         {
-            var orderItemCreator = creatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(materialReceiving, 5);
-            var orderItemCreatorWithConsumption = creatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
+            var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(materialReceiving, 5);
+            var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
-            await DoOperationsWithItemsList(orderItemOperations.RemoveReceiving, orderItemCreator, ">");
+            await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
             await ((EditingBlockItemDB)materialReceiving).RemoveItemFromDataBase();
 
-            await DoOperationsWithItemsList(orderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
+            await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
         }
 
         public async Task Edit(IMaterialReceiving materialReceiving, IMaterialReceiving newMaterialReceiving)
@@ -50,14 +50,14 @@ namespace ManagementAccounting.Classes.Common
             var controlMaterialReceiving = materialReceiving.Date > newMaterialReceiving.Date
                 ? newMaterialReceiving
                 : materialReceiving;
-            var orderItemCreator = creatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(controlMaterialReceiving, 5);
+            var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(controlMaterialReceiving, 5);
 
-            var orderItemCreatorWithConsumption = creatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
+            var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
-            await DoOperationsWithItemsList(orderItemOperations.RemoveReceiving, orderItemCreator, ">=");
+            await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
 
             await ((EditingBlockItemDB)newMaterialReceiving).EditItemInDataBase<IMaterialReceiving>(newMaterialReceiving.Date, newMaterialReceiving.Quantity, newMaterialReceiving.Cost, newMaterialReceiving.Remainder, newMaterialReceiving.Note);
-            await DoOperationsWithItemsList(orderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
+            await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
         }
 
         public async Task Default(IMaterialReceiving materialReceiving, IMaterialReceiving previousMaterialReceiving)
@@ -65,14 +65,14 @@ namespace ManagementAccounting.Classes.Common
             var controlMaterialReceiving = materialReceiving.Date > previousMaterialReceiving.Date
                 ? previousMaterialReceiving
                 : materialReceiving;
-            var orderItemCreator = creatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(controlMaterialReceiving, 5);
+            var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(controlMaterialReceiving, 5);
 
-            var orderItemCreatorWithConsumption = creatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
+            var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
-            await DoOperationsWithItemsList(orderItemOperations.RemoveReceiving, orderItemCreator, ">=");
+            await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
 
             await((EditingBlockItemDB)previousMaterialReceiving).EditItemInDataBase<IMaterialReceiving>(previousMaterialReceiving.Date, previousMaterialReceiving.Quantity, previousMaterialReceiving.Cost, previousMaterialReceiving.Remainder, previousMaterialReceiving.Note);
-            await DoOperationsWithItemsList(orderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
+            await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
         }
 
         private async Task DoOperationsWithItemsList(Func<IOrderItem, Task> operations, BlockItemsCollectionCreator orderItemCreator, string searchCriterion)

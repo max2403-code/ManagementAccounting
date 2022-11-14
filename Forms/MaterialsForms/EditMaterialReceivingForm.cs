@@ -13,27 +13,28 @@ namespace ManagementAccounting.Forms.RemaindersForms
 {
     public partial class EditMaterialReceivingForm : Form
     {
-        private IMaterialReceiving _materialReceiving { get; set; }
-        private IMaterialReceiving newMaterialReceiving { get; set; }
-        private IOperationsWithUserInput inputOperations { get; }
-        private ISystemMaterialReceivingOperations materialReceivingOperations { get; }
-        private IItemsFactory itemsFactory { get; }
-        private TextBox dateValue { get; }
-        private TextBox quantityValue { get; }
-        private TextBox costValue { get; }
-        private TextBox noteValue { get; }
-        private Button editButton { get; }
-        private Button cancelButton { get; }
-        private MaterialReceivingForm materialReceivingForm { get; }
+        private IMaterialReceiving MaterialReceiving { get; set; }
+        private IMaterialReceiving NewMaterialReceiving { get; set; }
+        private IOperationsWithUserInput InputOperations { get; }
+        private ISystemMaterialReceivingOperations MaterialReceivingOperations { get; }
+        private IItemsFactory ItemsFactory { get; }
+        private List<Button> Buttons { get; }
+        private TextBox DateValue { get; }
+        private TextBox QuantityValue { get; }
+        private TextBox CostValue { get; }
+        private TextBox NoteValue { get; }
+        private Button EditButton { get; }
+        private Button CloseButton { get; }
+        private MaterialReceivingForm MaterialReceivingForm { get; }
 
         public EditMaterialReceivingForm(IMaterialReceiving materialReceiving, MaterialReceivingForm materialReceivingForm, IItemsFactory itemsFactory, IOperationsWithUserInput inputOperations, ISystemMaterialReceivingOperations materialReceivingOperations)
         {
-            this.materialReceivingForm = materialReceivingForm;
-            this.inputOperations = inputOperations;
-            this.itemsFactory = itemsFactory;
-            this.materialReceivingOperations = materialReceivingOperations;
-
-            _materialReceiving = materialReceiving;
+            MaterialReceivingForm = materialReceivingForm;
+            InputOperations = inputOperations;
+            ItemsFactory = itemsFactory;
+            MaterialReceivingOperations = materialReceivingOperations;
+            Buttons = new List<Button>();
+            MaterialReceiving = materialReceiving;
 
             Size = new Size(400, 600);
 
@@ -44,57 +45,61 @@ namespace ManagementAccounting.Forms.RemaindersForms
             Controls.Add(topLabel);
 
             var dateLabel = new Label();
-            dateLabel.Text = "Дата";
+            dateLabel.Text = "Дата:";
+            dateLabel.Width = 130;
             dateLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 15);
             Controls.Add(dateLabel);
 
-            dateValue = new TextBox();
-            dateValue.Location = new Point(dateLabel.Location.X + dateLabel.Width + 15, dateLabel.Location.Y);
-            dateValue.Text = _materialReceiving.Date.ToString("dd/MM/yyyy");
-            Controls.Add(dateValue);
+            DateValue = new TextBox();
+            DateValue.Location = new Point(dateLabel.Location.X + dateLabel.Width + 15, dateLabel.Location.Y);
+            DateValue.Text = MaterialReceiving.Date.ToString("dd/MM/yyyy");
+            Controls.Add(DateValue);
 
 
             var quantityLabel = new Label();
-            quantityLabel.Text = "Количество";
-            quantityLabel.Location = new Point(10, dateValue.Location.Y + dateValue.Height + 15);
+            quantityLabel.Text = $"Количество, {InputOperations.TranslateType(MaterialReceiving.Material.Unit.ToString())}:";
+            quantityLabel.Width = 130;
+            quantityLabel.Location = new Point(10, DateValue.Location.Y + DateValue.Height + 15);
             Controls.Add(quantityLabel);
 
-            quantityValue = new TextBox();
-            quantityValue.Location = new Point(quantityLabel.Location.X + quantityLabel.Width + 15, quantityLabel.Location.Y);
-            quantityValue.Text = _materialReceiving.Quantity.ToString();
-            Controls.Add(quantityValue);
+            QuantityValue = new TextBox();
+            QuantityValue.Location = new Point(quantityLabel.Location.X + quantityLabel.Width + 15, quantityLabel.Location.Y);
+            QuantityValue.Text = MaterialReceiving.Quantity.ToString();
+            Controls.Add(QuantityValue);
 
             var costLabel = new Label();
-            costLabel.Text = "Стоимость";
+            costLabel.Text = "Стоимость, руб.:";
+            costLabel.Width = 130;
             costLabel.Location = new Point(10, quantityLabel.Location.Y + quantityLabel.Height + 15);
             Controls.Add(costLabel);
 
-            costValue = new TextBox();
-            costValue.Location = new Point(costLabel.Location.X + costLabel.Width + 15, costLabel.Location.Y);
-            costValue.Text = _materialReceiving.Cost.ToString();
-            Controls.Add(costValue);
+            CostValue = new TextBox();
+            CostValue.Location = new Point(costLabel.Location.X + costLabel.Width + 15, costLabel.Location.Y);
+            CostValue.Text = MaterialReceiving.Cost.ToString();
+            Controls.Add(CostValue);
 
             var noteLabel = new Label();
-            noteLabel.Text = "Заметка";
+            noteLabel.Text = "Заметка:";
+            noteLabel.Width = 130;
             noteLabel.Location = new Point(10, costLabel.Location.Y + costLabel.Height + 15);
             Controls.Add(noteLabel);
 
-            noteValue = new TextBox();
-            noteValue.Location = new Point(noteLabel.Location.X + noteLabel.Width + 15, noteLabel.Location.Y);
-            noteValue.Text = _materialReceiving.Note;
-            Controls.Add(noteValue);
+            NoteValue = new TextBox();
+            NoteValue.Location = new Point(noteLabel.Location.X + noteLabel.Width + 15, noteLabel.Location.Y);
+            NoteValue.Text = MaterialReceiving.Note;
+            Controls.Add(NoteValue);
 
-            editButton = new Button();
-            editButton.Text = "Изменить";
-            editButton.Location = new Point(30, noteLabel.Location.Y + noteLabel.Height + 15);
-            editButton.Click += EditButtonOnClick;
-            Controls.Add(editButton);
+            EditButton = new Button();
+            EditButton.Text = "Изменить";
+            EditButton.Location = new Point(30, noteLabel.Location.Y + noteLabel.Height + 15);
+            EditButton.Click += EditButtonOnClick;
+            Controls.Add(EditButton);
 
-            cancelButton = new Button();
-            cancelButton.Text = "Отмена";
-            cancelButton.Location = new Point(editButton.Location.X + editButton.Width + 15, editButton.Location.Y);
-            cancelButton.Click += CancelButtonOnClick;
-            Controls.Add(cancelButton);
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.Location = new Point(EditButton.Location.X + EditButton.Width + 15, EditButton.Location.Y);
+            CloseButton.Click += CancelButtonOnClick;
+            Controls.Add(CloseButton);
         }
 
         private void CancelButtonOnClick(object sender, EventArgs e)
@@ -104,31 +109,49 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
         private async void EditButtonOnClick(object sender, EventArgs e)
         {
+            DisableButtons();
+            var isDateCorrect = InputOperations.TryGetCorrectData(DateValue.Text, out var date);
+            var isQuantityCorrect = InputOperations.TryGetPositiveDecimal(QuantityValue.Text, out var quantity);
+            var isCostCorrect = InputOperations.TryGetPositiveDecimalOrZero(CostValue.Text, out var cost);
+            var remainder = quantity;
+            var isNoteCorrect = InputOperations.TryGetNotEmptyName(NoteValue.Text, 50, out var note);
+
+            if (!isDateCorrect || !isQuantityCorrect || !isCostCorrect || !isNoteCorrect)
+            {
+                MessageBox.Show("Поля заполнены неверно", "Внимание");
+                EnableButtons();
+                return;
+            }
+
             try
             {
-                var date = inputOperations.GetCorrectData(dateValue.Text);
-                var quantity = inputOperations.GetPositiveDecimal(quantityValue.Text);
-                var cost = inputOperations.GetPositiveDecimalorZero(costValue.Text);
-                var remainder = quantity;
-                var note = inputOperations.GetNotEmptyName(noteValue.Text, 50);
-                newMaterialReceiving =
-                    itemsFactory.CreateMaterialReceiving(_materialReceiving.Material, date, quantity, cost, remainder, note, _materialReceiving.Index);
-                await materialReceivingOperations.Edit(_materialReceiving, newMaterialReceiving);
-                materialReceivingForm.UpdateMeterialReceiving(newMaterialReceiving);
+                NewMaterialReceiving =
+                    ItemsFactory.CreateMaterialReceiving(MaterialReceiving.Material, date, quantity, cost, remainder, note, MaterialReceiving.Index);
+                await MaterialReceivingOperations.Edit(MaterialReceiving, NewMaterialReceiving);
+                MaterialReceivingForm.UpdateMaterialReceiving(NewMaterialReceiving);
             }
             catch (OrderItemOperationException exception)
             {
-                await materialReceivingOperations.Default(newMaterialReceiving, _materialReceiving);
+                await MaterialReceivingOperations.Default(NewMaterialReceiving, MaterialReceiving);
 
                 MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
                 return;
             }
-            catch (Exception exception)
-            {
-                MessageBox.Show("Введены некорректные данные", "Внимание");
-                return;
-            }
+            
             Close();
+        }
+
+        private void EnableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = true;
+        }
+
+        private void DisableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = false;
         }
     }
 }

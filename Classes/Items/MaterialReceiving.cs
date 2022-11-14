@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.Design;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -21,10 +22,9 @@ namespace ManagementAccounting
         public decimal Price => Math.Round(Cost / Quantity, 2);
         public decimal Remainder { get; private set; }
         public string Note { get; private set; }
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
-        public MaterialReceiving(IMaterial material, DateTime date, decimal quantity, decimal cost, decimal remainder, string note, int index, IDataBase dataBase, IItemsFactory itemsFactory)
-            : base(dataBase)
+        public MaterialReceiving(IMaterial material, DateTime date, decimal quantity, decimal cost, decimal remainder, string note, int index, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Name = $"Поступление от {date.ToString("dd/MM/yyyy")}";
             Index = index;
@@ -34,12 +34,14 @@ namespace ManagementAccounting
             Cost = cost;
             Remainder = remainder;
             Note = note;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
-            return "INSERT INTO materialreceiving (MaterialIdmr, Quantitymr, ReceiveDatemr, TotalCostmr, Remaindermr, Notemr, SearchNamemr) VALUES (@MaterialIdmr, @Quantitymr, @ReceiveDatemr, @TotalCostmr, @Remaindermr, @Notemr, @SearchNamemr) RETURNING Idmr";
+            return isPreviouslyExistingItem 
+                ? "INSERT INTO materialreceiving VALUES (@IdMR, @MaterialIdmr, @Quantitymr, @ReceiveDatemr, @TotalCostmr, @Remaindermr, @Notemr, @SearchNamemr)"
+                : "INSERT INTO materialreceiving (MaterialIdmr, Quantitymr, ReceiveDatemr, TotalCostmr, Remaindermr, Notemr, SearchNamemr) VALUES (@MaterialIdmr, @Quantitymr, @ReceiveDatemr, @TotalCostmr, @Remaindermr, @Notemr, @SearchNamemr) RETURNING Idmr";
         }
 
         private protected override string GetAddExceptionMessage()
@@ -49,6 +51,7 @@ namespace ManagementAccounting
 
         private protected override void AssignParametersToAddCommand(NpgsqlCommand cmd)
         {
+            if(Index != -1) cmd.Parameters.AddWithValue("IdMR", NpgsqlDbType.Integer, Index);
             cmd.Parameters.AddWithValue("MaterialIdmr", NpgsqlDbType.Integer, Material.Index);
             AssignParametersToEditCommand(cmd);
         }
@@ -60,7 +63,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T) itemsFactory.CreateMaterialReceiving(Material, Date, Quantity, Cost, Remainder, Note, Index);
+            return (T) ItemsFactory.CreateMaterialReceiving(Material, Date, Quantity, Cost, Remainder, Note, Index);
         }
 
         private protected override string GetEditItemCommandText()

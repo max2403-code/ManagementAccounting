@@ -2,33 +2,29 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 
 namespace ManagementAccounting.Classes.Abstract
 {
     public abstract class EditingBlockItemDB : BlockItemDB, IEditable
     {
-        public new event Action ExceptionEvent;
-        private IDataBase dataBase { get; }
-
-
-        protected EditingBlockItemDB(IDataBase dataBase) : base(dataBase)
+        protected EditingBlockItemDB(IDataBase dataBase, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
-            this.dataBase = dataBase;
         }
         public async Task EditItemInDataBase<T>(params object[] parameters) 
         {
             var copyItem = GetCopyItem<T>();
             var commandText = GetEditItemCommandText();
             UpdateItem(parameters);
+            ExceptionChecker.IsExceptionHappened = false;
 
-            if (ExceptionEvent != null) ExceptionEvent = null;
-            await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, GetEditExceptionMessage(), AssignParametersToEditCommand);
+            await DataBase.ExecuteNonQueryAndReaderAsync(ExceptionChecker, commandText, AssignParametersToEditCommand);
 
-            if (ExceptionEvent != null)
+            if (ExceptionChecker.IsExceptionHappened)
             {
                 UndoValues(copyItem);
-                ExceptionEvent.Invoke();
+                ExceptionChecker.DoException(GetEditExceptionMessage());
             }
         }
 

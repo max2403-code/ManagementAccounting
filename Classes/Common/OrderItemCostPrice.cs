@@ -11,17 +11,18 @@ namespace ManagementAccounting.Classes.Common
 {
     public class OrderItemCostPrice : IOrderItemCostPrice
     {
-        private ICreatorFactory creatorFactory { get; }
+        private ICreatorFactory CreatorFactory { get; }
         public OrderItemCostPrice(ICreatorFactory creatorFactory)
         {
-            this.creatorFactory = creatorFactory;
+            CreatorFactory = creatorFactory;
         }
-        public async Task<decimal> GetOrderItemCostPrice(IOrderItem orderItem)
+        public async Task<decimal[]> GetOrderItemCostPrice(IOrderItem orderItem)
         {
             var orderItemCostPrice = 0m;
             var orderMaterialReceivingCreator =
-                creatorFactory.CreateOrderMaterialReceivingCollectionCreator(orderItem, 5);
+                CreatorFactory.CreateOrderMaterialReceivingCollectionCreator(orderItem, 5);
             var offset = 0;
+            var prices = new decimal[2];
 
             while (true)
             {
@@ -39,7 +40,10 @@ namespace ManagementAccounting.Classes.Common
                 if (!isThereMoreOfItems) break;
             }
 
-            return orderItemCostPrice;
+            prices[0] = orderItemCostPrice / orderItem.Order.Quantity;
+            prices[1] = orderItemCostPrice;
+
+            return prices;
         }
     }
 }

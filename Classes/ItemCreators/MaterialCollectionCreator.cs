@@ -10,11 +10,11 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class MaterialCollectionCreator : BlockItemsCollectionCreator
     {
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
         public MaterialCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
        
         private protected override IBlockItem GetItemFromDataBase(DbDataRecord item)
@@ -24,7 +24,7 @@ namespace ManagementAccounting.Classes.ItemCreators
             var unitOfMaterial = (UnitOfMaterial)(int)item["UnitM"];
             var index = (int)item["IdM"];
 
-            return itemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, index);
+            return ItemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)

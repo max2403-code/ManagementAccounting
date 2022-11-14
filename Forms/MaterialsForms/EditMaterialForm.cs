@@ -11,19 +11,20 @@ namespace ManagementAccounting
 {
     public partial class EditMaterialForm : Form
     {
-        private Button editButton { get; }
-        private Button closeButton { get; }
-        private ComboBox materialTypes { get; }
-        private ComboBox unitTypes { get; }
-        private TextBox nameLine { get; }
-        private IMaterial _material { get; }
-        private IOperationsWithUserInput inputOperations { get; }
+        private Button EditButton { get; }
+        private Button CloseButton { get; }
+        private ComboBox MaterialTypes { get; }
+        private ComboBox UnitTypes { get; }
+        private TextBox NameLine { get; }
+        private List<Button> Buttons { get; }
+        private IMaterial Material { get; }
+        private IOperationsWithUserInput InputOperations { get; }
 
         public EditMaterialForm(IMaterial material, IOperationsWithUserInput inputOperations)
         {
-            this.inputOperations = inputOperations;
-            _material = material;
-            
+            this.InputOperations = inputOperations;
+            Material = material;
+            Buttons = new List<Button>();
             Size = new Size(400, 600);
 
 
@@ -35,52 +36,52 @@ namespace ManagementAccounting
 
             var nameLabel = new Label();
             nameLabel.Location = new Point(10, topLabel.Location.Y + topLabel.Height + 50);
-            nameLabel.Width = 100;
-            nameLabel.Text = "Наименование материала:";
+            nameLabel.Width = 130;
+            nameLabel.Text = "Наименование:";
             Controls.Add(nameLabel);
 
-            nameLine = new TextBox();
-            nameLine.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
-            nameLine.Width = 200;
-            Controls.Add(nameLine);
+            NameLine = new TextBox();
+            NameLine.Location = new Point(nameLabel.Location.X + nameLabel.Width + 10, nameLabel.Location.Y);
+            NameLine.Width = 200;
+            Controls.Add(NameLine);
 
             var typeLabel = new Label();
             typeLabel.Location = new Point(10, nameLabel.Location.Y + nameLabel.Height + 20);
-            typeLabel.Width = 100;
+            typeLabel.Width = 130;
             typeLabel.Text = "Тип материала:";
             Controls.Add(typeLabel);
 
-            materialTypes = new ComboBox();
-            materialTypes.DropDownStyle = ComboBoxStyle.DropDownList;
-            materialTypes.Location = new Point(typeLabel.Location.X + typeLabel.Width + 10, typeLabel.Location.Y);
-            materialTypes.Items.AddRange(inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(MaterialType))));
-            Controls.Add(materialTypes);
+            MaterialTypes = new ComboBox();
+            MaterialTypes.DropDownStyle = ComboBoxStyle.DropDownList;
+            MaterialTypes.Location = new Point(typeLabel.Location.X + typeLabel.Width + 10, typeLabel.Location.Y);
+            MaterialTypes.Items.AddRange(inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(MaterialType))));
+            Controls.Add(MaterialTypes);
 
             var unitLabel = new Label();
             unitLabel.Location = new Point(10, typeLabel.Location.Y + typeLabel.Height + 20);
-            unitLabel.Width = 100;
+            unitLabel.Width = 130;
             unitLabel.Text = "Единица измерения:";
             Controls.Add(unitLabel);
 
-            unitTypes = new ComboBox();
-            unitTypes.DropDownStyle = ComboBoxStyle.DropDownList;
-            unitTypes.Location = new Point(unitLabel.Location.X + unitLabel.Width + 10, unitLabel.Location.Y);
-            unitTypes.Items.AddRange(inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(UnitOfMaterial))));
-            Controls.Add(unitTypes);
+            UnitTypes = new ComboBox();
+            UnitTypes.DropDownStyle = ComboBoxStyle.DropDownList;
+            UnitTypes.Location = new Point(unitLabel.Location.X + unitLabel.Width + 10, unitLabel.Location.Y);
+            UnitTypes.Items.AddRange(inputOperations.GetTranslateTypesNames(Enum.GetNames(typeof(UnitOfMaterial))));
+            Controls.Add(UnitTypes);
 
-            editButton = new Button();
-            editButton.Location = new Point(50, unitLabel.Location.Y + unitLabel.Height + 25);
-            editButton.Text = "Изменить";
-            editButton.AutoSize = true;
-            editButton.Click += EditButtonOnClick;
-            Controls.Add(editButton);
+            EditButton = new Button();
+            EditButton.Location = new Point(50, unitLabel.Location.Y + unitLabel.Height + 25);
+            EditButton.Text = "Изменить";
+            EditButton.AutoSize = true;
+            EditButton.Click += EditButtonOnClick;
+            Controls.Add(EditButton);
 
-            closeButton = new Button();
-            closeButton.Location = new Point(editButton.Location.X + editButton.Width + 20, editButton.Location.Y);
-            closeButton.Text = "Отмена";
-            closeButton.AutoSize = true;
-            closeButton.Click += CloseButtonOnClick;
-            Controls.Add(closeButton);
+            CloseButton = new Button();
+            CloseButton.Location = new Point(EditButton.Location.X + EditButton.Width + 20, EditButton.Location.Y);
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Click += CloseButtonOnClick;
+            Controls.Add(CloseButton);
         }
 
         private void CloseButtonOnClick(object sender, EventArgs e)
@@ -90,27 +91,42 @@ namespace ManagementAccounting
 
         private async void EditButtonOnClick(object sender, EventArgs e)
         {
-            var materialType = materialTypes.SelectedItem;
-            var unitType = unitTypes.SelectedItem;
+            DisableButtons();
+            var materialType = MaterialTypes.SelectedItem;
+            var unitType = UnitTypes.SelectedItem;
 
-            if (materialType == null || unitType == null)
+            var isNameCorrect = InputOperations.TryGetNotEmptyName(NameLine.Text, 50, out var name);
+
+            if (materialType == null || unitType == null || !isNameCorrect)
             {
-                MessageBox.Show("Наименование материала и(или) тип введены неверно", "Внимание");
+                MessageBox.Show("Наименование, тип материала и(или) единица измерения введены неверно", "Внимание");
+                EnableButtons();
                 return;
             }
 
             try
             {
-                var name = inputOperations.GetNotEmptyName(nameLine.Text, 50) ;
-
-                await ((EditingBlockItemDB)_material).EditItemInDataBase<IMaterial>(Enum.Parse<MaterialType>(inputOperations.TranslateType((string)materialType)), name, Enum.Parse<UnitOfMaterial>(inputOperations.TranslateType((string)unitType)));
+                await ((EditingBlockItemDB)Material).EditItemInDataBase<IMaterial>(Enum.Parse<MaterialType>(InputOperations.TranslateType((string)materialType)), name, Enum.Parse<UnitOfMaterial>(InputOperations.TranslateType((string)unitType)));
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
                 return;
             }
             Close();
+        }
+
+        private void EnableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = true;
+        }
+
+        private void DisableButtons()
+        {
+            foreach (var button in Buttons)
+                button.Enabled = false;
         }
     }
 }

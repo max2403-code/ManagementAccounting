@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Items;
 using Npgsql;
 using NpgsqlTypes;
@@ -15,15 +16,15 @@ namespace ManagementAccounting
     {
         public string Name { get; private set; }
         public int Index { get; private set; }
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
-        public Calculation(string calculationName, int index, IDataBase dataBase, IItemsFactory itemsFactory) : base(dataBase)
+        public Calculation(string calculationName, int index, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Name = calculationName;
             Index = index;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO calculations (CalculationNamec) VALUES (@CalculationNamec) RETURNING IdC";
         }
@@ -45,7 +46,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T)itemsFactory.CreateCalculation(Name, Index);
+            return (T)ItemsFactory.CreateCalculation(Name, Index);
         }
 
         private protected override string GetEditItemCommandText()

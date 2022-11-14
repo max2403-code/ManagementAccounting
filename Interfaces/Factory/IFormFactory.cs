@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ManagementAccounting.Classes.ItemCreators;
 using ManagementAccounting.Forms.CalculationsForms;
+using ManagementAccounting.Forms.OrdersForms;
 using ManagementAccounting.Forms.PreOrdersForms;
 using ManagementAccounting.Forms.RemaindersForms;
 using ManagementAccounting.Interfaces.Items;
@@ -11,6 +12,7 @@ namespace ManagementAccounting.Interfaces.Factory
 {
     public interface IFormFactory
     {
+        LoginForm CreateLoginForm(MainForm mainForm);
         AddMaterialForm CreateAddMaterialForm();
         AddMaterialReceivingForm CreateAddMaterialReceivingForm(IMaterial material);
         EditMaterialForm CreateEditMaterialForm(IMaterial material);
@@ -30,5 +32,8 @@ namespace ManagementAccounting.Interfaces.Factory
         EditPreOrderForm CreateEditPreOrderForm(IPreOrder preOrder);
         AddPreOrderForm CreateAddPreOrderForm();
         PreOrderForm CreatePreOrderForm(IPreOrder preOrder);
+        CreateOrderForm CreateCreateOrderForm(IOrder order, PreOrderForm preOrderForm);
+
+        OrderForm CreateOrderForm(IOrder order);
     }
 }

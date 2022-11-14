@@ -10,20 +10,20 @@ namespace ManagementAccounting.Classes.Common
 {
     public class OrderItemOperations : IOrderItemOperations
     {
-        private IItemsFactory itemsFactory{ get; }
-        private ICreatorFactory creatorFactory{ get; }
+        private IItemsFactory ItemsFactory{ get; }
+        private ICreatorFactory CreatorFactory{ get; }
 
 
 
         public OrderItemOperations(IItemsFactory itemsFactory, ICreatorFactory creatorFactory)
         {
-            this.creatorFactory = creatorFactory;
-            this.itemsFactory = itemsFactory;
+            CreatorFactory = creatorFactory;
+            ItemsFactory = itemsFactory;
         }
 
         public async Task AddReceiving(IOrderItem orderItem)
         {
-            var materialReceivingCollectionCreator = creatorFactory.CreateMaterialReceivingCollectionCreatorForOrders(orderItem, 1);
+            var materialReceivingCollectionCreator = CreatorFactory.CreateMaterialReceivingCollectionCreatorForOrders(orderItem, 1);
             var consumption = orderItem.Consumption;
             var isEndOfOperation = consumption == 0;
 
@@ -57,7 +57,7 @@ namespace ManagementAccounting.Classes.Common
                     await ((EditingBlockItemDB) orderItem).EditItemInDataBase<IOrderItem>(consumption, orderItem.TotalConsumption);
                     await ((EditingBlockItemDB) materialReceiving).EditItemInDataBase<IMaterialReceiving>(materialReceiving.Date, materialReceiving.Quantity, materialReceiving.Cost, remainder, materialReceiving.Note);
                     
-                    var orderMaterialReceiving = itemsFactory.CreateOrderMaterialReceiving(orderItem, materialReceiving, temporaryConsumption);
+                    var orderMaterialReceiving = ItemsFactory.CreateOrderMaterialReceiving(orderItem, materialReceiving, temporaryConsumption);
 
                     await ((BlockItemDB)orderMaterialReceiving).AddItemToDataBase();
                 }
@@ -67,7 +67,7 @@ namespace ManagementAccounting.Classes.Common
         public async Task RemoveReceiving(IOrderItem orderItem)
         {
             var orderItemConsumption = orderItem.Consumption;
-            var orderMaterialReceivingCollectionCreator = creatorFactory.CreateOrderMaterialReceivingCollectionCreator(orderItem, 1);
+            var orderMaterialReceivingCollectionCreator = CreatorFactory.CreateOrderMaterialReceivingCollectionCreator(orderItem, 1);
 
             while (true)
             {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -17,17 +18,16 @@ namespace ManagementAccounting
         public DateTime CreationDate { get; private set; }
         public int Quantity { get; }
         public string ShortName { get; }
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
-        public Order(string shortName, DateTime creationDate, int quantity, int index, IDataBase dataBase, IItemsFactory itemsFactory) 
-            : base(dataBase)
+        public Order(string shortName, DateTime creationDate, int quantity, int index, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Index = index;
             Name = string.Join(' ', shortName, "от", creationDate.ToString("dd/MM/yyyy"));
             ShortName = shortName;
             CreationDate = creationDate;
             Quantity = quantity;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
         //public async Task<List<IBlockItem>> GetItemsList(int offset, params string[] selectionCriterion)
@@ -94,7 +94,7 @@ namespace ManagementAccounting
         //    await _dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, "Проблема с БД");
         //    ExceptionEvent?.Invoke();
         //}
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO orders (CreationDateO, OrderNameO, QuantityO, SearchNameO) VALUES (@CreationDateO, @OrderNameO, @QuantityO, @SearchNameO) RETURNING IdO;";
         }
@@ -118,7 +118,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T) itemsFactory.CreateOrder(ShortName, CreationDate, Quantity, Index);
+            return (T) ItemsFactory.CreateOrder(ShortName, CreationDate, Quantity, Index);
         }
 
         private protected override string GetEditItemCommandText()

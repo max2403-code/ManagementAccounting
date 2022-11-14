@@ -10,18 +10,18 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class CalculationCollectionCreator : BlockItemsCollectionCreator
     {
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
         public CalculationCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
         private protected override IBlockItem GetItemFromDataBase(DbDataRecord item)
         {
             var calculationName = (string)item["CalculationNamec"];
             var index = (int)item["Idc"];
-            return itemsFactory.CreateCalculation(calculationName, index);
+            return ItemsFactory.CreateCalculation(calculationName, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)

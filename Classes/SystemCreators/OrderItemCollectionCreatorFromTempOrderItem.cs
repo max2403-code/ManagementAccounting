@@ -8,11 +8,11 @@ namespace ManagementAccounting.Classes.Common
 {
     public class OrderItemCollectionCreatorFromTempOrderItem : BlockItemsCollectionCreator
     {
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
         public OrderItemCollectionCreatorFromTempOrderItem(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
         private protected override IBlockItem GetItemFromDataBase(DbDataRecord item)
@@ -22,18 +22,18 @@ namespace ManagementAccounting.Classes.Common
             var creationDate = (DateTime)item["CreationDateO"];
             var orderIndex = (int)item["IdO"];
 
-            var order = itemsFactory.CreateOrder(shortName, creationDate, quantity, orderIndex);
+            var order = ItemsFactory.CreateOrder(shortName, creationDate, quantity, orderIndex);
 
             var materialType = (MaterialType)(int)item["MaterialTypeM"];
             var materialName = (string)item["MaterialNameM"];
             var unitOfMaterial = (UnitOfMaterial)(int)item["UnitM"];
             var materialIndex = (int)item["IdM"];
 
-            var material = itemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, materialIndex);
+            var material = ItemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, materialIndex);
             var consumption = (decimal)item["ConsumptionOI"];
             var totalConsumption = (decimal)item["TotalConsumptionOI"];
             var index = (int)item["IdOI"];
-            return itemsFactory.CreateOrderItem(order, material, consumption, totalConsumption, index);
+            return ItemsFactory.CreateOrderItem(order, material, consumption, totalConsumption, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)

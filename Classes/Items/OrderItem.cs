@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -18,11 +19,10 @@ namespace ManagementAccounting
         public IOrder Order { get; }
         public decimal Consumption { get; private set; }
         public decimal TotalConsumption { get; private set; }
+        public decimal UnitConsumption => TotalConsumption / Order.Quantity;
+        private IItemsFactory ItemsFactory { get; }
 
-        private IItemsFactory itemsFactory { get; }
-
-        public OrderItem(IOrder order, IMaterial material, decimal consumption, decimal totalConsumption, int index, IDataBase dataBase, IItemsFactory itemsFactory)
-            : base(dataBase)
+        public OrderItem(IOrder order, IMaterial material, decimal consumption, decimal totalConsumption, int index, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Index = index;
             Order = order;
@@ -30,45 +30,10 @@ namespace ManagementAccounting
             Name = Material.Name;
             Consumption = consumption;
             TotalConsumption = totalConsumption;
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
-
-        //public IBlockItem GetNewBlockItem(params object[] parameters)
-        //{
-        //    var orderItem = this;
-        //    var materialReceiving = (IMaterialReceiving)parameters[0];
-        //    var materialConsumption = (decimal)parameters[1];
-        //    return _itemFactory.CreateOrderMaterialReceiving(orderItem, materialReceiving, materialConsumption);
-        //}
-
-
-        //public async Task<List<IBlockItem>> GetItemsList(int offset, params string[] selectionCriterion)
-        //{
-        //    var commandText = $"SELECT * FROM ordermaterialreceiving, materialreceiving WHERE ordermaterialreceiving.OrderItemIdOMR = {Index} AND ordermaterialreceiving.MaterialReceivingIdOMR = materialreceiving.IdMR LIMIT {LengthOfItemsList + 1} OFFSET {offset};";
-        //    var itemsList = await _dataBase.ExecuteReaderAsync(GetItemFromDataBase, commandText);
-
-        //    return itemsList;
-        //}
-
-        //public IBlockItem GetItemFromDataBase(DbDataRecord item)
-        //{
-        //    var orderItem = this;
-        //    var date = (DateTime)item["ReceiveDatemr"];
-        //    var quantity = (decimal)item["Quantitymr"];
-        //    var cost = (decimal)item["TotalCostmr"];
-        //    var remainder = (decimal)item["Remaindermr"];
-        //    var note = (string)item["Notemr"];
-        //    var materialIndex = (int)item["MaterialIdmr"];
-        //    var index = (int)item["Idmr"];
-        //    var materialReceiving = _itemFactory.CreateMaterialReceiving(date, quantity, cost, remainder, note, materialIndex, index);
-        //    var materialConsumption = (decimal)item["QuantityOMR"];
-
-        //    return _itemFactory.CreateOrderMaterialReceiving(orderItem, materialReceiving, materialConsumption);
-        //}
-
-
-        private protected override string GetAddItemCommandText()
+        private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO orderitems (OrderIdOI, MaterialIdOI, ConsumptionOI, TotalConsumptionOI) VALUES (@OrderIdOI, @MaterialIdOI, @ConsumptionOI, @TotalConsumptionOI) RETURNING IdOI;";
         }
@@ -94,7 +59,7 @@ namespace ManagementAccounting
 
         private protected override T GetCopyItem<T>()
         {
-            return (T) itemsFactory.CreateOrderItem(Order, Material, Consumption, Index);
+            return (T) ItemsFactory.CreateOrderItem(Order, Material, Consumption, Index);
         }
 
         private protected override string GetEditItemCommandText()

@@ -8,23 +8,23 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class PreOrderCollectionCreator : BlockItemsCollectionCreator
     {
-        private IItemsFactory itemsFactory { get; }
+        private IItemsFactory ItemsFactory { get; }
 
         public PreOrderCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
         {
-            this.itemsFactory = itemsFactory;
+            ItemsFactory = itemsFactory;
         }
 
         private protected override IBlockItem GetItemFromDataBase(DbDataRecord item)
         {
             var calculationName = (string)item["CalculationNamec"];
             var calculationId = (int)item["Idc"];
-            var calculation = itemsFactory.CreateCalculation(calculationName, calculationId);
+            var calculation = ItemsFactory.CreateCalculation(calculationName, calculationId);
             var quantity = (int)item["QuantityPO"];
             var creationDate = (DateTime)item["CreationDatePO"];
             var index = (int)item["IdPO"];
 
-            return itemsFactory.CreatePreOrder(calculation, quantity, creationDate, index);
+            return ItemsFactory.CreatePreOrder(calculation, quantity, creationDate, index);
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)
