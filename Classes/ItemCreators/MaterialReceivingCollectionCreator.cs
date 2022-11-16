@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.ItemCreators;
 
 namespace ManagementAccounting.Classes.ItemCreators
@@ -13,7 +14,7 @@ namespace ManagementAccounting.Classes.ItemCreators
         protected IMaterial Material { get; }
         private IItemsFactory ItemsFactory { get; }
         
-        public MaterialReceivingCollectionCreator(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
+        public MaterialReceivingCollectionCreator(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(lengthOfItemsList, dataBase, exChecker)
         {
             ItemsFactory = itemsFactory;
             Material = material;

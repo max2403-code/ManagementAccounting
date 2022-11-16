@@ -8,13 +8,13 @@ using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Interfaces.Common;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.RemaindersForms
 {
     public partial class EditMaterialReceivingForm : Form
     {
-        private IMaterialReceiving MaterialReceiving { get; set; }
-        private IMaterialReceiving NewMaterialReceiving { get; set; }
+        private IMaterialReceiving MaterialReceiving { get; }
         private IOperationsWithUserInput InputOperations { get; }
         private ISystemMaterialReceivingOperations MaterialReceivingOperations { get; }
         private IItemsFactory ItemsFactory { get; }
@@ -25,11 +25,9 @@ namespace ManagementAccounting.Forms.RemaindersForms
         private TextBox NoteValue { get; }
         private Button EditButton { get; }
         private Button CloseButton { get; }
-        private MaterialReceivingForm MaterialReceivingForm { get; }
 
-        public EditMaterialReceivingForm(IMaterialReceiving materialReceiving, MaterialReceivingForm materialReceivingForm, IItemsFactory itemsFactory, IOperationsWithUserInput inputOperations, ISystemMaterialReceivingOperations materialReceivingOperations)
+        public EditMaterialReceivingForm(IMaterialReceiving materialReceiving, IItemsFactory itemsFactory, IOperationsWithUserInput inputOperations, ISystemMaterialReceivingOperations materialReceivingOperations)
         {
-            MaterialReceivingForm = materialReceivingForm;
             InputOperations = inputOperations;
             ItemsFactory = itemsFactory;
             MaterialReceivingOperations = materialReceivingOperations;
@@ -97,14 +95,10 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             CloseButton = new Button();
             CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true; 
             CloseButton.Location = new Point(EditButton.Location.X + EditButton.Width + 15, EditButton.Location.Y);
-            CloseButton.Click += CancelButtonOnClick;
+            CloseButton.Click += (sender, args) => Close();
             Controls.Add(CloseButton);
-        }
-
-        private void CancelButtonOnClick(object sender, EventArgs e)
-        {
-            Close();
         }
 
         private async void EditButtonOnClick(object sender, EventArgs e)
@@ -123,22 +117,41 @@ namespace ManagementAccounting.Forms.RemaindersForms
                 return;
             }
 
+            var oldMaterialReceiving = ItemsFactory.CreateMaterialReceiving(MaterialReceiving.Material,
+                MaterialReceiving.Date, MaterialReceiving.Quantity, MaterialReceiving.Cost, MaterialReceiving.Quantity,
+                MaterialReceiving.Note, MaterialReceiving.Index);
+            var newMaterialReceiving = ItemsFactory.CreateMaterialReceiving(MaterialReceiving.Material, date, quantity, cost, remainder, note, MaterialReceiving.Index);
             try
             {
-                NewMaterialReceiving =
-                    ItemsFactory.CreateMaterialReceiving(MaterialReceiving.Material, date, quantity, cost, remainder, note, MaterialReceiving.Index);
-                await MaterialReceivingOperations.Edit(MaterialReceiving, NewMaterialReceiving);
-                MaterialReceivingForm.UpdateMaterialReceiving(NewMaterialReceiving);
+                await MaterialReceivingOperations.Edit(oldMaterialReceiving, newMaterialReceiving);
             }
             catch (OrderItemOperationException exception)
             {
-                await MaterialReceivingOperations.Default(NewMaterialReceiving, MaterialReceiving);
+                try
+                {
+                    await MaterialReceivingOperations.Default(newMaterialReceiving, oldMaterialReceiving);
+                }
+                catch (OrderItemOperationException)
+                {
+                    MessageBox.Show("Если ошибка произощла здесь, то это печально", "Внимание");
+                    return;
+                }
+                catch (NpgsqlException npgsqlException)
+                {
+                    MessageBox.Show(npgsqlException.Message, "Внимание");
+                    return;
+                }
 
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();
                 return;
             }
-            
+            catch (NpgsqlException npgsqlException)
+            {
+                MessageBox.Show(npgsqlException.Message, "Внимание");
+                return;
+            }
+
             Close();
         }
 

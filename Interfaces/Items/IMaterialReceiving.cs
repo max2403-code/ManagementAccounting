@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ManagementAccounting.Interfaces.Common;
 
 namespace ManagementAccounting
 {
-    public interface IMaterialReceiving : IBlockItem
+    public interface IMaterialReceiving : IBlockItem, IUpdatable
     {
         public int Index { get; }
         public IMaterial Material { get; }

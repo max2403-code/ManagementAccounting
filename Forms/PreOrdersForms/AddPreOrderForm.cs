@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.Items;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.PreOrdersForms
 {
@@ -125,7 +126,15 @@ namespace ManagementAccounting.Forms.PreOrdersForms
         private async void AllCalculationsOnClick(object? sender, EventArgs e)
         {
             NameLine.Text = "";
-            await ShowItems(0);
+            try
+            {
+                await ShowItems(0);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
+            }
         }
 
         private void CloseButtonOnClick(object sender, EventArgs e)
@@ -151,7 +160,7 @@ namespace ManagementAccounting.Forms.PreOrdersForms
                 var preOrder = ItemsFactory.CreatePreOrder((ICalculation)calculation, quantity, date) as EditingBlockItemDB;
                 await preOrder.AddItemToDataBase();
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();
@@ -165,7 +174,15 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             var control = (Control)sender;
             var offset = (int)control.Tag;
 
-            await ShowItems(offset);
+            try
+            {
+                await ShowItems(offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
+            }
         }
 
         private async void NameLine_TextChanged(object sender, EventArgs e)
@@ -175,7 +192,16 @@ namespace ManagementAccounting.Forms.PreOrdersForms
                 ShowEmptyList("Введите название материала");
                 return;
             }
-            await ShowItems(0);
+
+            try
+            {
+                await ShowItems(0);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+                EnableButtons();
+            }
         }
 
         private async Task ShowItems(int offset)

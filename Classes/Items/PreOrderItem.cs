@@ -17,9 +17,13 @@ namespace ManagementAccounting
         public decimal MinPrice => MinUnitPrice * Quantity;
         public decimal MaxPrice => MaxUnitPrice * Quantity;
         public int Quantity { get; }
+        public decimal MaxMaterialPrice { get; }
+        public decimal MinMaterialPrice { get; }
 
         public PreOrderItem(IMaterial material, decimal materialUnitСonsumption, decimal minMaterialPrice, decimal maxMaterialPrice, int quantity, bool isRemainderNotAvailable)
         {
+            MinMaterialPrice = minMaterialPrice;
+            MaxMaterialPrice = maxMaterialPrice;
             IsRemainderNotAvailable = isRemainderNotAvailable;
             Material = material;
             Name = Material.Name;

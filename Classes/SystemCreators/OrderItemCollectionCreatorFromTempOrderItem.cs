@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 
 namespace ManagementAccounting.Classes.Common
 {
@@ -10,7 +11,7 @@ namespace ManagementAccounting.Classes.Common
     {
         private IItemsFactory ItemsFactory { get; }
 
-        public OrderItemCollectionCreatorFromTempOrderItem(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
+        public OrderItemCollectionCreatorFromTempOrderItem(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(lengthOfItemsList, dataBase, exChecker)
         {
             ItemsFactory = itemsFactory;
         }

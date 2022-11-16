@@ -10,6 +10,7 @@ using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.ItemCreators;
 using ManagementAccounting.Forms.RemaindersForms;
 using ManagementAccounting.Interfaces.Factory;
+using Npgsql;
 
 namespace ManagementAccounting
 {
@@ -25,6 +26,8 @@ namespace ManagementAccounting
         private Button AddReceivingButton { get; }
         private Button EditMaterialButton { get; }
         private Button RemoveMaterialButton { get; }
+        private Button CloseButton { get; }
+        private bool IsCallFromOtherBlocks { get; }
         private List<Control> ActiveItemTempControls { get; }
         private IMaterial Material { get; }
         private IFormFactory FormFactory{ get; }
@@ -32,13 +35,14 @@ namespace ManagementAccounting
         private MaterialReceivingNotEmptyCollectionCreator CreatorNotEmpty { get; }
         private IOperationsWithUserInput InputOperations { get; }
 
-        public MaterialForm(IMaterial material, ICreatorFactory creatorFactory, IOperationsWithUserInput inputOperations, IFormFactory formFactory)
+        public MaterialForm(IMaterial material, bool isCallFromOtherBlocks, ICreatorFactory creatorFactory, IOperationsWithUserInput inputOperations, IFormFactory formFactory)
         {
             CreatorNotEmpty = creatorFactory.CreateMaterialReceivingNotEmptyCreator(material, 5);
             Creator = creatorFactory.CreateMaterialReceivingCreator(material, 5);
             Material = material;
             InputOperations = inputOperations;
             FormFactory = formFactory;
+            IsCallFromOtherBlocks = isCallFromOtherBlocks;
             ActiveItemTempControls = new List<Control>();
 
             Size = new Size(400, 600);
@@ -94,6 +98,13 @@ namespace ManagementAccounting
             RemoveMaterialButton.Click += RemoveMaterialButtonOnClick;
             Controls.Add(RemoveMaterialButton);
 
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Location = new Point(RemoveMaterialButton.Location.X + RemoveMaterialButton.Width + 15, RemoveMaterialButton.Location.Y);
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
+
             NameLine = new TextBox();
             NameLine.Location = new Point(AddReceivingButton.Location.X, AddReceivingButton.Location.Y + AddReceivingButton.Height + 15);
             NameLine.Width = 300;
@@ -121,6 +132,13 @@ namespace ManagementAccounting
             CheckBox.CheckedChanged += NameLine_TextChanged;
             Controls.Add(CheckBox);
 
+            if (isCallFromOtherBlocks)
+            {
+                AddReceivingButton.Enabled = false;
+                EditMaterialButton.Enabled = false;
+                RemoveMaterialButton.Enabled = false;
+            }
+
         }
 
         private async void RemoveMaterialButtonOnClick(object sender, EventArgs e)
@@ -131,7 +149,7 @@ namespace ManagementAccounting
             {
                 await ((BlockItemDB)Material).RemoveItemFromDataBase();
             }
-            catch(Exception exception)
+            catch(NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;
@@ -151,9 +169,16 @@ namespace ManagementAccounting
         private async void AddReceivingButton_Click(object sender, EventArgs e)
         {
             var addReceivingForm = FormFactory.CreateAddMaterialReceivingForm(Material);
-
             addReceivingForm.ShowDialog();
-            await ShowItems(Offset);
+            
+            try
+            {
+                await ShowItems(Offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
         
         private async void PreviousNext_Click(object sender, EventArgs e)
@@ -161,12 +186,26 @@ namespace ManagementAccounting
             var control = (Control)sender;
             var offset = (int)control.Tag;
 
-            await ShowItems(offset);
+            try
+            {
+                await ShowItems(offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async void NameLine_TextChanged(object sender, EventArgs e)
         {
-            await ShowItems(0);
+            try
+            {
+                await ShowItems(0);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async Task ShowItems(int offset)
@@ -256,10 +295,17 @@ namespace ManagementAccounting
         {
             var control = (Control) sender;
             var receiving = (IMaterialReceiving) control.Tag;
-            var receivingForm = FormFactory.CreateMaterialReceivingForm(receiving);
+            var receivingForm = FormFactory.CreateMaterialReceivingForm(receiving, IsCallFromOtherBlocks);
             receivingForm.ShowDialog();
 
-            await ShowItems(Offset);
+            try
+            {
+                await ShowItems(Offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private void ClearActiveItemTempControls()

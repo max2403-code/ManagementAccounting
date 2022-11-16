@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using ManagementAccounting.Interfaces.Common;
+using Npgsql;
 
 namespace ManagementAccounting.Classes.Common
 {
-    public class ExceptionChecker : IExceptionChecker
+    public class NpgsqlExceptionChecker : IExceptionChecker
     {
         public bool IsExceptionHappened { get; set; }
         public void DoException(string message)
         {
-            throw new Exception(message);
+            throw new NpgsqlException(message);
         }
     }
 }

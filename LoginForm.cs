@@ -89,7 +89,7 @@ namespace ManagementAccounting
             {
                 await SignIn.SigningIn(login, password);
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 
                 MessageBox.Show(exception.Message, "Внимание!");

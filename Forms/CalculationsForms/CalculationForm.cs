@@ -10,6 +10,7 @@ using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.ItemCreators;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.Items;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.CalculationsForms
 {
@@ -26,6 +27,8 @@ namespace ManagementAccounting.Forms.CalculationsForms
         private Button EditCalculationButton { get; }
         private Button ShowCalculationItemButton { get; }
         private Button RemoveCalculationButton { get; }
+        private Button CloseButton { get; }
+
         private List<Control> ActiveItemTempControls { get; }
         private ICalculation Calculation { get; }
         private IFormFactory FormFactory { get; }
@@ -102,6 +105,13 @@ namespace ManagementAccounting.Forms.CalculationsForms
             //nameLine.TextChanged += NameLine_TextChanged;
             //Controls.Add(nameLine);
 
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Location = new Point(RemoveCalculationButton.Location.X + RemoveCalculationButton.Width + 15, RemoveCalculationButton.Location.Y);
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
+
             PreviousListButton = new Button();
             PreviousListButton.Text = "Назад";
             PreviousListButton.Location = new Point(20 + AddCalculationItemButton.Location.X, AddCalculationItemButton.Location.Y + AddCalculationItemButton.Height + 15);
@@ -137,7 +147,7 @@ namespace ManagementAccounting.Forms.CalculationsForms
             {
                 await ((BlockItemDB)Calculation).RemoveItemFromDataBase();
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;
@@ -157,20 +167,43 @@ namespace ManagementAccounting.Forms.CalculationsForms
             var addCalculationItemForm = FormFactory.CreateAddCalculationItemForm(Calculation);
 
             addCalculationItemForm.ShowDialog();
-            await ShowItems(Offset);
+            
+            try
+            {
+                await ShowItems(Offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async void PreviousNext_Click(object sender, EventArgs e)
         {
             var control = (Control)sender;
             var offset = (int)control.Tag;
-
-            await ShowItems(offset);
+            
+            try
+            {
+                await ShowItems(offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async void NameLine_TextChanged(object sender, EventArgs e)
         {
-            await ShowItems(0);
+
+            try
+            {
+                await ShowItems(0);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async Task ShowItems(int offset)
@@ -272,7 +305,14 @@ namespace ManagementAccounting.Forms.CalculationsForms
             var receivingForm = FormFactory.CreateCalculationItemForm(calculationItem);
             receivingForm.ShowDialog();
 
-            await ShowItems(Offset);
+            try
+            {
+                await ShowItems(Offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
 

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ManagementAccounting.Interfaces.Common;
 
 namespace ManagementAccounting.Classes.ItemCreators
 {
     public class MaterialReceivingCollectionCreatorForOrders : MaterialReceivingCollectionCreator
     {
         private IOrderItem OrderItem { get; }
-        public MaterialReceivingCollectionCreatorForOrders(IOrderItem orderItem, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(orderItem.Material, lengthOfItemsList, dataBase, itemsFactory)
+        public MaterialReceivingCollectionCreatorForOrders(IOrderItem orderItem, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(orderItem.Material, lengthOfItemsList, dataBase, itemsFactory, exChecker)
         {
             OrderItem = orderItem;
         }

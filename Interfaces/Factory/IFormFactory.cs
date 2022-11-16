@@ -13,27 +13,28 @@ namespace ManagementAccounting.Interfaces.Factory
     public interface IFormFactory
     {
         LoginForm CreateLoginForm(MainForm mainForm);
+
         AddMaterialForm CreateAddMaterialForm();
         AddMaterialReceivingForm CreateAddMaterialReceivingForm(IMaterial material);
         EditMaterialForm CreateEditMaterialForm(IMaterial material);
-        EditMaterialReceivingForm CreateEditMaterialReceivingForm(IMaterialReceiving materialReceiving, MaterialReceivingForm materialReceivingForm);
-        MaterialForm CreateMaterialForm(IMaterial material);
-        MaterialReceivingForm CreateMaterialReceivingForm(IMaterialReceiving materialReceiving);
-
-
+        EditMaterialReceivingForm CreateEditMaterialReceivingForm(IMaterialReceiving materialReceiving);
+        MaterialForm CreateMaterialForm(IMaterial material, bool isCallFromOtherBlocks);
+        MaterialReceivingForm CreateMaterialReceivingForm(IMaterialReceiving materialReceiving, bool isCallFromOtherBlocks);
+        
         AddCalculationForm CreateAddCalculationForm();
         AddCalculationItemForm CreateAddCalculationItemForm(ICalculation calculation);
         EditCalculationForm CreateEditCalculationForm(ICalculation calculation);
         CalculationForm CreateCalculationForm(ICalculation calculation);
-
         CalculationItemForm CreateCalculationItemForm(ICalculationItem calculationItem);
         EditCalculationItemForm CreateEditCalculationItemForm(ICalculationItem calculationItem);
 
         EditPreOrderForm CreateEditPreOrderForm(IPreOrder preOrder);
         AddPreOrderForm CreateAddPreOrderForm();
         PreOrderForm CreatePreOrderForm(IPreOrder preOrder);
+        
         CreateOrderForm CreateCreateOrderForm(IOrder order, PreOrderForm preOrderForm);
-
         OrderForm CreateOrderForm(IOrder order);
+        EditOrderForm CreateEditOrderForm(IOrder order);
+        EditOrderItemForm CreateEditOrderItemForm(IOrderItem orderItem);
     }
 }

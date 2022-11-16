@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
+using Npgsql;
 
 namespace ManagementAccounting
 {
@@ -108,7 +109,7 @@ namespace ManagementAccounting
             {
                 await ((EditingBlockItemDB)Material).EditItemInDataBase<IMaterial>(Enum.Parse<MaterialType>(InputOperations.TranslateType((string)materialType)), name, Enum.Parse<UnitOfMaterial>(InputOperations.TranslateType((string)unitType)));
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();

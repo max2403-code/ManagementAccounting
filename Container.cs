@@ -62,7 +62,7 @@ namespace ManagementAccounting
             container.Bind<ISystemOrderItemOperations>().To<SystemOrderItemOperations>();
             container.Bind<ISystemOrderOperations>().To<SystemOrderOperations>();
             container.Bind<ISignIn>().To<SignIn>().InSingletonScope();
-            container.Bind<IExceptionChecker>().To<ExceptionChecker>();
+            container.Bind<IExceptionChecker>().To<NpgsqlExceptionChecker>();
             container.Bind<IEmptyCalculationChecker>().To<EmptyCalculationChecker>();
             //container.Bind<IFromPreOrderToOrderConverter>().To<FromPreOrderToOrderConverter>();
 

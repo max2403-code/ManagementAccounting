@@ -10,6 +10,7 @@ using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.OrdersForms
 {
@@ -26,6 +27,8 @@ namespace ManagementAccounting.Forms.OrdersForms
         private Button CalculateItemButton { get; }
         private Button EditOrderButton { get; }
         private Button RemoveOrderButton { get; }
+        private Button CloseButton { get; }
+
         private List<Control> ActiveItemTempControls { get; }
         private IOrder Order { get; set; }
         private IFormFactory FormFactory { get; }
@@ -139,6 +142,13 @@ namespace ManagementAccounting.Forms.OrdersForms
             RemoveOrderButton.Click += RemoveOrderButtonOnClick;
             Controls.Add(RemoveOrderButton);
 
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Location = new Point(RemoveOrderButton.Location.X + RemoveOrderButton.Width + 15, RemoveOrderButton.Location.Y);
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
+
             PreviousListButton = new Button();
             PreviousListButton.Text = "Назад";
             PreviousListButton.Location = new Point(20 + CalculateItemButton.Location.X, CalculateItemButton.Location.Y + CalculateItemButton.Height + 15);
@@ -159,33 +169,35 @@ namespace ManagementAccounting.Forms.OrdersForms
             TableColumnName.Width = 200;
             Controls.Add(TableColumnName);
 
+            var minMaterialPriceColumnName = new Label();
+            minMaterialPriceColumnName.Location = new Point(10 + TableColumnName.Location.X + TableColumnName.Width, TableColumnName.Location.Y);
+            minMaterialPriceColumnName.Text = "Цена мат-а";
+            minMaterialPriceColumnName.Width = 80;
+            Controls.Add(minMaterialPriceColumnName);
+
             var unitConsumptionColumnName = new Label();
-            unitConsumptionColumnName.Location = new Point(10 + TableColumnName.Location.X + TableColumnName.Width, TableColumnName.Location.Y);
-            unitConsumptionColumnName.Text = "Норма расхода на ед.";
-            unitConsumptionColumnName.Width = 80;
+            unitConsumptionColumnName.Location = new Point(10 + minMaterialPriceColumnName.Location.X + minMaterialPriceColumnName.Width, minMaterialPriceColumnName.Location.Y);
+            unitConsumptionColumnName.Text = "Норма расхода на шт.";
+            unitConsumptionColumnName.Width = 130;
             Controls.Add(unitConsumptionColumnName);
 
             var unitPriceColumnName = new Label();
             unitPriceColumnName.Location = new Point(10 + unitConsumptionColumnName.Location.X + unitConsumptionColumnName.Width, unitConsumptionColumnName.Location.Y);
-            unitPriceColumnName.Text = "Цена мат-а за ед.";
-            unitPriceColumnName.Width = 80;
+            unitPriceColumnName.Text = "Ст-ть мат-а на ед.";
+            unitPriceColumnName.Width = 130;
             Controls.Add(unitPriceColumnName);
 
             var consumptionColumnName = new Label();
             consumptionColumnName.Location = new Point(10 + unitPriceColumnName.Location.X + unitPriceColumnName.Width, unitPriceColumnName.Location.Y);
             consumptionColumnName.Text = "Норма расхода";
-            consumptionColumnName.Width = 80;
+            consumptionColumnName.Width = 130;
             Controls.Add(consumptionColumnName);
 
             var priceColumnName = new Label();
             priceColumnName.Location = new Point(10 + consumptionColumnName.Location.X + consumptionColumnName.Width, consumptionColumnName.Location.Y);
-            priceColumnName.Text = "Цена мат-а";
-            priceColumnName.Width = 80;
+            priceColumnName.Text = "Ст-ть мат-а на заказ";
+            priceColumnName.Width = 130;
             Controls.Add(priceColumnName);
-        }
-        public void UpdateOrder(IOrder newOrder)
-        {
-            Order = newOrder;
         }
 
         private async void RemoveOrderButtonOnClick(object sender, EventArgs e)
@@ -199,8 +211,25 @@ namespace ManagementAccounting.Forms.OrdersForms
             }
             catch (OrderItemOperationException exception)
             {
-                await OrderOperations.Insert(Order);
-
+                try
+                {
+                    await OrderOperations.Insert(Order);
+                }
+                catch (OrderItemOperationException)
+                {
+                    MessageBox.Show("Если ошибка произощла здесь, то это печально", "Внимание");
+                    return;
+                }
+                catch (NpgsqlException ex)
+                {
+                    MessageBox.Show(ex.Message, "Внимание");
+                    return;
+                }
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
+            }
+            catch (NpgsqlException exception)
+            {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;
             }
@@ -209,17 +238,32 @@ namespace ManagementAccounting.Forms.OrdersForms
 
         private async void EditOrderButtonOnClick(object sender, EventArgs e)
         {
-            //var editForm = formFactory.CreateEditOrderForm(order);
-            //editForm.ShowDialog();
-            NameValue.Text = Order.Name;
-            Date.Text = Order.CreationDate.ToString("dd/MM/yyyy");
+            var editForm = FormFactory.CreateEditOrderForm(Order);
+            editForm.ShowDialog();
 
-            await Calculate();
+            try
+            {
+                await Order.Update();
+                NameValue.Text = Order.Name;
+                Date.Text = Order.CreationDate.ToString("dd/MM/yyyy");
+                await Calculate();
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async void CalculateItemButton_Click(object sender, EventArgs e)
         {
-            await Calculate();
+            try
+            {
+                await Calculate();
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async Task Calculate()
@@ -235,13 +279,28 @@ namespace ManagementAccounting.Forms.OrdersForms
             var control = (Control)sender;
             var offset = (int)control.Tag;
 
-            await ShowItems(offset);
+            try
+            {
+                await ShowItems(offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
-        private async void NameLine_TextChanged(object sender, EventArgs e)
-        {
-            await ShowItems(0);
-        }
+        //private async void NameLine_TextChanged(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        await ShowItems(0);
+
+        //    }
+        //    catch (NpgsqlException exception)
+        //    {
+        //        MessageBox.Show(exception.Message, "Внимание");
+        //    }
+        //}
 
         private async Task ShowItems(int offset)
         {
@@ -315,41 +374,75 @@ namespace ManagementAccounting.Forms.OrdersForms
             itemLabel.Location = new Point(10, lastControl.Location.Y + lastControl.Height + 15);
             itemLabel.MaximumSize = new Size(200, 0);
             itemLabel.AutoSize = true;
+            itemLabel.Click += ItemLabelOnClick;
             Controls.Add(itemLabel);
             ActiveItemTempControls.Add(itemLabel);
 
             itemLabel.Text = orderItem.Name;
             itemLabel.Tag = orderItem;
-            
+
+            var materialPrice = new Label();
+            materialPrice.Text = string.Join(' ', Math.Round(prices[0], 2).ToString(), "руб.");
+            materialPrice.Location = new Point(200 + itemLabel.Location.X + 10, itemLabel.Location.Y);
+            materialPrice.Width = 80;
+            Controls.Add(materialPrice);
+            ActiveItemTempControls.Add(materialPrice);
+
             var unitConsumption = new Label();
             unitConsumption.Text = string.Join(' ', Math.Round(orderItem.UnitConsumption, 2).ToString(), InputOperations.TranslateType(orderItem.Material.Unit.ToString()));
-            unitConsumption.Location = new Point(200 + itemLabel.Location.X + 10, itemLabel.Location.Y);
-            unitConsumption.Width = 80;
+            unitConsumption.Location = new Point(materialPrice.Width + materialPrice.Location.X + 10, materialPrice.Location.Y);
+            unitConsumption.Width = 130;
             Controls.Add(unitConsumption);
             ActiveItemTempControls.Add(unitConsumption);
 
             var unitItemPrice = new Label();
-            unitItemPrice.Text = string.Join(' ', Math.Round(prices[0], 2).ToString(), "руб.") ;
+            unitItemPrice.Text = string.Join(' ', Math.Round(prices[1], 2).ToString(), "руб.") ;
             unitItemPrice.Location = new Point(unitConsumption.Width + unitConsumption.Location.X + 10, unitConsumption.Location.Y);
-            unitItemPrice.Width = 80;
+            unitItemPrice.Width = 130;
             Controls.Add(unitItemPrice);
             ActiveItemTempControls.Add(unitItemPrice);
 
             var consumption = new Label();
             consumption.Text = string.Join(' ', Math.Round(orderItem.TotalConsumption, 2).ToString(), InputOperations.TranslateType(orderItem.Material.Unit.ToString())) ;
             consumption.Location = new Point(unitItemPrice.Width + unitItemPrice.Location.X + 10, unitItemPrice.Location.Y);
-            consumption.Width = 80;
+            consumption.Width = 130;
+            consumption.Tag = orderItem;
+            consumption.Click += ConsumptionOnClick;
             Controls.Add(consumption);
             ActiveItemTempControls.Add(consumption);
 
             var itemPrice = new Label();
-            itemPrice.Text = string.Join(' ', Math.Round(prices[1], 2).ToString(), "руб.") ;
+            itemPrice.Text = string.Join(' ', Math.Round(prices[2], 2).ToString(), "руб.") ;
             itemPrice.Location = new Point(consumption.Width + consumption.Location.X + 10, consumption.Location.Y);
-            itemPrice.Width = 80;
+            itemPrice.Width = 130;
             Controls.Add(itemPrice);
             ActiveItemTempControls.Add(itemPrice);
 
             return itemLabel;
+        }
+
+        private async void ConsumptionOnClick(object sender, EventArgs e)
+        {
+            var orderItem = (IOrderItem)((Control)sender).Tag;
+            var editOrderItemForm = FormFactory.CreateEditOrderItemForm(orderItem);
+            editOrderItemForm.ShowDialog();
+
+            try
+            {
+                await Calculate();
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
+        }
+
+        private void ItemLabelOnClick(object sender, EventArgs e)
+        {
+            var control = (Control)sender;
+            var orderItem = (IOrderItem)control.Tag;
+            var materialForm = FormFactory.CreateMaterialForm(orderItem.Material, true);
+            materialForm.ShowDialog();
         }
 
         private void ClearActiveItemTempControls()

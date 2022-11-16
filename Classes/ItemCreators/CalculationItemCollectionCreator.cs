@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.ItemCreators;
 using ManagementAccounting.Interfaces.Items;
 
@@ -14,7 +15,7 @@ namespace ManagementAccounting.Classes.ItemCreators
         private ICalculation Calculation { get; }
         private IItemsFactory ItemsFactory { get; }
 
-        public CalculationItemCollectionCreator(ICalculation calculation, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
+        public CalculationItemCollectionCreator(ICalculation calculation, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(lengthOfItemsList, dataBase, exChecker)
         {
             ItemsFactory = itemsFactory;
             Calculation = calculation;

@@ -12,6 +12,7 @@ using ManagementAccounting.Forms.PreOrdersForms;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.Items;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.OrdersForms
 {
@@ -26,14 +27,8 @@ namespace ManagementAccounting.Forms.OrdersForms
         private Label OrderNameValue { get; }
         private Label OrderQuantityValue { get; }
         private Label OrderCreationDateValue { get; }
-
-        //private Label QuantityLabel { get; }
-
-
-        //private List<Button> Buttons { get; }
         private List<Control> ActiveItemTempControls { get; }
         private List<Control> ActiveItemTempValueControls { get; }
-
         private IOperationsWithUserInput InputOperations { get; }
         private IItemsFactory ItemsFactory { get; }
         private IOrder Order { get; }
@@ -104,17 +99,14 @@ namespace ManagementAccounting.Forms.OrdersForms
             AddButton.AutoSize = true;
             AddButton.Click += AddButtonOnClick;
             Controls.Add(AddButton);
-
-
+            
             CloseButton = new Button();
             CloseButton.Location = new Point(AddButton.Location.X + AddButton.Width + 20, AddButton.Location.Y);
             CloseButton.Text = "Отмена";
             CloseButton.AutoSize = true;
             CloseButton.Click += CloseButtonOnClick;
             Controls.Add(CloseButton);
-
             
-
             AllOrderItems = new Button();
             AllOrderItems.Text = "Показать материалы";
             AllOrderItems.AutoSize = true;
@@ -139,13 +131,28 @@ namespace ManagementAccounting.Forms.OrdersForms
 
         private async void OnFormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!PreOrderForm.IsConvertingPasssedSuccessfully)
+            if (PreOrderForm.IsConvertingPasssedSuccessfully) return;
+
+            try
+            {
                 await Converter.RemoveOrder(Order);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async void AllOrderItemsOnClick(object sender, EventArgs e)
         {
-            await ShowItems(0);
+            try
+            {
+                await ShowItems(0);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private void CloseButtonOnClick(object sender, EventArgs e)
@@ -164,9 +171,27 @@ namespace ManagementAccounting.Forms.OrdersForms
             }
             catch (OrderItemOperationException exception)
             {
+                try
+                {
+                    await OrderOperations.Remove(Order);
+                }
+                catch (OrderItemOperationException)
+                {
+                    MessageBox.Show("Если ошибка произощла здесь, то это печально", "Внимание");
+                    return;
+                }
+                catch (NpgsqlException npgsqlException)
+                {
+                    MessageBox.Show(npgsqlException.Message, "Внимание");
+                    return;
+                }
                 MessageBox.Show(exception.Message, "Внимание");
-                await OrderOperations.Remove(Order);
                 //EnableButtons();
+                return;
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
                 return;
             }
 
@@ -178,8 +203,16 @@ namespace ManagementAccounting.Forms.OrdersForms
         {
             var control = (Control)sender;
             var offset = (int)control.Tag;
-            if(await IsAssignOrderItemsPassedSuccessfully())
-                await ShowItems(offset);
+
+            try
+            {
+                if (await IsAssignOrderItemsPassedSuccessfully())
+                    await ShowItems(offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async Task<bool> IsAssignOrderItemsPassedSuccessfully()
@@ -198,7 +231,7 @@ namespace ManagementAccounting.Forms.OrdersForms
 
                 if (Math.Abs(orderItem.TotalConsumption - consumption) >= (decimal) 1e-9)
                 {
-                    await ((EditingBlockItemDB) orderItem).EditItemInDataBase<IOrderItem>(consumption, consumption);
+                    await ((EditingBlockItemDB)orderItem).EditItemInDataBase<IOrderItem>(consumption, consumption);
                 }
             }
 

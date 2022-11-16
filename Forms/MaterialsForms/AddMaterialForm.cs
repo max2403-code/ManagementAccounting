@@ -113,7 +113,7 @@ namespace ManagementAccounting
                 var material = ItemsFactory.CreateMaterial(Enum.Parse<MaterialType>(InputOperations.TranslateType((string)materialType)), name, Enum.Parse < UnitOfMaterial > (InputOperations.TranslateType((string)unitType))) as EditingBlockItemDB;
                 await material.AddItemToDataBase();
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();

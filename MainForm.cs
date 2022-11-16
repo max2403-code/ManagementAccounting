@@ -140,7 +140,7 @@ namespace ManagementAccounting
             Controls.Add(NextListButton);
         }
 
-        private void SignInOnClick(object? sender, EventArgs e)
+        private void SignInOnClick(object sender, EventArgs e)
         {
             var loginForm = FormFactory.CreateLoginForm(this);
             loginForm.ShowDialog();
@@ -151,7 +151,7 @@ namespace ManagementAccounting
                 button.Enabled = true;
         }
 
-        private void MaterialsButtonOnClick(object? sender, EventArgs e)
+        private void MaterialsButtonOnClick(object sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control) sender;
@@ -179,7 +179,7 @@ namespace ManagementAccounting
             NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
         }
 
-        private void CalculationsButtonOnClick(object? sender, EventArgs e)
+        private void CalculationsButtonOnClick(object sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control)sender;
@@ -207,7 +207,7 @@ namespace ManagementAccounting
             NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
         }
 
-        private void PreOrdersButtonOnClick(object? sender, EventArgs e)
+        private void PreOrdersButtonOnClick(object sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control)sender;
@@ -235,7 +235,7 @@ namespace ManagementAccounting
             NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
         }
 
-        private void OrdersButtonOnClick(object? sender, EventArgs e)
+        private void OrdersButtonOnClick(object sender, EventArgs e)
         {
             ShowEmptyList("Введите наименование");
             var control = (Control)sender;
@@ -375,14 +375,14 @@ namespace ManagementAccounting
             var label = (Label) sender;
             var material = (IMaterial) label.Tag;
             
-            var form = FormFactory.CreateMaterialForm(material);
+            var form = FormFactory.CreateMaterialForm(material, false);
 
             form.ShowDialog();
 
             await ShowItems(Offset);
         }
 
-        private async void AddMaterialButtonOnClick(object? sender, EventArgs e)
+        private async void AddMaterialButtonOnClick(object sender, EventArgs e)
         {
             var form = FormFactory.CreateAddMaterialForm();
             form.ShowDialog();
@@ -391,7 +391,7 @@ namespace ManagementAccounting
         }
 
 
-        private async void AddCalculationButtonOnClick(object? sender, EventArgs e)
+        private async void AddCalculationButtonOnClick(object sender, EventArgs e)
         {
             var form = FormFactory.CreateAddCalculationForm();
             form.ShowDialog();
@@ -411,7 +411,7 @@ namespace ManagementAccounting
             await ShowItems(Offset);
         }
 
-        private async void AddPreOrderButtonOnClick(object? sender, EventArgs e)
+        private async void AddPreOrderButtonOnClick(object sender, EventArgs e)
         {
             var form = FormFactory.CreateAddPreOrderForm();
             form.ShowDialog();

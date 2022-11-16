@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Factory;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.CalculationsForms
 {
@@ -21,6 +22,7 @@ namespace ManagementAccounting.Forms.CalculationsForms
         private Label MaterialNameValue { get; }
         private Button EditReceivingButton { get; }
         private Button RemoveReceivingButton { get; }
+        private Button CloseButton { get; }
         private IFormFactory FormFactory { get; }
 
         public CalculationItemForm(ICalculationItem calculationItem, IFormFactory formFactory, IOperationsWithUserInput inputOperations)
@@ -72,6 +74,13 @@ namespace ManagementAccounting.Forms.CalculationsForms
             RemoveReceivingButton.Location = new Point(EditReceivingButton.Location.X + EditReceivingButton.Width + 15, EditReceivingButton.Location.Y);
             RemoveReceivingButton.Click += RemoveCalcItemButtonOnClick;
             Controls.Add(RemoveReceivingButton);
+
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Location = new Point(RemoveReceivingButton.Location.X + RemoveReceivingButton.Width + 15, RemoveReceivingButton.Location.Y);
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
         }
 
         private async void RemoveCalcItemButtonOnClick(object sender, EventArgs e)
@@ -83,7 +92,7 @@ namespace ManagementAccounting.Forms.CalculationsForms
             {
                 await ((BlockItemDB)CalculationItem).RemoveItemFromDataBase();
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;

@@ -130,18 +130,35 @@ namespace ManagementAccounting
 
             try
             {
-                MaterialReceiving =
-                    ItemsFactory.CreateMaterialReceiving(Material, date, quantity, cost, remainder, note);
+                MaterialReceiving = ItemsFactory.CreateMaterialReceiving(Material, date, quantity, cost, remainder, note);
                 await MaterialReceivingOperations.Insert(MaterialReceiving);
             }
             catch (OrderItemOperationException exception)
             {
-                await MaterialReceivingOperations.Remove(MaterialReceiving);
+                try
+                {
+                    await MaterialReceivingOperations.Remove(MaterialReceiving);
+                }
+                catch (OrderItemOperationException)
+                {
+                    MessageBox.Show("Если ошибка произощла здесь, то это печально", "Внимание");
+                    return;
+                }
+                catch (NpgsqlException npgsqlException)
+                {
+                    MessageBox.Show(npgsqlException.Message, "Внимание");
+                    return;
+                }
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();
                 return;
             }
-            
+            catch (NpgsqlException npgsqlException)
+            {
+                MessageBox.Show(npgsqlException.Message, "Внимание");
+                return;
+            }
+
             Close();
         }
         private void EnableButtons()

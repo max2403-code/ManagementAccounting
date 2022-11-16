@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.ItemCreators;
 
 namespace ManagementAccounting.Classes.ItemCreators
@@ -12,7 +13,7 @@ namespace ManagementAccounting.Classes.ItemCreators
     {
         private IItemsFactory ItemsFactory { get; }
 
-        public CalculationCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
+        public CalculationCollectionCreator(int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(lengthOfItemsList, dataBase, exChecker)
         {
             ItemsFactory = itemsFactory;
         }

@@ -9,6 +9,7 @@ using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.OrdersForms
 {
@@ -22,17 +23,14 @@ namespace ManagementAccounting.Forms.OrdersForms
         private IOperationsWithUserInput InputOperations { get; }
         private ISystemOrderOperations OrderOperations { get; }
         private IItemsFactory ItemsFactory { get; }
-        private OrderForm OrderForm { get; }
 
-        public EditOrderForm(IOrder order, OrderForm orderForm, IOperationsWithUserInput inputOperations, ISystemOrderOperations orderOperations, IItemsFactory itemsFactory)
+        public EditOrderForm(IOrder order, IOperationsWithUserInput inputOperations, ISystemOrderOperations orderOperations, IItemsFactory itemsFactory)
         {
             InputOperations = inputOperations;
             Order = order;
             ItemsFactory = itemsFactory;
             OrderOperations = orderOperations;
             Size = new Size(400, 600);
-
-
 
             var topLabel = new Label();
             topLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -86,12 +84,14 @@ namespace ManagementAccounting.Forms.OrdersForms
 
         private async void EditButtonOnClick(object sender, EventArgs e)
         {
+            EditButton.Enabled = false;
             //var isQuantityCorrect = InputOperations.TryGetPositiveInt(QuantityValue.Text, out var quantity);
             var isDateCorrect = InputOperations.TryGetCorrectData(DateValue.Text, out var date);
 
             if (!isDateCorrect)
             {
                 MessageBox.Show("Введены некорректные данные", "Внимание");
+
                 return;
             }
 
@@ -100,12 +100,30 @@ namespace ManagementAccounting.Forms.OrdersForms
             try
             {
                 await OrderOperations.Edit(Order, newOrder);
-                OrderForm.UpdateOrder(newOrder);
             }
             catch (OrderItemOperationException exception)
             {
-                await OrderOperations.Default(newOrder, Order);
+                try
+                {
+                    await OrderOperations.Default(newOrder, Order);
+                }
+                catch (OrderItemOperationException)
+                {
+                    MessageBox.Show("Если ошибка произощла здесь, то это печально", "Внимание");
+                    return;
+                }
+                catch (NpgsqlException npgsqlException)
+                {
+                    MessageBox.Show(npgsqlException.Message, "Внимание");
+                    return;
+                }
+
                 MessageBox.Show(exception.Message, "Внимание");
+                return;
+            }
+            catch (NpgsqlException npgsqlException)
+            {
+                MessageBox.Show(npgsqlException.Message, "Внимание");
                 return;
             }
             Close();

@@ -30,70 +30,7 @@ namespace ManagementAccounting
             ItemsFactory = itemsFactory;
         }
 
-        //public async Task<List<IBlockItem>> GetItemsList(int offset, params string[] selectionCriterion)
-        //{
-        //    var commandText = $"SELECT * FROM orderitems, remainders WHERE orderitems.OrderIdOI = {Index} AND orderitems.MaterialIdOI = remainders.IdM ORDER BY remainders.MaterialTypeM, remainders.MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
-        //    var itemsList = await _dataBase.ExecuteReaderAsync(GetItemFromDataBase, commandText);
-
-        //    return itemsList;
-        //}
-
-        //public IBlockItem GetItemFromDataBase(DbDataRecord item)
-        //{
-
-        //    var order = this;
-        //    var materialType = (MaterialType)(int)item["MaterialTypeM"];
-        //    var materialName = (string)item["MaterialNameM"];
-        //    var unitOfMaterial = (UnitOfMaterial)(int)item["UnitM"];
-        //    var materialIndex = (int)item["IdM"];
-
-        //    var material = _itemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, materialIndex);
-        //    var materialConsumption = (decimal)item["QuantityOI"];
-        //    var index = (int)item["IdOI"];
-
-        //    return _itemsFactory.CreateOrderItem(order, material, materialConsumption, index);
-        //}
-
-        //public IBlockItem GetNewBlockItem(params object[] parameters)
-        //{
-        //    //var order = (IOrder)parameters[0];
-        //    var order = this;
-        //    var material = (IMaterial)parameters[0];
-        //    var materialConsumption = (decimal)parameters[1];
-
-        //    return _itemsFactory.CreateOrderItem(order, material, materialConsumption);
-        //}
-
-        //public void AssignParametersToAddCommand(NpgsqlCommand cmd)
-        //{
-        //    cmd.Parameters.AddWithValue("CreationDateO", NpgsqlDbType.Timestamp, CreationDate);
-        //    cmd.Parameters.AddWithValue("OrderNameO", NpgsqlDbType.Varchar, 50, shortName);
-        //    cmd.Parameters.AddWithValue("QuantityO", NpgsqlDbType.Numeric, Quantity);
-        //    cmd.Parameters.AddWithValue("SearchNameO", NpgsqlDbType.Varchar, 64, Name);
-
-        //}
-
-        //public async Task AddItemToDataBase()
-        //{
-        //    var commandText = "INSERT INTO orders (CreationDateO, OrderNameO, QuantityO) VALUES (@CreationDateO, @OrderNameO, @QuantityO) RETURNING IdO;";
-        //    if (ExceptionEvent != null) ExceptionEvent = null;
-        //    await _dataBase.ExecuteIdReaderAsync(this, AssignIndex, commandText, "Время изготовления данного заказа совпадает с временем другого заказа");
-
-        //    ExceptionEvent?.Invoke();
-        //}
-
-        //private void AssignIndex(DbDataRecord item)
-        //{
-        //    Index = (int)item["IdO"];
-        //}
-
-        //public async Task RemoveItemFromDataBase()
-        //{
-        //    var commandText = $"DELETE FROM orders WHERE ido = {Index}";
-        //    if (ExceptionEvent != null) ExceptionEvent = null;
-        //    await _dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, "Проблема с БД");
-        //    ExceptionEvent?.Invoke();
-        //}
+        
         private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {
             return "INSERT INTO orders (CreationDateO, OrderNameO, QuantityO, SearchNameO) VALUES (@CreationDateO, @OrderNameO, @QuantityO, @SearchNameO) RETURNING IdO;";
@@ -159,6 +96,19 @@ namespace ManagementAccounting
         private protected override string GetRemoveExceptionMessage()
         {
             return "Проблема с БД";
+        }
+        public async Task Update()
+        {
+            var cmdText = $"SELECT * FROM orders WHERE ido = {Index}";
+            ExceptionChecker.IsExceptionHappened = false;
+            await DataBase.ExecuteUpdaterAsync(ExceptionChecker, UpdateOrderFromDataBase, cmdText);
+            if (ExceptionChecker.IsExceptionHappened) ExceptionChecker.DoException("Проблема с БД");
+        }
+
+        private void UpdateOrderFromDataBase(DbDataRecord item)
+        {
+            CreationDate = (DateTime)item["CreationDateO"];
+            Name = string.Join(' ', ShortName, "от", CreationDate.ToString("dd/MM/yyyy"));
         }
     }
 }

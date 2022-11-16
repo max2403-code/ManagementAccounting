@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Factory;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.PreOrdersForms
 {
@@ -15,11 +16,9 @@ namespace ManagementAccounting.Forms.PreOrdersForms
         private IPreOrder PreOrder { get; set; }
         private Button EditButton { get; }
         private Button CloseButton { get; }
-
         private TextBox QuantityValue { get; }
         private TextBox DateValue { get; }
         private List<Button> Buttons { get; }
-
         private IOperationsWithUserInput InputOperations { get; }
 
         public EditPreOrderForm(IPreOrder preOrder, IOperationsWithUserInput inputOperations)
@@ -97,7 +96,7 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             {
                 await ((EditingBlockItemDB)PreOrder).EditItemInDataBase<IPreOrder>(quantity, date);
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();

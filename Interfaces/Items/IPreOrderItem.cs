@@ -15,5 +15,7 @@ namespace ManagementAccounting
         public decimal MaxPrice { get; }
         public decimal MinPrice { get; }
         public int Quantity { get; }
+        public decimal MaxMaterialPrice { get; }
+        public decimal MinMaterialPrice { get; }
     }
 }

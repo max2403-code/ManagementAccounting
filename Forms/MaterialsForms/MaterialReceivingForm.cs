@@ -9,12 +9,13 @@ using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.RemaindersForms
 {
     public partial class MaterialReceivingForm : Form
     {
-        private IMaterialReceiving MaterialReceiving { get; set; }
+        private IMaterialReceiving MaterialReceiving { get; }
         private Label TopLabel { get; }
 
         //private TextBox dateTextBox { get; }
@@ -27,14 +28,13 @@ namespace ManagementAccounting.Forms.RemaindersForms
         private Label MaterialNameValue { get; }
         private Button EditReceivingButton { get; }
         private Button RemoveReceivingButton { get; }
+        private Button CloseButton { get; }
+
         private IFormFactory FormFactory { get; }
         private IOperationsWithUserInput OperationsWithUserInput { get; }
         private ISystemMaterialReceivingOperations MaterialReceivingOperations { get; }
 
-
-
-
-        public MaterialReceivingForm(IMaterialReceiving materialReceiving, IFormFactory formFactory, IOperationsWithUserInput operationsWithUserInput, ISystemMaterialReceivingOperations materialReceivingOperations)
+        public MaterialReceivingForm(IMaterialReceiving materialReceiving, bool isCallFromOtherBlocks, IFormFactory formFactory, IOperationsWithUserInput operationsWithUserInput, ISystemMaterialReceivingOperations materialReceivingOperations)
         {
             FormFactory = formFactory;
             OperationsWithUserInput = operationsWithUserInput;
@@ -132,6 +132,19 @@ namespace ManagementAccounting.Forms.RemaindersForms
             RemoveReceivingButton.Location = new Point(EditReceivingButton.Location.X + EditReceivingButton.Width + 15, EditReceivingButton.Location.Y);
             RemoveReceivingButton.Click += RemoveReceivingButtonOnClick;
             Controls.Add(RemoveReceivingButton);
+
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Location = new Point(RemoveReceivingButton.Location.X + RemoveReceivingButton.Width + 15, RemoveReceivingButton.Location.Y);
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
+
+            if (isCallFromOtherBlocks)
+            {
+                EditReceivingButton.Enabled = false;
+                RemoveReceivingButton.Enabled = false;
+            }
         }
 
         private async void RemoveReceivingButtonOnClick(object sender, EventArgs e)
@@ -145,8 +158,26 @@ namespace ManagementAccounting.Forms.RemaindersForms
             }
             catch(OrderItemOperationException exception)
             {
-                await MaterialReceivingOperations.Insert(MaterialReceiving, true);
+                try
+                {
+                    await MaterialReceivingOperations.Insert(MaterialReceiving, true);
+                }
+                catch (OrderItemOperationException)
+                {
+                    MessageBox.Show("Если ошибка произощла здесь, то это печально", "Внимание");
+                    return;
+                }
+                catch (NpgsqlException npgsqlException)
+                {
+                    MessageBox.Show(npgsqlException.Message, "Внимание");
+                    return;
+                }
 
+                MessageBox.Show(exception.Message, "Внимание");
+                return;
+            }
+            catch (NpgsqlException exception)
+            {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;
             }
@@ -154,21 +185,25 @@ namespace ManagementAccounting.Forms.RemaindersForms
             Close();
         }
 
-        private void EditReceivingButtonOnClick(object sender, EventArgs e)
+        private async void EditReceivingButtonOnClick(object sender, EventArgs e)
         {
-            var editReceivingForm = FormFactory.CreateEditMaterialReceivingForm(MaterialReceiving, this);
+            var editReceivingForm = FormFactory.CreateEditMaterialReceivingForm(MaterialReceiving);
             editReceivingForm.ShowDialog();
+            try
+            {
+                await MaterialReceiving.Update();
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
 
             TopLabel.Text = MaterialReceiving.Name;
-            QuantityValue.Text = MaterialReceiving.Quantity.ToString();
-            CostValue.Text = MaterialReceiving.Cost.ToString();
-            RemainderValue.Text = MaterialReceiving.Remainder.ToString();
+            QuantityValue.Text = string.Join(' ', MaterialReceiving.Quantity.ToString(), OperationsWithUserInput.TranslateType(MaterialReceiving.Material.Unit.ToString()));
+            CostValue.Text = string.Join(' ', MaterialReceiving.Cost.ToString(), "руб.");
+            RemainderValue.Text = string.Join(' ', MaterialReceiving.Remainder.ToString(), OperationsWithUserInput.TranslateType(MaterialReceiving.Material.Unit.ToString()));
             NoteValue.Text = MaterialReceiving.Note;
-        }
-
-        public void UpdateMaterialReceiving(IMaterialReceiving materialReceiving)
-        {
-            MaterialReceiving = materialReceiving;
+            PriceValue.Text = string.Join(' ', MaterialReceiving.Price.ToString(), "руб.");
         }
     }
 }

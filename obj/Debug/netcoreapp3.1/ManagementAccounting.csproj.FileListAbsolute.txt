@@ -40,3 +40,4 @@ C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\Managem
 C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.OrderForm.resources
 C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.CreateOrderForm.resources
 C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.EditOrderForm.resources
+C:\Users\muxxx\source\repos\ManagementAccounting\obj\Debug\netcoreapp3.1\ManagementAccounting.Forms.OrdersForms.EditOrderItemForm.resources

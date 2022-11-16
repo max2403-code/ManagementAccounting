@@ -83,9 +83,9 @@ namespace ManagementAccounting.Classes.Common
 
                 foreach (var orderItem in itemsList.Cast<IOrderItem>())
                 {
-                    var editedOrderItem = ItemsFactory.CreateOrderItem(editedOrder, orderItem.Material,
-                        orderItem.TotalConsumption, orderItem.TotalConsumption, orderItem.Index);
-                    await operations(orderItem, editedOrderItem);
+                    var oldOrderItem = ItemsFactory.CreateOrderItem(orderItem.Order, orderItem.Material, orderItem.TotalConsumption, orderItem.TotalConsumption, orderItem.Index);
+                    var editedOrderItem = ItemsFactory.CreateOrderItem(editedOrder, oldOrderItem.Material, oldOrderItem.Consumption, oldOrderItem.TotalConsumption, oldOrderItem.Index);
+                    await operations(oldOrderItem, editedOrderItem);
                 }
             }
         }

@@ -48,7 +48,7 @@ namespace ManagementAccounting.Classes.Common
             
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
 
-            await ((EditingBlockItemDB)newOrderItem).EditItemInDataBase<IOrderItem>(newOrderItem.TotalConsumption, newOrderItem.TotalConsumption);
+            await ((EditingBlockItemDB)newOrderItem).EditItemInDataBase<IOrderItem>(newOrderItem.Consumption, newOrderItem.TotalConsumption);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreator, ">=");
 
         }
@@ -62,7 +62,7 @@ namespace ManagementAccounting.Classes.Common
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
 
-            await ((EditingBlockItemDB)previousOrderItem).EditItemInDataBase<IOrderItem>(previousOrderItem.TotalConsumption, previousOrderItem.TotalConsumption);
+            await ((EditingBlockItemDB)previousOrderItem).EditItemInDataBase<IOrderItem>(previousOrderItem.Consumption, previousOrderItem.TotalConsumption);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreator, ">=");
         }
 

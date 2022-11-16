@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Text;
 using ManagementAccounting.Classes.Abstract;
+using ManagementAccounting.Interfaces.Common;
 using DateTime = System.DateTime;
 
 namespace ManagementAccounting.Classes.SystemCreators
@@ -12,7 +13,7 @@ namespace ManagementAccounting.Classes.SystemCreators
         private IItemsFactory ItemsFactory { get; }
         private IMaterial Material { get; }
 
-        public OrderItemCollectionCreatorWithConsumption(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory) : base(lengthOfItemsList, dataBase)
+        public OrderItemCollectionCreatorWithConsumption(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(lengthOfItemsList, dataBase, exChecker)
         {
             Material = material;
             ItemsFactory = itemsFactory;

@@ -116,5 +116,23 @@ namespace ManagementAccounting
         {
             return "Проблемы с БД";
         }
+
+        public async Task Update()
+        {
+            var cmdText = $"SELECT * FROM materialreceiving WHERE idmr = {Index}";
+            ExceptionChecker.IsExceptionHappened = false;
+            await DataBase.ExecuteUpdaterAsync(ExceptionChecker, UpdateMaterialReceivingFromDataBase, cmdText);
+            if (ExceptionChecker.IsExceptionHappened) ExceptionChecker.DoException("Проблема с БД");
+        }
+
+        private void UpdateMaterialReceivingFromDataBase(DbDataRecord item)
+        {
+            Date = (DateTime)item["ReceiveDatemr"];
+            Quantity = (decimal)item["Quantitymr"];
+            Cost = (decimal)item["TotalCostmr"];
+            Remainder = (decimal)item["Remaindermr"];
+            Note = (string)item["Notemr"];
+            Name = $"Поступление от {Date.ToString("dd/MM/yyyy")}";
+        }
     }
 }

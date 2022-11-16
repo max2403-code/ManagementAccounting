@@ -22,7 +22,7 @@ namespace ManagementAccounting.Classes.Common
             var orderMaterialReceivingCreator =
                 CreatorFactory.CreateOrderMaterialReceivingCollectionCreator(orderItem, 5);
             var offset = 0;
-            var prices = new decimal[2];
+            var prices = new decimal[3];
 
             while (true)
             {
@@ -40,8 +40,10 @@ namespace ManagementAccounting.Classes.Common
                 if (!isThereMoreOfItems) break;
             }
 
-            prices[0] = orderItemCostPrice / orderItem.Order.Quantity;
-            prices[1] = orderItemCostPrice;
+            prices[0] = orderItemCostPrice / orderItem.TotalConsumption;
+            prices[1] = orderItemCostPrice / orderItem.Order.Quantity;
+            prices[2] = orderItemCostPrice;
+
 
             return prices;
         }

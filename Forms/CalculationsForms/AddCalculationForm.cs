@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.Items;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.CalculationsForms
 {
@@ -58,14 +59,9 @@ namespace ManagementAccounting.Forms.CalculationsForms
             CloseButton.Location = new Point(AddButton.Location.X + AddButton.Width + 20, AddButton.Location.Y);
             CloseButton.Text = "Отмена";
             CloseButton.AutoSize = true;
-            CloseButton.Click += CloseButtonOnClick;
+            CloseButton.Click += (sender, args) => Close();
             Controls.Add(CloseButton);
             Buttons.Add(CloseButton);
-        }
-
-        private void CloseButtonOnClick(object sender, EventArgs e)
-        {
-            Close();
         }
 
         private async void AddButtonOnClick(object sender, EventArgs e)
@@ -86,7 +82,7 @@ namespace ManagementAccounting.Forms.CalculationsForms
             {
                 await calculation.AddItemToDataBase();
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 EnableButtons();

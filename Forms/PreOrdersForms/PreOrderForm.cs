@@ -11,6 +11,7 @@ using ManagementAccounting.Classes.ItemCreators;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
 using ManagementAccounting.Interfaces.Items;
+using Npgsql;
 
 namespace ManagementAccounting.Forms.PreOrdersForms
 {
@@ -32,6 +33,8 @@ namespace ManagementAccounting.Forms.PreOrdersForms
         private Button CreateOrderButton { get; }
         private Button EditPreOrderButton { get; }
         private Button RemovePreOrderButton { get; }
+        private Button CloseButton { get; }
+
         private List<Control> ActiveItemTempControls { get; }
         private IPreOrder PreOrder { get; }
         private IFormFactory FormFactory { get; }
@@ -193,6 +196,13 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             RemovePreOrderButton.Click += RemovePreOrderButtonOnClick;
             Controls.Add(RemovePreOrderButton);
 
+            CloseButton = new Button();
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Location = new Point(RemovePreOrderButton.Location.X + RemovePreOrderButton.Width + 15, RemovePreOrderButton.Location.Y);
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
+
             PreviousListButton = new Button();
             PreviousListButton.Text = "Назад";
             PreviousListButton.Location = new Point(20 + CalculateItemButton.Location.X, CalculateItemButton.Location.Y + CalculateItemButton.Height + 15);
@@ -213,21 +223,33 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             TableColumnName.Width = 200;
             Controls.Add(TableColumnName);
 
+            var minMaterialPriceColumnName = new Label();
+            minMaterialPriceColumnName.Location = new Point(10 + TableColumnName.Location.X + TableColumnName.Width, TableColumnName.Location.Y);
+            minMaterialPriceColumnName.Text = "Мин. цена мат-а";
+            minMaterialPriceColumnName.Width = 150;
+            Controls.Add(minMaterialPriceColumnName);
+
+            var maxMaterialPriceColumnName = new Label();
+            maxMaterialPriceColumnName.Location = new Point(10 + minMaterialPriceColumnName.Location.X + minMaterialPriceColumnName.Width, minMaterialPriceColumnName.Location.Y);
+            maxMaterialPriceColumnName.Text = "Макс. цена мат-а";
+            maxMaterialPriceColumnName.Width = 150;
+            Controls.Add(maxMaterialPriceColumnName);
+
             var unitConsumptionColumnName = new Label();
-            unitConsumptionColumnName.Location = new Point(10 + TableColumnName.Location.X + TableColumnName.Width, TableColumnName.Location.Y);
+            unitConsumptionColumnName.Location = new Point(10 + maxMaterialPriceColumnName.Location.X + maxMaterialPriceColumnName.Width, maxMaterialPriceColumnName.Location.Y);
             unitConsumptionColumnName.Text = "Норма расхода на ед.";
             unitConsumptionColumnName.Width = 150;
             Controls.Add(unitConsumptionColumnName);
 
             var unitMinPriceColumnName = new Label();
             unitMinPriceColumnName.Location = new Point(10 + unitConsumptionColumnName.Location.X + unitConsumptionColumnName.Width, unitConsumptionColumnName.Location.Y);
-            unitMinPriceColumnName.Text = "Мин. цена мат-а за ед.";
+            unitMinPriceColumnName.Text = "Мин. ст-ть мат-а за ед.";
             unitMinPriceColumnName.Width = 150;
             Controls.Add(unitMinPriceColumnName);
 
             var unitMaxPriceColumnName = new Label();
             unitMaxPriceColumnName.Location = new Point(10 + unitMinPriceColumnName.Location.X + unitMinPriceColumnName.Width, unitMinPriceColumnName.Location.Y);
-            unitMaxPriceColumnName.Text = "Макс. цена мат-а за ед.";
+            unitMaxPriceColumnName.Text = "Макс. ст-ть мат-а за ед.";
             unitMaxPriceColumnName.Width = 150;
             Controls.Add(unitMaxPriceColumnName);
 
@@ -239,13 +261,13 @@ namespace ManagementAccounting.Forms.PreOrdersForms
 
             var priceMinColumnName = new Label();
             priceMinColumnName.Location = new Point(10 + consumptionColumnName.Location.X + consumptionColumnName.Width, consumptionColumnName.Location.Y);
-            priceMinColumnName.Text = "Мин. цена мат-а";
+            priceMinColumnName.Text = "Мин. ст-ть мат-а";
             priceMinColumnName.Width = 150;
             Controls.Add(priceMinColumnName);
 
             var priceMaxColumnName = new Label();
             priceMaxColumnName.Location = new Point(10 + priceMinColumnName.Location.X + priceMinColumnName.Width, priceMinColumnName.Location.Y);
-            priceMaxColumnName.Text = "Макс. цена мат-а";
+            priceMaxColumnName.Text = "Макс. ст-ть мат-а";
             priceMaxColumnName.Width = 150;
             Controls.Add(priceMaxColumnName);
         }
@@ -257,7 +279,7 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             {
                 Order = await Converter.Convert(PreOrder, date);
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;
@@ -267,11 +289,19 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             {
                 await Converter.CreateOrderItems(Order, PreOrder);
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
-                MessageBox.Show(exception.Message, "Внимание");
-                await Converter.RemoveOrder(Order);
                 Order = null;
+                try
+                {
+                    await Converter.RemoveOrder(Order);
+                }
+                catch (NpgsqlException ex)
+                {
+                    MessageBox.Show(ex.Message, "Внимание");
+                    return;
+                }
+                MessageBox.Show(exception.Message, "Внимание");
                 return;
             }
 
@@ -280,7 +310,15 @@ namespace ManagementAccounting.Forms.PreOrdersForms
 
             if (IsConvertingPasssedSuccessfully)
             {
-                await ((EditingBlockItemDB) PreOrder).RemoveItemFromDataBase();
+                try
+                {
+                    await ((EditingBlockItemDB)PreOrder).RemoveItemFromDataBase();
+                }
+                catch (NpgsqlException exception)
+                {
+                    MessageBox.Show(exception.Message, "Внимание");
+                    return;
+                }
                 Close();
             }
             else
@@ -314,7 +352,7 @@ namespace ManagementAccounting.Forms.PreOrdersForms
                 await ((BlockItemDB)PreOrder).RemoveItemFromDataBase();
 
             }
-            catch (Exception exception)
+            catch (NpgsqlException exception)
             {
                 MessageBox.Show(exception.Message, "Внимание");
                 return;
@@ -331,7 +369,6 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             Quantity.Text = string.Join(' ', PreOrder.Quantity.ToString(), InputOperations.TranslateType(UnitOfMaterial.pcs.ToString()));
             DefaultPreOrder();
 
-            //await Calculate();
         }
 
         private async void CalculateItemButton_Click(object sender, EventArgs e)
@@ -345,7 +382,15 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             }
 
             CreateOrderButton.Tag = date;
-            await Calculate(date);
+
+            try
+            {
+                await Calculate(date);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async Task Calculate(DateTime orderDate)
@@ -367,8 +412,14 @@ namespace ManagementAccounting.Forms.PreOrdersForms
         {
             var control = (Control)sender;
             var offset = (int)control.Tag;
-
-            await ShowItems(offset);
+            try
+            {
+                await ShowItems(offset);
+            }
+            catch (NpgsqlException exception)
+            {
+                MessageBox.Show(exception.Message, "Внимание");
+            }
         }
 
         private async Task ShowItems(int offset)
@@ -434,12 +485,27 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             itemLabel.AutoSize = true;
             itemLabel.Text = preOrderItem.Name;
             itemLabel.Tag = preOrderItem;
+            itemLabel.Click += ItemLabel_Click;
             Controls.Add(itemLabel);
             ActiveItemTempControls.Add(itemLabel);
 
+            var minMatP = new Label();
+            minMatP.Text = string.Join(' ', Math.Round(preOrderItem.MinMaterialPrice, 2).ToString(), "руб.");
+            minMatP.Location = new Point(200 + itemLabel.Location.X + 10, itemLabel.Location.Y);
+            minMatP.Width = 150;
+            Controls.Add(minMatP);
+            ActiveItemTempControls.Add(minMatP);
+
+            var maxMatP = new Label();
+            maxMatP.Text = string.Join(' ', Math.Round(preOrderItem.MaxMaterialPrice, 2).ToString(), "руб.");
+            maxMatP.Location = new Point(minMatP.Width + minMatP.Location.X + 10, minMatP.Location.Y);
+            maxMatP.Width = 150;
+            Controls.Add(maxMatP);
+            ActiveItemTempControls.Add(maxMatP);
+
             var minUnitC = new Label();
             minUnitC.Text = string.Join(' ', Math.Round(preOrderItem.MaterialUnitСonsumption, 2).ToString(), InputOperations.TranslateType(preOrderItem.Material.Unit.ToString())) ;
-            minUnitC.Location = new Point(200 + itemLabel.Location.X + 10, itemLabel.Location.Y);
+            minUnitC.Location = new Point(maxMatP.Width + maxMatP.Location.X + 10, maxMatP.Location.Y);
             minUnitC.Width = 150;
             Controls.Add(minUnitC);
             ActiveItemTempControls.Add(minUnitC);
@@ -480,6 +546,14 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             ActiveItemTempControls.Add(maxP);
 
             return itemLabel;
+        }
+
+        private void ItemLabel_Click(object sender, EventArgs e)
+        {
+            var control = (Control) sender;
+            var preOrderItem = (IPreOrderItem) control.Tag;
+            var materialForm = FormFactory.CreateMaterialForm(preOrderItem.Material, true);
+            materialForm.ShowDialog();
         }
 
         private void ClearActiveItemTempControls()

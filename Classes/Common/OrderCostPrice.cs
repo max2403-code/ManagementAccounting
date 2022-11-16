@@ -38,7 +38,7 @@ namespace ManagementAccounting.Classes.Common
                 foreach (var orderItem in itemsList.Cast<IOrderItem>())
                 {
                     var orderItemCostPrices = await OrderItemCostPrice.GetOrderItemCostPrice(orderItem);
-                    orderCostPrice += orderItemCostPrices[1];
+                    orderCostPrice += orderItemCostPrices[2];
                 }
                 if (!isThereMoreOfItems) break;
             }
