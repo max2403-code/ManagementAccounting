@@ -31,8 +31,6 @@ namespace ManagementAccounting.Classes.ItemCreators
         private protected override string GetCommandText(int offset, string searchCriterion)
         {
             return $"SELECT * FROM materialreceiving WHERE MaterialIdmr = {Material.Index} AND SearchNamemr LIKE '%{searchCriterion}%' ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
-
-            //return $"SELECT * FROM materialreceiving AS mr, materials AS m WHERE mr.MaterialIdmr = {material.Index} AND mr.SearchNamemr LIKE '%{searchCriterion}%' AND mr.MaterialIdmr = m.IdM ORDER BY ReceiveDatemr OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
         }
     }
 }

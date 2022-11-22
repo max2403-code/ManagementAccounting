@@ -44,7 +44,6 @@ namespace ManagementAccounting.Classes.Common
         {
             var orderItemsCreator = CreatorFactory.CreateOrderItemCollectionCreator(order, 5);
             await ((EditingBlockItemDB)previousOrder).EditItemInDataBase<IOrder>(previousOrder.CreationDate);
-
             await DoEditOperationsWithItemsList(OrderItemOperations.Default, previousOrder, orderItemsCreator, "");
         }
 

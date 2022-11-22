@@ -21,7 +21,6 @@ namespace ManagementAccounting.Classes.ItemCreators
             var materialName = (string)item["MaterialNameM"];
             var unitOfMaterial = (UnitOfMaterial)(int)item["UnitM"];
             var indexMaterial = (int)item["IdM"];
-
             var material = ItemsFactory.CreateMaterial(materialType, materialName, unitOfMaterial, indexMaterial);
             var consumption = (decimal)item["ConsumptionOI"];
             var totalConsumption = (decimal)item["TotalConsumptionOI"];

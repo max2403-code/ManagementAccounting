@@ -8,6 +8,5 @@ namespace ManagementAccounting.Interfaces.Common
         Task Remove(IMaterialReceiving materialReceiving);
         Task Edit(IMaterialReceiving materialReceiving, IMaterialReceiving newMaterialReceiving);
         Task Default(IMaterialReceiving materialReceiving, IMaterialReceiving previousMaterialReceiving);
-
     }
 }

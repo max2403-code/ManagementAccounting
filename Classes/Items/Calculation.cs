@@ -68,7 +68,6 @@ namespace ManagementAccounting
         {
             var copyCalculation = copyItem as ICalculation;
             Name = copyCalculation.Name;
-
         }
 
         private protected override string GetRemoveItemCommandText()
@@ -80,52 +79,5 @@ namespace ManagementAccounting
         {
             return "Калькуляция используется в предзаказе";
         }
-
-
-        
-
-        //public void AssignParametersToAddCommand(NpgsqlCommand cmd)
-        //{
-        //    cmd.Parameters.AddWithValue("CalculationNamec", NpgsqlDbType.Varchar, 50, Name);
-        //}
-
-        //public void AssignParametersToEditCommand(NpgsqlCommand cmd)
-        //{
-        //    cmd.Parameters.AddWithValue("CalculationNamec", NpgsqlDbType.Varchar, 50, Name);
-        //}
-
-        //public async Task AddItemToDataBase()
-        //{
-        //    var commandText = "INSERT INTO calculations (CalculationNamec) VALUES (@CalculationNamec)";
-        //    if (ExceptionEvent != null) ExceptionEvent = null;
-        //    await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, "Калькуляция с таким названием уже существует", AssignParametersToAddCommand);
-        //    ExceptionEvent?.Invoke();
-        //}
-
-        //public async Task EditItemInDataBase(params object[] parameters)
-        //{
-        //    var copyCalculation = itemsFactory.CreateCalculation(Name, Index);
-        //    var commandText = $"UPDATE calculations SET CalculationNamec = @CalculationNamec WHERE idc = {Index}";
-            
-        //    Name = (string)parameters[0];
-
-        //    if (ExceptionEvent != null) ExceptionEvent = null;
-        //    await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, "Калькуляция с таким названием уже существует", AssignParametersToEditCommand);
-
-        //    if (ExceptionEvent != null)
-        //    {
-        //        Name = copyCalculation.Name;
-        //        ExceptionEvent.Invoke();
-        //    }
-        //}
-
-        //public async Task RemoveItemFromDataBase()
-        //{
-        //    var commandText = $"DELETE FROM calculations WHERE idc = {Index}";
-        //    if (ExceptionEvent != null) ExceptionEvent = null;
-        //    await dataBase.ExecuteNonQueryAndReaderAsync(this, commandText, "Калькуляция используется в наряд-заказе");
-        //    ExceptionEvent?.Invoke();
-        //}
-
     }
 }

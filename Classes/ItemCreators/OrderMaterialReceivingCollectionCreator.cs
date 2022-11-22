@@ -9,14 +9,10 @@ namespace ManagementAccounting.Classes.ItemCreators
     {
         private IItemsFactory ItemsFactory { get; }
         private IOrderItem OrderItem { get; }
-        //private IMaterial material { get; }
-
 
         public OrderMaterialReceivingCollectionCreator(IOrderItem orderItem, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(lengthOfItemsList, dataBase, exChecker)
         {
             OrderItem = orderItem;
-            //this.material = material;
-
             ItemsFactory = itemsFactory;
         }
 

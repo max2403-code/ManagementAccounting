@@ -35,8 +35,6 @@ namespace ManagementAccounting.Classes.ItemCreators
         private protected override string GetCommandText(int offset, string searchCriterion)
         {
             return $"SELECT m.*, ci.ConsumptionCI, (SELECT MIN(TotalCostMR / QuantityMR) FROM materialreceiving AS mr WHERE mr.MaterialIdMR = ci.MaterialIdCI AND mr.RemainderMR > 0 AND mr.ReceiveDateMR <= '{searchCriterion}') AS minprice, (SELECT MAX(TotalCostMR / QuantityMR) FROM materialreceiving AS mr WHERE mr.MaterialIdMR = ci.MaterialIdCI AND mr.RemainderMR > 0 AND mr.ReceiveDateMR <= '{searchCriterion}') AS maxprice FROM calculationitems AS ci, materials AS m WHERE ci.CalculationIdCI = {PreOrder.Calculation.Index} AND ci.MaterialIdCI = m.IdM ORDER BY m.MaterialTypeM, m.MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
-
-            //return $"SELECT m.*, ci.ConsumptionCI, (SELECT MIN(TotalCostMR / QuantityMR) FROM materialreceiving AS mr WHERE mr.MaterialIdMR = ci.MaterialIdCI AND mr.RemainderMR > 0) AS minprice, (SELECT MAX(TotalCostMR / QuantityMR) FROM materialreceiving AS mr WHERE mr.MaterialIdMR = ci.MaterialIdCI AND mr.RemainderMR > 0) AS maxprice FROM calculationitems AS ci, materials AS m WHERE ci.CalculationIdCI = {PreOrder.Calculation.Index} AND ci.MaterialIdCI = m.IdM ORDER BY m.MaterialTypeM, m.MaterialNameM OFFSET {offset} ROWS FETCH NEXT {LengthOfItemsList + 1} ROWS ONLY;";
         }
     }
 }

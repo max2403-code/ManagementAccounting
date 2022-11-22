@@ -19,6 +19,7 @@ namespace ManagementAccounting.Classes.Tests
             var materialName = "ТестТкань1";
             var materialType = MaterialType.Fabric;
             var unitOfMaterial = UnitOfMaterial.m2;
+            
             await dataBase.SignInAsync(exChecker, "postgres", "user");
 
             var material = new Material(materialType, materialName, unitOfMaterial, -1, dataBase, itemsFactory,
@@ -31,10 +32,7 @@ namespace ManagementAccounting.Classes.Tests
             var resultMaterial = creatorResult.Item1.FirstOrDefault() as Material;
             await material.RemoveItemFromDataBase();
 
-
             Assert.AreEqual(materialName, resultMaterial.Name);
-
-
         }
     }
 }

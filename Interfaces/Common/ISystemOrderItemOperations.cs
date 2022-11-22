@@ -8,6 +8,5 @@ namespace ManagementAccounting.Interfaces.Common
         Task Remove(IOrderItem orderItem);
         Task Edit(IOrderItem orderItem, IOrderItem newOrderItem);
         Task Default(IOrderItem orderItem, IOrderItem newOrderItem);
-
     }
 }

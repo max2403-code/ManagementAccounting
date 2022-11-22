@@ -15,7 +15,6 @@ namespace ManagementAccounting
         public decimal Consumption { get; private set; }
         private IItemsFactory ItemsFactory { get; }
 
-
         public CalculationItem(IMaterial material,  decimal consumption, int calculationId, int index,  IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {
             Index = index;

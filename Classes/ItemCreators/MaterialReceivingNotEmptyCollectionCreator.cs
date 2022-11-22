@@ -4,10 +4,8 @@ namespace ManagementAccounting.Classes.ItemCreators
 {
     public class MaterialReceivingNotEmptyCollectionCreator : MaterialReceivingCollectionCreator
     {
-        //private IMaterial Material { get; }
         public MaterialReceivingNotEmptyCollectionCreator(IMaterial material, int lengthOfItemsList, IDataBase dataBase, IItemsFactory itemsFactory, IExceptionChecker exChecker) : base(material, lengthOfItemsList, dataBase, itemsFactory, exChecker)
         {
-            //Material = material;
         }
 
         private protected override string GetCommandText(int offset, string searchCriterion)

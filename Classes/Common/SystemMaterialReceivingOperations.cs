@@ -23,13 +23,9 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorFromMaterialReceiving(materialReceiving, 5);
             var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
-            //await ((EditingBlockItemDB)materialReceiving).AddItemToDataBase();
-
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
             await ((EditingBlockItemDB) materialReceiving).AddItemToDataBase(isPreviouslyExistingItem);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
-
-
         }
 
         public async Task Remove(IMaterialReceiving materialReceiving)
@@ -39,7 +35,6 @@ namespace ManagementAccounting.Classes.Common
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
             await ((EditingBlockItemDB)materialReceiving).RemoveItemFromDataBase();
-
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
         }
 
@@ -53,7 +48,6 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
-
             await ((EditingBlockItemDB)newMaterialReceiving).EditItemInDataBase<IMaterialReceiving>(newMaterialReceiving.Date, newMaterialReceiving.Quantity, newMaterialReceiving.Cost, newMaterialReceiving.Remainder, newMaterialReceiving.Note);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
         }
@@ -68,7 +62,6 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreatorWithConsumption = CreatorFactory.CreateOrderItemCollectionCreatorWithConsumption(materialReceiving.Material, 5);
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
-
             await((EditingBlockItemDB)previousMaterialReceiving).EditItemInDataBase<IMaterialReceiving>(previousMaterialReceiving.Date, previousMaterialReceiving.Quantity, previousMaterialReceiving.Cost, previousMaterialReceiving.Remainder, previousMaterialReceiving.Note);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreatorWithConsumption, "");
         }

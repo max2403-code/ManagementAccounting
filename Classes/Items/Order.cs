@@ -26,7 +26,6 @@ namespace ManagementAccounting
             Quantity = quantity;
             ItemsFactory = itemsFactory;
         }
-
         
         private protected override string GetAddItemCommandText(bool isPreviouslyExistingItem = false)
         {

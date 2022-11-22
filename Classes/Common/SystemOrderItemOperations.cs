@@ -23,7 +23,6 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorForOrders(orderItem, 5);
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
-            //await orderItemOperations.AddReceiving(orderItem);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreator, ">=");
         }
         
@@ -32,9 +31,7 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorForOrders(orderItem, 5);
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
-            //await orderItemOperations.RemoveReceiving(orderItem);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreator, ">=", orderItem.Index);
-
         }
 
         public async Task Edit(IOrderItem orderItem, IOrderItem newOrderItem)
@@ -45,7 +42,6 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorForOrders(controlOrderItem, 5);
             
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
-
             await ((EditingBlockItemDB)newOrderItem).EditItemInDataBase<IOrderItem>(newOrderItem.Consumption, newOrderItem.TotalConsumption);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreator, ">=");
 
@@ -59,7 +55,6 @@ namespace ManagementAccounting.Classes.Common
             var orderItemCreator = CreatorFactory.CreateOrderItemCollectionCreatorForOrders(controlOrderItem, 5);
 
             await DoOperationsWithItemsList(OrderItemOperations.RemoveReceiving, orderItemCreator, ">=");
-
             await ((EditingBlockItemDB)previousOrderItem).EditItemInDataBase<IOrderItem>(previousOrderItem.Consumption, previousOrderItem.TotalConsumption);
             await DoOperationsWithItemsList(OrderItemOperations.AddReceiving, orderItemCreator, ">=");
         }

@@ -8,7 +8,5 @@
         public decimal Consumption { get; }
         public decimal TotalConsumption { get; }
         public decimal UnitConsumption { get; }
-
-
     }
 }

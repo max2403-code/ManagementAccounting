@@ -27,18 +27,6 @@ namespace ManagementAccounting
             container.Bind<BlockItemsCollectionCreator>().To<PreOrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
             container.Bind<BlockItemsCollectionCreator>().To<OrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
 
-
-
-
-            //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingCollectionCreator>();
-            //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingNotEmptyCollectionCreator>();
-            //container.Bind<ICalculationItemCollectionCreator>().To<CalculationItemCollectionCreator>();
-
-            //container.Bind<AddMaterialForm>().ToSelf();
-
-            //container.Bind<IProgramBlock>().To<PreOrders>();
-
-
             container.Bind<IMaterial>().To<Material>();
             container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
             container.Bind<ICalculation>().To<Calculation>();
@@ -60,11 +48,7 @@ namespace ManagementAccounting
             container.Bind<ISignIn>().To<SignIn>().InSingletonScope();
             container.Bind<IExceptionChecker>().To<NpgsqlExceptionChecker>();
             container.Bind<IEmptyCalculationChecker>().To<EmptyCalculationChecker>();
-
-
-
-
-
+            
             container.Bind<ICreatorFactory>().ToFactory();
             container.Bind<IItemsFactory>().ToFactory();
             //container.Bind<IFormFactory>().ToFactory();
