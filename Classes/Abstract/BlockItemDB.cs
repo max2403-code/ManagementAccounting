@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Text;
+﻿using System.Data.Common;
 using System.Threading.Tasks;
 using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 
 namespace ManagementAccounting.Classes.Abstract
 {
-    public abstract class BlockItemDB : IAddable, IRemovable
+    public abstract class BlockItemDB
     {
         protected IExceptionChecker ExceptionChecker { get; }
         protected IDataBase DataBase { get; }

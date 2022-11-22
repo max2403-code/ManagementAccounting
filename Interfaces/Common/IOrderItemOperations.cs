@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using ManagementAccounting.Classes.Abstract;
+﻿using System.Threading.Tasks;
 
 namespace ManagementAccounting.Interfaces.Common
 {

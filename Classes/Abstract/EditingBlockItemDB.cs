@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ManagementAccounting.Interfaces.Common;
 using Npgsql;
 
 namespace ManagementAccounting.Classes.Abstract
 {
-    public abstract class EditingBlockItemDB : BlockItemDB, IEditable
+    public abstract class EditingBlockItemDB : BlockItemDB
     {
         protected EditingBlockItemDB(IDataBase dataBase, IExceptionChecker exceptionChecker) : base(dataBase, exceptionChecker)
         {

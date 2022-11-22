@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Items;

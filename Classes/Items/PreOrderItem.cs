@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ManagementAccounting.Classes.Abstract;
-
-namespace ManagementAccounting
+﻿namespace ManagementAccounting
 {
     public class PreOrderItem : IPreOrderItem
     {

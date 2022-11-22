@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ManagementAccounting.Interfaces.Common;
 
 namespace ManagementAccounting.Classes.Common
 {
     class SignIn : ISignIn
     {
-        private IExceptionChecker ExceptionChecker { get; set; }
+        private IExceptionChecker ExceptionChecker { get; }
         private IDataBase DataBase { get; }
 
         public SignIn(IDataBase dataBase, IExceptionChecker exceptionChecker)

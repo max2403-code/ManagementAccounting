@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Common;
@@ -24,8 +22,6 @@ namespace ManagementAccounting.Classes.Common
         {
             var order = ItemsFactory.CreateOrder(preOrder.Calculation.Name, creationDate, preOrder.Quantity);
             await ((EditingBlockItemDB) order).AddItemToDataBase();
-
-            //await CreateOrderItems(order, preOrderItemCreator);
 
             return order;
 

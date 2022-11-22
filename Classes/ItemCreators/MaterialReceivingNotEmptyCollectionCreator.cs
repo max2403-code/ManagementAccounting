@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ManagementAccounting.Classes.Abstract;
-using ManagementAccounting.Interfaces.Common;
+﻿using ManagementAccounting.Interfaces.Common;
 
 namespace ManagementAccounting.Classes.ItemCreators
 {

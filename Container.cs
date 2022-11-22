@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Forms;
+﻿using System.Collections.Generic;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Classes.ItemCreators;
@@ -15,10 +12,10 @@ namespace ManagementAccounting
 {
     public static class Container
     {
-        public static MainForm CreateMainForm()
-        {
-            return ConfigureContainer().Get<MainForm>();
-        }
+        //public static MainForm CreateMainForm()
+        //{
+        //    return ConfigureContainer().Get<MainForm>();
+        //}
 
         public static StandardKernel ConfigureContainer()
         {
@@ -63,7 +60,6 @@ namespace ManagementAccounting
             container.Bind<ISignIn>().To<SignIn>().InSingletonScope();
             container.Bind<IExceptionChecker>().To<NpgsqlExceptionChecker>();
             container.Bind<IEmptyCalculationChecker>().To<EmptyCalculationChecker>();
-            //container.Bind<IFromPreOrderToOrderConverter>().To<FromPreOrderToOrderConverter>();
 
 
 
@@ -71,7 +67,7 @@ namespace ManagementAccounting
 
             container.Bind<ICreatorFactory>().ToFactory();
             container.Bind<IItemsFactory>().ToFactory();
-            container.Bind<IFormFactory>().ToFactory();
+            //container.Bind<IFormFactory>().ToFactory();
             
             container.Bind<IOperationsWithUserInput>().To<OperationsWithUserInput>().InSingletonScope();
             

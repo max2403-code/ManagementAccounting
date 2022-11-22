@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data.Common;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Items;
 using Npgsql;
 using NpgsqlTypes;
-using BlockItemDB = ManagementAccounting.Classes.Abstract.BlockItemDB;
 
 namespace ManagementAccounting
 {

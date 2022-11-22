@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ManagementAccounting.Interfaces.Items
+﻿namespace ManagementAccounting.Interfaces.Items
 {
     public interface ICalculation : IBlockItem
     {
