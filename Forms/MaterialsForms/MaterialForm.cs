@@ -44,8 +44,7 @@ namespace ManagementAccounting
             FormFactory = formFactory;
             IsCallFromOtherBlocks = isCallFromOtherBlocks;
             ActiveItemTempControls = new List<Control>();
-
-            Size = new Size(400, 600);
+            AutoScroll = true;
 
             var topLabel = new Label();
             topLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -75,6 +74,7 @@ namespace ManagementAccounting
             TypeValue.Location = new Point(typeLabel.Location.X + typeLabel.Width + 10, typeLabel.Location.Y);
             Controls.Add(TypeValue);
 
+            
             AddReceivingButton = new Button();
             AddReceivingButton.Text = "Добавить пост-е";
             AddReceivingButton.AutoSize = true;
@@ -105,6 +105,9 @@ namespace ManagementAccounting
             CloseButton.Click += (sender, args) => Close();
             Controls.Add(CloseButton);
 
+            Size = new Size(CloseButton.Location.X + CloseButton.Width + 30, 600);
+
+
             NameLine = new TextBox();
             NameLine.Location = new Point(AddReceivingButton.Location.X, AddReceivingButton.Location.Y + AddReceivingButton.Height + 15);
             NameLine.Width = 300;
@@ -115,6 +118,7 @@ namespace ManagementAccounting
             PreviousListButton.Text = "Назад";
             PreviousListButton.Location = new Point(20 + NameLine.Location.X, NameLine.Location.Y + NameLine.Height + 15);
             PreviousListButton.Enabled = false;
+            PreviousListButton.AutoSize = true;
             PreviousListButton.Click += PreviousNext_Click;
             Controls.Add(PreviousListButton);
 
@@ -122,6 +126,7 @@ namespace ManagementAccounting
             NextListButton.Text = "Вперед";
             NextListButton.Location = new Point(20 + PreviousListButton.Location.X + PreviousListButton.Width, PreviousListButton.Location.Y);
             NextListButton.Enabled = false;
+            NextListButton.AutoSize = true;
             NextListButton.Click += PreviousNext_Click;
             Controls.Add(NextListButton);
 

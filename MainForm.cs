@@ -23,7 +23,6 @@ namespace ManagementAccounting
         private Button CalculationsButton { get; }
         private Button PreOrdersButton { get; }
         private Button OrdersButton { get; }
-
         private List<Button> MainButtonsHashSet { get; }
         private List<Control> ActiveTempControls { get; }
         private List<Control> ActiveItemTempControls { get; }
@@ -31,6 +30,7 @@ namespace ManagementAccounting
         private Button PreviousListButton { get; }
         private Button AllItems { get; }
         private Button AddItem { get; }
+        private Button CloseButton { get; }
         private TextBox SearchNameLine { get; }
         private Button SignIn { get; } 
         private int Offset { get; set; }
@@ -50,11 +50,11 @@ namespace ManagementAccounting
             AutoScroll = true;
             FormBorderStyle = FormBorderStyle.Fixed3D;
             MaximizeBox = false;
-            Size = new Size(600, 600);
 
             SignIn = new Button();
             SignIn.AutoSize = true;
             SignIn.Click += SignInOnClick;
+            SignIn.AutoSize = true;
             SignIn.Text = "Войти в базу данных";
             Controls.Add(SignIn);
 
@@ -97,6 +97,15 @@ namespace ManagementAccounting
             OrdersButton.Click += OrdersButtonOnClick;
             MainButtonsHashSet.Add(OrdersButton);
             Controls.Add(OrdersButton);
+
+            CloseButton = new Button();
+            CloseButton.Location = new Point(OrdersButton.Location.X + OrdersButton.Width + 20, OrdersButton.Location.Y);
+            CloseButton.Text = "Отмена";
+            CloseButton.AutoSize = true;
+            CloseButton.Click += (sender, args) => Close();
+            Controls.Add(CloseButton);
+
+            Size = new Size(CloseButton.Location.X + CloseButton.Width + 30, 600);
 
             AddItem = new Button();
             AddItem.Location = new Point(10, SignIn.Location.Y + SignIn.Height + 25);

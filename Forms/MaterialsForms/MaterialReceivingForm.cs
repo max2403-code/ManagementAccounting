@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
@@ -41,7 +42,6 @@ namespace ManagementAccounting.Forms.RemaindersForms
             MaterialReceiving = materialReceiving;
             MaterialReceivingOperations = materialReceivingOperations;
 
-            Size = new Size(400, 600);
 
             TopLabel = new Label();
             TopLabel.TextAlign = ContentAlignment.MiddleCenter;
@@ -51,7 +51,7 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             var materialNameLabel = new Label();
             materialNameLabel.Text = "Материал:";
-            materialNameLabel.Width = 130;
+            materialNameLabel.Width = 180;
             materialNameLabel.Location = new Point(10, TopLabel.Location.Y + TopLabel.Height + 15);
             Controls.Add(materialNameLabel);
 
@@ -64,7 +64,7 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             var quantityLabel = new Label();
             quantityLabel.Text = "Количество:";
-            quantityLabel.Width = 130;
+            quantityLabel.Width = 180;
             quantityLabel.Location = new Point(10, materialNameLabel.Location.Y + materialNameLabel.Height + 15);
             Controls.Add(quantityLabel);
 
@@ -76,7 +76,7 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             var costLabel = new Label();
             costLabel.Text = "Стоимость:";
-            costLabel.Width = 130;
+            costLabel.Width = 180;
             costLabel.Location = new Point(10, quantityLabel.Location.Y + quantityLabel.Height + 15);
             Controls.Add(costLabel);
 
@@ -88,7 +88,7 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             var priceLabel = new Label();
             priceLabel.Text = "Цена за ед.:";
-            priceLabel.Width = 130;
+            priceLabel.Width = 180;
             priceLabel.Location = new Point(10, costLabel.Location.Y + costLabel.Height + 15);
             Controls.Add(priceLabel);
 
@@ -100,7 +100,7 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             var remainderLabel = new Label();
             remainderLabel.Text = "Остаток на складе:";
-            remainderLabel.Width = 130;
+            remainderLabel.Width = 180;
             remainderLabel.Location = new Point(10, priceLabel.Location.Y + priceLabel.Height + 15);
             Controls.Add(remainderLabel);
 
@@ -112,9 +112,10 @@ namespace ManagementAccounting.Forms.RemaindersForms
 
             var noteLabel = new Label();
             noteLabel.Text = "Заметка:";
-            noteLabel.Width = 130;
+            noteLabel.Width = 180;
             noteLabel.Location = new Point(10, remainderLabel.Location.Y + remainderLabel.Height + 15);
             Controls.Add(noteLabel);
+
 
             NoteValue = new Label();
             NoteValue.Location = new Point(noteLabel.Location.X + noteLabel.Width + 15, noteLabel.Location.Y);
@@ -139,6 +140,9 @@ namespace ManagementAccounting.Forms.RemaindersForms
             CloseButton.Location = new Point(RemoveReceivingButton.Location.X + RemoveReceivingButton.Width + 15, RemoveReceivingButton.Location.Y);
             CloseButton.Click += (sender, args) => Close();
             Controls.Add(CloseButton);
+
+            Size = new Size(CloseButton.Location.X + CloseButton.Width + 100, 600);
+
 
             if (isCallFromOtherBlocks)
             {
