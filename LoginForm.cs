@@ -74,12 +74,12 @@ namespace ManagementAccounting
             Controls.Add(CloseButton);
         }
 
-        private void CloseButtonOnClick(object? sender, EventArgs e)
+        private void CloseButtonOnClick(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private async void OkButtonOnClick(object? sender, EventArgs e)
+        private async void OkButtonOnClick(object sender, EventArgs e)
         {
             var login = LoginTBox.Text;
             var password = PasswordTBox.Text;

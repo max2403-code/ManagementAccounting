@@ -7,7 +7,6 @@ using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Classes.ItemCreators;
 using ManagementAccounting.Interfaces.Common;
 using ManagementAccounting.Interfaces.Factory;
-using ManagementAccounting.Interfaces.ItemCreators;
 using ManagementAccounting.Interfaces.Items;
 using Ninject;
 using Ninject.Extensions.Factory;

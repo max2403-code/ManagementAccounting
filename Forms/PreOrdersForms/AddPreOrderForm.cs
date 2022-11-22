@@ -123,7 +123,7 @@ namespace ManagementAccounting.Forms.PreOrdersForms
             Controls.Add(NextListButton);
         }
 
-        private async void AllCalculationsOnClick(object? sender, EventArgs e)
+        private async void AllCalculationsOnClick(object sender, EventArgs e)
         {
             NameLine.Text = "";
             try

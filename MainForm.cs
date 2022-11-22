@@ -110,7 +110,6 @@ namespace ManagementAccounting
             SearchNameLine.Location = new Point(10, AddItem.Location.Y + AddItem.Height + 10);
             SearchNameLine.TextChanged += NameLine_TextChanged;
             SearchNameLine.Width = 450;
-            SearchNameLine.Tag = TypeOfItem.Material;
             SearchNameLine.Enabled = false;
             ActiveTempControls.Add(SearchNameLine);
             Controls.Add(SearchNameLine);
@@ -120,7 +119,6 @@ namespace ManagementAccounting
             AllItems.Click += AllItems_Click;
             AllItems.AutoSize = true;
             AllItems.Text = "Показать";
-            AllItems.Tag = TypeOfItem.Material;
             AllItems.Enabled = false;
             ActiveTempControls.Add(AllItems);
             Controls.Add(AllItems);
