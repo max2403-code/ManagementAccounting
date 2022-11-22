@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Windows.Forms;
 using ManagementAccounting.Classes.Abstract;
 using ManagementAccounting.Classes.Common;
 using ManagementAccounting.Classes.ItemCreators;
@@ -12,10 +15,10 @@ namespace ManagementAccounting
 {
     public static class Container
     {
-        //public static MainForm CreateMainForm()
-        //{
-        //    return ConfigureContainer().Get<MainForm>();
-        //}
+        public static MainForm CreateMainForm()
+        {
+            return ConfigureContainer().Get<MainForm>();
+        }
 
         public static StandardKernel ConfigureContainer()
         {
@@ -26,6 +29,18 @@ namespace ManagementAccounting
             container.Bind<BlockItemsCollectionCreator>().To<CalculationCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
             container.Bind<BlockItemsCollectionCreator>().To<PreOrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
             container.Bind<BlockItemsCollectionCreator>().To<OrderCollectionCreator>().WithConstructorArgument("lengthOfItemsList", 5);
+
+
+
+
+            //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingCollectionCreator>();
+            //container.Bind<BlockItemsCollectionCreator>().To<MaterialReceivingNotEmptyCollectionCreator>();
+            //container.Bind<ICalculationItemCollectionCreator>().To<CalculationItemCollectionCreator>();
+
+            //container.Bind<AddMaterialForm>().ToSelf();
+
+            //container.Bind<IProgramBlock>().To<PreOrders>();
+
 
             container.Bind<IMaterial>().To<Material>();
             container.Bind<IMaterialReceiving>().To<MaterialReceiving>();
@@ -48,10 +63,15 @@ namespace ManagementAccounting
             container.Bind<ISignIn>().To<SignIn>().InSingletonScope();
             container.Bind<IExceptionChecker>().To<NpgsqlExceptionChecker>();
             container.Bind<IEmptyCalculationChecker>().To<EmptyCalculationChecker>();
-            
+            //container.Bind<IFromPreOrderToOrderConverter>().To<FromPreOrderToOrderConverter>();
+
+
+
+
+
             container.Bind<ICreatorFactory>().ToFactory();
             container.Bind<IItemsFactory>().ToFactory();
-            //container.Bind<IFormFactory>().ToFactory();
+            container.Bind<IFormFactory>().ToFactory();
             
             container.Bind<IOperationsWithUserInput>().To<OperationsWithUserInput>().InSingletonScope();
             

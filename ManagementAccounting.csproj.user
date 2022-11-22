@@ -1,2 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="Forms\CalculationsForms\AddCalculationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\CalculationsForms\AddCalculationItemForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\CalculationsForms\CalculationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\CalculationsForms\CalculationItemForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\CalculationsForms\EditCalculationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\CalculationsForms\EditCalculationItemForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MaterialsForms\AddMaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MaterialsForms\AddMaterialReceivingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MaterialsForms\EditMaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MaterialsForms\EditMaterialReceivingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MaterialsForms\MaterialReceivingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\OrdersForms\CreateOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\OrdersForms\EditOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\OrdersForms\EditOrderItemForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\OrdersForms\OrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\PreOrdersForms\AddPreOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\PreOrdersForms\EditPreOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\PreOrdersForms\PreOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MaterialsForms\MaterialForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
